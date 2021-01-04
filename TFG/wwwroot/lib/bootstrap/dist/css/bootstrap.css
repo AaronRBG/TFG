@@ -44,7 +44,7 @@
 html {
   font-family: sans-serif;
   line-height: 1.15;
-  -webkit-text-size-adjust: 100%;
+  -webkit_text-size-adjust: 100%;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
 
@@ -85,11 +85,11 @@ p {
 abbr[title],
 abbr[data-original-title] {
   text-decoration: underline;
-  -webkit-text-decoration: underline dotted;
+  -webkit_text-decoration: underline dotted;
   text-decoration: underline dotted;
   cursor: help;
   border-bottom: 0;
-  -webkit-text-decoration-skip-ink: none;
+  -webkit_text-decoration-skip-ink: none;
   text-decoration-skip-ink: none;
 }
 
@@ -1973,7 +1973,7 @@ textarea.form-control {
   margin-bottom: 1rem;
 }
 
-.form-text {
+.form_text {
   display: block;
   margin-top: 0.25rem;
 }
@@ -3245,7 +3245,7 @@ input[type="button"].btn-block {
   white-space: nowrap;
 }
 
-.dropdown-item-text {
+.dropdown-item_text {
   display: block;
   padding: 0.25rem 1.5rem;
   color: #212529;
@@ -3473,13 +3473,13 @@ input[type="button"].btn-block {
 }
 
 .input-group-prepend .btn + .btn,
-.input-group-prepend .btn + .input-group-text,
-.input-group-prepend .input-group-text + .input-group-text,
-.input-group-prepend .input-group-text + .btn,
+.input-group-prepend .btn + .input-group_text,
+.input-group-prepend .input-group_text + .input-group_text,
+.input-group-prepend .input-group_text + .btn,
 .input-group-append .btn + .btn,
-.input-group-append .btn + .input-group-text,
-.input-group-append .input-group-text + .input-group-text,
-.input-group-append .input-group-text + .btn {
+.input-group-append .btn + .input-group_text,
+.input-group-append .input-group_text + .input-group_text,
+.input-group-append .input-group_text + .btn {
   margin-left: -1px;
 }
 
@@ -3491,7 +3491,7 @@ input[type="button"].btn-block {
   margin-left: -1px;
 }
 
-.input-group-text {
+.input-group_text {
   display: -ms-flexbox;
   display: flex;
   -ms-flex-align: center;
@@ -3509,8 +3509,8 @@ input[type="button"].btn-block {
   border-radius: 0.25rem;
 }
 
-.input-group-text input[type="radio"],
-.input-group-text input[type="checkbox"] {
+.input-group_text input[type="radio"],
+.input-group_text input[type="checkbox"] {
   margin-top: 0;
 }
 
@@ -3521,8 +3521,8 @@ input[type="button"].btn-block {
 
 .input-group-lg > .form-control,
 .input-group-lg > .custom-select,
-.input-group-lg > .input-group-prepend > .input-group-text,
-.input-group-lg > .input-group-append > .input-group-text,
+.input-group-lg > .input-group-prepend > .input-group_text,
+.input-group-lg > .input-group-append > .input-group_text,
 .input-group-lg > .input-group-prepend > .btn,
 .input-group-lg > .input-group-append > .btn {
   padding: 0.5rem 1rem;
@@ -3538,8 +3538,8 @@ input[type="button"].btn-block {
 
 .input-group-sm > .form-control,
 .input-group-sm > .custom-select,
-.input-group-sm > .input-group-prepend > .input-group-text,
-.input-group-sm > .input-group-append > .input-group-text,
+.input-group-sm > .input-group-prepend > .input-group_text,
+.input-group-sm > .input-group-append > .input-group_text,
 .input-group-sm > .input-group-prepend > .btn,
 .input-group-sm > .input-group-append > .btn {
   padding: 0.25rem 0.5rem;
@@ -3554,21 +3554,21 @@ input[type="button"].btn-block {
 }
 
 .input-group > .input-group-prepend > .btn,
-.input-group > .input-group-prepend > .input-group-text,
+.input-group > .input-group-prepend > .input-group_text,
 .input-group > .input-group-append:not(:last-child) > .btn,
-.input-group > .input-group-append:not(:last-child) > .input-group-text,
+.input-group > .input-group-append:not(:last-child) > .input-group_text,
 .input-group > .input-group-append:last-child > .btn:not(:last-child):not(.dropdown-toggle),
-.input-group > .input-group-append:last-child > .input-group-text:not(:last-child) {
+.input-group > .input-group-append:last-child > .input-group_text:not(:last-child) {
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
 }
 
 .input-group > .input-group-append > .btn,
-.input-group > .input-group-append > .input-group-text,
+.input-group > .input-group-append > .input-group_text,
 .input-group > .input-group-prepend:not(:first-child) > .btn,
-.input-group > .input-group-prepend:not(:first-child) > .input-group-text,
+.input-group > .input-group-prepend:not(:first-child) > .input-group_text,
 .input-group > .input-group-prepend:first-child > .btn:not(:first-child),
-.input-group > .input-group-prepend:first-child > .input-group-text:not(:first-child) {
+.input-group > .input-group-prepend:first-child > .input-group_text:not(:first-child) {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
 }
@@ -4178,7 +4178,7 @@ input[type="button"].btn-block {
   float: none;
 }
 
-.navbar-text {
+.navbar_text {
   display: inline-block;
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
@@ -4433,15 +4433,15 @@ input[type="button"].btn-block {
   background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3e%3cpath stroke='rgba(0, 0, 0, 0.5)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
 }
 
-.navbar-light .navbar-text {
+.navbar-light .navbar_text {
   color: rgba(0, 0, 0, 0.5);
 }
 
-.navbar-light .navbar-text a {
+.navbar-light .navbar_text a {
   color: rgba(0, 0, 0, 0.9);
 }
 
-.navbar-light .navbar-text a:hover, .navbar-light .navbar-text a:focus {
+.navbar-light .navbar_text a:hover, .navbar-light .navbar_text a:focus {
   color: rgba(0, 0, 0, 0.9);
 }
 
@@ -4481,15 +4481,15 @@ input[type="button"].btn-block {
   background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3e%3cpath stroke='rgba(255, 255, 255, 0.5)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
 }
 
-.navbar-dark .navbar-text {
+.navbar-dark .navbar_text {
   color: rgba(255, 255, 255, 0.5);
 }
 
-.navbar-dark .navbar-text a {
+.navbar-dark .navbar_text a {
   color: #fff;
 }
 
-.navbar-dark .navbar-text a:hover, .navbar-dark .navbar-text a:focus {
+.navbar-dark .navbar_text a:hover, .navbar-dark .navbar_text a:focus {
   color: #fff;
 }
 
@@ -4537,7 +4537,7 @@ input[type="button"].btn-block {
   margin-bottom: 0;
 }
 
-.card-text:last-child {
+.card_text:last-child {
   margin-bottom: 0;
 }
 
@@ -6443,11 +6443,11 @@ a.close.disabled {
   vertical-align: bottom !important;
 }
 
-.align-text-bottom {
+.align_text-bottom {
   vertical-align: text-bottom !important;
 }
 
-.align-text-top {
+.align_text-top {
   vertical-align: text-top !important;
 }
 

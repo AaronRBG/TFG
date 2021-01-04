@@ -3,14 +3,98 @@
 }
 <div id="Top-container">
     <div id="Top">
-        <span class='database_icon'></span><span class="top-text">Selected file</span><span class='folder_icon'></span>
+        <button type="button" class="btn btn-default"><span class='database_icon'></span></button>
+        <span class="top-text">Selected file</span>
+        <button type="button" class="btn btn-default"><span class='folder_icon'></span></button>
     </div>
 </div>
-<div id="Datacleaning">
-    <h1 class="display-4">Datacleaning</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div id="Datacleaning" class="left-half">
+    <h1>Datacleaning</h1>
+    <div id="datacleaning_inside">
+        <div id="data_masking" class="functionality">
+            <button type="button" class="btn btn-default"><span class='info_icon'></span></button>
+            <span class="functionality-text">Data Masking</span>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-outline-primary">Run on full database</button>
+                <button type="button" class="btn btn-outline-dark">Select what to run</button>
+            </div>
+        </div>
+        <div id="data_unification" class="functionality">
+            <button type="button" class="btn btn-default"><span class='info_icon'></span></button>
+            <span class="functionality-text">Data Unification</span>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-outline-primary">Run on full database</button>
+                <button type="button" class="btn btn-outline-dark">Select what to run</button>
+            </div>
+        </div>
+        <div id="remove_duplicates" class="functionality">
+            <button type="button" class="btn btn-default"><span class='info_icon'></span></button>
+            <span class="functionality-text">Remove Duplicates</span>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-outline-primary">Run on full database</button>
+                <button type="button" class="btn btn-outline-dark">Select what to run</button>
+            </div>
+        </div>
+        <div id="constraints" class="functionality">
+            <button type="button" class="btn btn-default"><span class='info_icon'></span></button>
+            <span class="functionality-text">Constraints</span>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-outline-primary">Run on full database</button>
+                <button type="button" class="btn btn-outline-dark">Select what to run</button>
+            </div>
+        </div>
+        <div id="missing_values" class="functionality">
+            <button type="button" class="btn btn-default"><span class='info_icon'></span></button>
+            <span class="functionality-text">Treating Missing Values</span>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-outline-primary">Run on full database</button>
+                <button type="button" class="btn btn-outline-dark">Select what to run</button>
+            </div>
+        </div>
+    </div>
 </div>
-<div id="Tuning">
-    <h1 class="display-4">Tuning</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div id="Tuning" class="right-half">
+    <h1>Tuning</h1>
+    <div id="tuning_inside">
+        <div id="improve_datatypes" class="functionality">
+            <button type="button" class="btn btn-default"><span class='info_icon'></span></button>
+            <span class="functionality-text">Improve Datatypes</span>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-outline-primary">Run on full database</button>
+                <button type="button" class="btn btn-outline-dark">Select what to run</button>
+            </div>
+        </div>
+        <div id="primary_keys" class="functionality">
+            <button type="button" class="btn btn-default"><span class='info_icon'></span></button>
+            <span class="functionality-text">Add/Improve Primary Keys</span>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-outline-primary">Run on full database</button>
+                <button type="button" class="btn btn-outline-dark">Select what to run</button>
+            </div>
+        </div>
+        <div id="foreign_keys" class="functionality">
+            <button type="button" class="btn btn-default"><span class='info_icon'></span></button>
+            <span class="functionality-text">Add/Improve Foreign Keys</span>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-outline-primary">Run on full database</button>
+                <button type="button" class="btn btn-outline-dark">Select what to run</button>
+            </div>
+        </div>
+        <div id="table_defragmentation" class="functionality">
+            <button type="button" class="btn btn-default"><span class='info_icon'></span></button>
+            <span class="functionality-text">Table Defragmentation</span>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-outline-primary">Run on full database</button>
+                <button type="button" class="btn btn-outline-dark">Select what to run</button>
+            </div>
+        </div>
+        <div id="improve_indexes" class="functionality">
+            <button type="button" class="btn btn-default"><span class='info_icon'></span></button>
+            <span class="functionality-text">Index Cleaning & Generation</span>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-outline-primary">Run on full database</button>
+                <button type="button" class="btn btn-outline-dark">Select what to run</button>
+            </div>
+        </div>
+    </div>
 </div>

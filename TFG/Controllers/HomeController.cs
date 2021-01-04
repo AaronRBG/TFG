@@ -23,7 +23,7 @@ namespace TFG.Controllers
             return View();
         }
 
-        public IActionResult Privacy()
+        public IActionResult DatabaseConnection()
         {
             return View();
         }

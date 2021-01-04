@@ -1,0 +1,30 @@
+﻿@{
+    ViewData["Title"] = "Database Connection";
+}
+<div id="Top-container">
+    <div id="Top">
+        <span class="top-text">Selected file</span>
+    </div>
+</div>
+<div id="Local" class="left-half">
+    <h1>Add a local database</h1>
+    <div id="local_inside">
+        <button type="button" class="btn btn-default"><span class='database_icon'></span></button>
+        <span class="top-text">Selected file</span>
+        <button type="button" class="btn btn-default"><span class='folder_icon'></span></button>
+    </div>
+</div>
+<div id="Remote" class="right-half">
+    <h1>Connect to a remote database</h1>
+    <div id="remote_inside">
+        <textarea id="connection_string" rows="5" cols="33">Introduce your connection string</textarea>
+    </div>
+</div>
+<div id="Bottom-container">
+    <div id="Bottom">
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-outline-primary">Connect to Local</button>
+            <button type="button" class="btn btn-outline-dark">Connect to Remote</button>
+        </div>
+    </div>
+</div>

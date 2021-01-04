@@ -27,12 +27,7 @@ a {
 /* Sticky footer styles
 -------------------------------------------------- */
 html {
-  font-size: 14px;
-}
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+  font-size: 1.5vh;
 }
 
 .border-top {
@@ -60,45 +55,50 @@ html {
 
 body {
   /* Margin bottom by footer height */
-  margin-bottom: 60px;
+  margin-bottom: 3vh;
 }
 .footer {
   position: absolute;
   bottom: 0;
   width: 100%;
   white-space: nowrap;
-  line-height: 60px; /* Vertically center the text there */
+  line-height: 3vh; /* Vertically center the text there */
 }
 
-div#Datacleaning {
+/* divs */
+
+.left-half {
     text-align: center;
     width: 50%;
     float: left;
-    height: 100vh;
+    height: 80vh;
     margin: 0;
     padding: 0;
     box-sizing: border-box;
     border-right: 0.4vw solid #000000;
 }
 
-div#Tuning {
+.right-half {
     text-align: center;
     width: 50%;
     float: right;
-    height: 100vh;
+    height: 80vh;
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-div#Top-container {
+div#Top-container, div#Bottom-container {
     text-align: center;
 }
 
-div#Top {
+div#Top, div#Bottom {
     text-align: center;
     display: inline-flex;
     align-items: center;
+    vertical-align: middle;
+    padding-top: 1vh;
+    padding-bottom : 1vh;
 }
 
 div#Top-inside {
@@ -106,19 +106,64 @@ div#Top-inside {
     align-items: center;
 }
 
+div#local_inside {
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+}
+
+div#remote_inside {
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+}
+
+.functionality {
+    display: flex;
+    align-items: flex-start;
+    padding-top: 5vh;
+    padding-left: 2vw;
+    padding-right: 5vw;
+}
+
+/* icons */
+
 .database_icon {
     background: url('https://img.icons8.com/ios-filled/32/000000/database.png');
     width: 32px;
     height: 32px;
+    display: inline-block;
 }
 
 .folder_icon {
     background: url('https://img.icons8.com/ios-filled/32/000000/folder-invoices--v2.png');
     width: 32px;
     height: 32px;
+    display: inline-block;
 }
+
+.info_icon {
+    background: url('https://img.icons8.com/metro/32/000000/info.png');
+    width: 32px;
+    height: 32px;
+    display: inline-block;
+}
+
+/* text */
 
 .top-text {
     vertical-align: middle;
+    padding-right: 1vw;
+    padding-left: 1vw;
 }
 
+.functionality-text {
+    vertical-align: middle;
+    font-size: 1.5rem;
+    padding-left: 3vw;
+}
+
+.btn-group {
+    margin-left: auto;
+}
