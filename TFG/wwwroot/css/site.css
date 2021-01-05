@@ -2,67 +2,69 @@
 for details on configuring this project to bundle and minify static web assets. */
 
 a.navbar-brand {
-  white-space: normal;
-  text-align: center;
-  word-break: break-all;
+    white-space: normal;
+    text-align: center;
+    word-break: break-all;
 }
 
 /* Provide sufficient contrast against white background */
 a {
-  color: #0366d6;
+    color: #0366d6;
 }
 
 .btn-primary {
-  color: #fff;
-  background-color: #1b6ec2;
-  border-color: #1861ac;
+    color: #fff;
+    background-color: #1b6ec2;
+    border-color: #1861ac;
 }
 
 .nav-pills .nav-link.active, .nav-pills .show > .nav-link {
-  color: #fff;
-  background-color: #1b6ec2;
-  border-color: #1861ac;
+    color: #fff;
+    background-color: #1b6ec2;
+    border-color: #1861ac;
 }
 
 /* Sticky footer styles
 -------------------------------------------------- */
 html {
-  font-size: 1.5vh;
+    font-size: 1.5vh;
 }
 
 .border-top {
-  border-top: 1px solid #e5e5e5;
+    border-top: 1px solid #e5e5e5;
 }
+
 .border-bottom {
-  border-bottom: 1px solid #e5e5e5;
+    border-bottom: 1px solid #e5e5e5;
 }
 
 .box-shadow {
-  box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
+    box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
 }
 
 button.accept-policy {
-  font-size: 1rem;
-  line-height: inherit;
+    font-size: 1rem;
+    line-height: inherit;
 }
 
 /* Sticky footer styles
 -------------------------------------------------- */
 html {
-  position: relative;
-  min-height: 100%;
+    position: relative;
+    min-height: 100%;
 }
 
 body {
-  /* Margin bottom by footer height */
-  margin-bottom: 3vh;
+    /* Margin bottom by footer height */
+    margin-bottom: 3vh;
 }
+
 .footer {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  white-space: nowrap;
-  line-height: 3vh; /* Vertically center the text there */
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    white-space: nowrap;
+    line-height: 3vh;
 }
 
 /* divs */
@@ -71,7 +73,6 @@ body {
     text-align: center;
     width: 50%;
     float: left;
-    height: 80vh;
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -82,14 +83,23 @@ body {
     text-align: center;
     width: 50%;
     float: right;
-    height: 80vh;
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
+div#Local, div#Remote {
+    height: 65vh;
+}
+
+div#Datacleaning, div#Tuning {
+    height: 80vh;
+}
+
 div#Top-container, div#Bottom-container {
     text-align: center;
+    padding-left: 35vw;
+    padding-right: 35vw;
 }
 
 div#Top, div#Bottom {
@@ -98,7 +108,7 @@ div#Top, div#Bottom {
     align-items: center;
     vertical-align: middle;
     padding-top: 1vh;
-    padding-bottom : 1vh;
+    padding-bottom: 1vh;
 }
 
 div#Top-inside {
@@ -106,17 +116,24 @@ div#Top-inside {
     align-items: center;
 }
 
+.middle-container {
+    padding-top: 15vh;
+    padding-bottom: 15vh;
+}
+
 div#local_inside {
     text-align: center;
     display: inline-flex;
     align-items: center;
     vertical-align: middle;
+    padding-top: 5vh;
 }
 
 div#remote_inside {
     text-align: center;
     display: inline-flex;
     align-items: center;
+    padding-top: 5vh;
 }
 
 .functionality {
@@ -150,11 +167,25 @@ div#remote_inside {
     display: inline-block;
 }
 
+.add_icon {
+    background: url('https://img.icons8.com/pastel-glyph/64/000000/plus--v1.png');
+    width: 64px;
+    height: 64px;
+    display: inline-block;
+}
+
+.file_icon {
+    background: url('https://img.icons8.com/material-rounded/32/000000/file--v1.png');
+    width: 32px;
+    height: 32px;
+    display: inline-block;
+}
+
 /* text */
 
 .top-text {
     vertical-align: middle;
-    padding-right: 1vw;
+    padding-right: 3vw;
     padding-left: 1vw;
 }
 
@@ -166,4 +197,14 @@ div#remote_inside {
 
 .btn-group {
     margin-left: auto;
+}
+
+textarea {
+    width: 35vw;
+    height: 20vh;
+    resize: none;
+}
+
+#fileLoader {
+    display: none;
 }

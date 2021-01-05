@@ -2,22 +2,27 @@
     ViewData["Title"] = "Database Connection";
 }
 <div id="Top-container">
-    <div id="Top">
-        <span class="top-text">Selected file</span>
-    </div>
+    <p>This version works with SQL Server 2019 Databases. You can either add a local database or connect to a remote one More specific procedure about file types and connection strings masking.</p>
+    <p>Esta version funciona con bases de datos en SQL Server 2019 Puedes añadir una base de datos local o conectarte a una remota.</p>
+    <p>Cosas mas especificas sobre los tipos de datos y mascaras de string de conexion.</p>
 </div>
 <div id="Local" class="left-half">
-    <h1>Add a local database</h1>
-    <div id="local_inside">
-        <button type="button" class="btn btn-default"><span class='database_icon'></span></button>
-        <span class="top-text">Selected file</span>
-        <button type="button" class="btn btn-default"><span class='folder_icon'></span></button>
+    <div class="middle-container">
+        <h1>Add a local database</h1>
+        <div id="local_inside">
+            <span class='file_icon'></span>
+            <span class="top-text">Selected file</span>
+            <input type="file" id="fileLoader" name="files" title="Load File" />
+            <button type="button" class="btn btn-default" onclick="openfileDialog();"><span class='add_icon'></span></button>
+        </div>
     </div>
 </div>
 <div id="Remote" class="right-half">
-    <h1>Connect to a remote database</h1>
-    <div id="remote_inside">
-        <textarea id="connection_string" rows="5" cols="33">Introduce your connection string</textarea>
+    <div class="middle-container">
+        <h1>Connect to a remote database</h1>
+        <div id="remote_inside">
+            <textarea id="connection_string">Introduce your connection string</textarea>
+        </div>
     </div>
 </div>
 <div id="Bottom-container">
