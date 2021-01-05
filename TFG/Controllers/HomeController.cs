@@ -1,11 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
 using TFG.Models;
+using Microsoft.Data.SqlClient;
+using System.Configuration;
 
 namespace TFG.Controllers
 {
@@ -33,5 +31,25 @@ namespace TFG.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+
+        [HttpPost]
+        public void connect(string connectionString)
+        {
+            //string strcon;
+            SqlConnection con;
+            //Get connection string from web.config file
+            //strcon = ConfigurationSettings.AppSettings["connectionString"];
+            con = new SqlConnection(connectionString);
+            con.Open();
+
+            bool boo = (con.State == System.Data.ConnectionState.Open);
+            if (boo) { System.Console.Write("connected"); }
+            con.Close();
+        }
     }
 }
+
+
+
+
+

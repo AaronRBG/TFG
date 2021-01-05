@@ -6,3 +6,8 @@
 function openfileDialog() {
     $("#fileLoader").click();
 }
+
+function connect() {
+    document.getElementById("connectionString").value = document.getElementById("constr").value
+    $("#hidden-btn").click();
+}

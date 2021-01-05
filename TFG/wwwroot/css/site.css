@@ -199,12 +199,12 @@ div#remote_inside {
     margin-left: auto;
 }
 
-textarea {
+#constr {
     width: 35vw;
     height: 20vh;
     resize: none;
 }
 
-#fileLoader {
+#fileLoader, #connectionString {
     display: none;
 }
