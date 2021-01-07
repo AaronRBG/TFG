@@ -71,7 +71,6 @@ body {
 
 .left-half {
     text-align: center;
-    width: 50%;
     float: left;
     margin: 0;
     padding: 0;
@@ -81,7 +80,6 @@ body {
 
 .right-half {
     text-align: center;
-    width: 50%;
     float: right;
     margin: 0;
     padding: 0;
@@ -90,16 +88,19 @@ body {
 
 div#Local, div#Remote {
     height: 65vh;
+    width: 50%;
 }
 
 div#Datacleaning, div#Tuning {
     height: 80vh;
+    width: 50%;
 }
 
-div#Top-container, div#Bottom-container {
+div#Bottom-container {
     text-align: center;
     padding-left: 35vw;
     padding-right: 35vw;
+    width: 50%;
 }
 
 div#Top, div#Bottom {
@@ -107,8 +108,6 @@ div#Top, div#Bottom {
     display: inline-flex;
     align-items: center;
     vertical-align: middle;
-    padding-top: 1vh;
-    padding-bottom: 1vh;
 }
 
 div#Top-inside {
@@ -126,14 +125,12 @@ div#local_inside {
     display: inline-flex;
     align-items: center;
     vertical-align: middle;
-    padding-top: 5vh;
 }
 
 div#remote_inside {
     text-align: center;
     display: inline-flex;
     align-items: center;
-    padding-top: 5vh;
 }
 
 .functionality {
