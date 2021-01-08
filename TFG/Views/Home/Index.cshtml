@@ -13,6 +13,11 @@
         </div>
     </div>
 </nav>
+@using (Html.BeginForm("GoToSelection", "Home"))
+{
+    <input type="text" id="functionalitySelected" name="functionalitySelected" />
+    <input id="hidden-btn2" class="hidden-btn" type="submit" style="display: none;" />
+}
 <div id="Datacleaning" class="left-half">
     <h1>Datacleaning</h1>
     <div id="datacleaning_inside">
@@ -21,7 +26,7 @@
             <span class="functionality-text">Data Masking</span>
             <div class="btn-group" role="group">
                 <button type="button" class="btn btn-outline-primary">Run on full database</button>
-                <button type="button" class="btn btn-outline-dark">Select what to run</button>
+                <button type="button" onclick="goToSelection('data_masking')" class="btn btn-outline-dark">Select what to run</button>
             </div>
         </div>
         <div id="data_unification" class="functionality">
@@ -29,7 +34,7 @@
             <span class="functionality-text">Data Unification</span>
             <div class="btn-group" role="group">
                 <button type="button" class="btn btn-outline-primary">Run on full database</button>
-                <button type="button" class="btn btn-outline-dark">Select what to run</button>
+                <button type="button" onclick="goToSelection('data_unification')" class="btn btn-outline-dark">Select what to run</button>
             </div>
         </div>
         <div id="remove_duplicates" class="functionality">
@@ -37,7 +42,7 @@
             <span class="functionality-text">Remove Duplicates</span>
             <div class="btn-group" role="group">
                 <button type="button" class="btn btn-outline-primary">Run on full database</button>
-                <button type="button" class="btn btn-outline-dark">Select what to run</button>
+                <button type="button" onclick="goToSelection('remove_duplicates')" class="btn btn-outline-dark">Select what to run</button>
             </div>
         </div>
         <div id="constraints" class="functionality">
@@ -45,7 +50,7 @@
             <span class="functionality-text">Constraints</span>
             <div class="btn-group" role="group">
                 <button type="button" class="btn btn-outline-primary">Run on full database</button>
-                <button type="button" class="btn btn-outline-dark">Select what to run</button>
+                <button type="button" onclick="goToSelection('constraints')" class="btn btn-outline-dark">Select what to run</button>
             </div>
         </div>
         <div id="missing_values" class="functionality">
@@ -53,7 +58,7 @@
             <span class="functionality-text">Treating Missing Values</span>
             <div class="btn-group" role="group">
                 <button type="button" class="btn btn-outline-primary">Run on full database</button>
-                <button type="button" class="btn btn-outline-dark">Select what to run</button>
+                <button type="button" onclick="goToSelection('missing_values')" class="btn btn-outline-dark">Select what to run</button>
             </div>
         </div>
     </div>
@@ -66,7 +71,7 @@
             <span class="functionality-text">Improve Datatypes</span>
             <div class="btn-group" role="group">
                 <button type="button" class="btn btn-outline-primary">Run on full database</button>
-                <button type="button" class="btn btn-outline-dark">Select what to run</button>
+                <button type="button" onclick="goToSelection('improve_datatypes')" class="btn btn-outline-dark">Select what to run</button>
             </div>
         </div>
         <div id="primary_keys" class="functionality">
@@ -74,7 +79,7 @@
             <span class="functionality-text">Add/Improve Primary Keys</span>
             <div class="btn-group" role="group">
                 <button type="button" class="btn btn-outline-primary">Run on full database</button>
-                <button type="button" class="btn btn-outline-dark">Select what to run</button>
+                <button type="button" onclick="goToSelection('primary_keys')" class="btn btn-outline-dark">Select what to run</button>
             </div>
         </div>
         <div id="foreign_keys" class="functionality">
@@ -82,7 +87,7 @@
             <span class="functionality-text">Add/Improve Foreign Keys</span>
             <div class="btn-group" role="group">
                 <button type="button" class="btn btn-outline-primary">Run on full database</button>
-                <button type="button" class="btn btn-outline-dark">Select what to run</button>
+                <button type="button" onclick="goToSelection('foreign_keys')" class="btn btn-outline-dark">Select what to run</button>
             </div>
         </div>
         <div id="table_defragmentation" class="functionality">
@@ -90,7 +95,7 @@
             <span class="functionality-text">Table Defragmentation</span>
             <div class="btn-group" role="group">
                 <button type="button" class="btn btn-outline-primary">Run on full database</button>
-                <button type="button" class="btn btn-outline-dark">Select what to run</button>
+                <button type="button" onclick="goToSelection('table_defragmentation')" class="btn btn-outline-dark">Select what to run</button>
             </div>
         </div>
         <div id="improve_indexes" class="functionality">
@@ -98,7 +103,7 @@
             <span class="functionality-text">Index Cleaning & Generation</span>
             <div class="btn-group" role="group">
                 <button type="button" class="btn btn-outline-primary">Run on full database</button>
-                <button type="button" class="btn btn-outline-dark">Select what to run</button>
+                <button type="button" onclick="goToSelection('improve_indexes')" class="btn btn-outline-dark">Select what to run</button>
             </div>
         </div>
     </div>

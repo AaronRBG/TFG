@@ -9,44 +9,46 @@
             <button type="button" onclick='window.location.href="DatabaseConnection"' class="btn btn-default" data-toggle="tooltip" data-placement="auto" title="Change database"><span class='folder_icon'></span></button>
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="Index" Index">Home</a></li>
-                @{/*<li class="breadcrumb-item"><a href="#">Library</a></li>*/}
-                <li class="breadcrumb-item active" aria-current="page">Selection</li>
+                <li class="breadcrumb-item active" aria-current="page"><text>@ViewData["functionalitySelected"]</text> Selection</li>
             </ol>
         </div>
     </div>
 </nav>
-<div id="Local" class="left-half">
-    <div class="middle-container">
-        <h1>Add a local database</h1>
-        <div id="local_inside">
-            <span class='file_icon'></span>
-            <span class="top-text">Selected file</span>
-            <input type="file" id="fileLoader" name="files" title="Load File" />
-            <button type="button" class="btn btn-default" onclick="openfileDialog();"><span class='add_icon'></span></button>
-        </div>
+<div id="middle_container">
+    <div id="selection-top" class="centeredBig">
+        <h3>
+            <span>Table and or columns selection</span>
+        </h3>
     </div>
-</div>
+    <div id="accordion" class="overflow-auto centeredBig">
+        @foreach (var table in ViewBag.tableData)
+        {
+            string collapse = "#collapse" + table[0];
+            <div class="card">
+                <div class="card-header" id="@table[0]">
+                    <h5>
+                        <input type="checkbox" />
+                        <button class="btn btn-link" data-toggle="collapse" data-target="@collapse" aria-expanded="true" aria-controls="collapseOne">
+                            @table[0]
+                        </button>
+                    </h5>
+                </div>
 
-<div id="Remote" class="right-half">
-    <div class="middle-container">
-        <h1>Connect to a remote database</h1>
-        <div id="remote_inside">
-            <textarea id="constr" placeholder="Introduce your connection string"></textarea>
-            @using (Html.BeginForm("connect", "Home"))
-            {
-                <input type="text" id="connectionString" name="connectionString" />
-                <input id="hidden-btn" type="submit" value="puto c#" style="display: none;" />
-            }
+                <div id="@collapse.Substring(1)" class="collapse hide" aria-labelledby="@table[0]" data-parent="#accordion">
+                    <div class="card-body">
+                        @for (int i = 1; i < ((string[])table).Length; i++)
+                        {
+                            <input type="checkbox" /> <span>@table[i]</span>
+                            <br />
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+    <div id="Bottom-container">
+        <div id="Bottom">
+                <button type="button" class="btn btn-outline-primary">Confirm and run</button>
         </div>
     </div>
 </div>
-    </div>
-<div id="Bottom-container">
-    <div id="Bottom">
-        <div class="btn-group" role="group">
-            <button type="button" class="btn btn-outline-primary">Connect to Local</button>
-            <button type="button" onclick="connect()" class="btn btn-outline-dark">Connect to Remote</button>
-        </div>
-    </div>
-</div>
-

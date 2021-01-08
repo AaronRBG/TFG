@@ -19,21 +19,19 @@
         </div>
     </div>
 </div>
-
 <div id="Remote" class="right-half">
     <div class="middle-container">
         <h1>Connect to a remote database</h1>
         <div id="remote_inside">
             <textarea id="constr" placeholder="Introduce your connection string"></textarea>
-            @using (Html.BeginForm("connect", "Home"))
+            @using (Html.BeginForm("Connect", "Home"))
             {
                 <input type="text" id="connectionString" name="connectionString" />
-                <input id="hidden-btn" type="submit" value="puto c#" style="display: none;" />
+                <input id="hidden-btn1" class="hidden-btn" type="submit" style="display: none;" />
             }
         </div>
     </div>
 </div>
-    </div>
 <div id="Bottom-container">
     <div id="Bottom">
         <div class="btn-group" role="group">

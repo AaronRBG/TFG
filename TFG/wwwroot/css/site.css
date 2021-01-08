@@ -96,14 +96,28 @@ div#Datacleaning, div#Tuning {
     width: 50%;
 }
 
+div#accordion {
+    height: 75vh;
+}
+
+.centeredBig {
+    padding-left: 15vw;
+    padding-right: 15vw;
+    align-content: center;
+}
+
+#selection-top {
+    text-align: center;
+}
+
 div#Bottom-container {
+    display: inline;
     text-align: center;
     padding-left: 35vw;
     padding-right: 35vw;
-    width: 50%;
 }
 
-div#Top, div#Bottom {
+div#Top {
     text-align: center;
     display: inline-flex;
     align-items: center;
@@ -202,6 +216,6 @@ div#remote_inside {
     resize: none;
 }
 
-#fileLoader, #connectionString {
+#fileLoader, #connectionString, #functionalitySelected {
     display: none;
 }

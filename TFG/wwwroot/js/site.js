@@ -9,5 +9,10 @@ function openfileDialog() {
 
 function connect() {
     document.getElementById("connectionString").value = document.getElementById("constr").value
-    $("#hidden-btn").click();
+    $("#hidden-btn1").click();
+}
+
+function goToSelection(functionality) {
+    document.getElementById("functionalitySelected").value = functionality;
+    $("#hidden-btn2").click();
 }
