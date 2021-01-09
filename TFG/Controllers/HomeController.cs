@@ -4,14 +4,15 @@ using System.Diagnostics;
 using TFG.Models;
 using Microsoft.Data.SqlClient;
 using System.Data;
+using Microsoft.AspNetCore.Http;
 
 namespace TFG.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        public static SqlConnection con { get; set; }
-
+        private SqlConnection con;
+            
         public HomeController(ILogger<HomeController> logger)
         {
             _logger = logger;
@@ -19,12 +20,12 @@ namespace TFG.Controllers
 
         public IActionResult Index()
         {
-            return View();
+            return View("Index", "Home");
         }
 
         public IActionResult DatabaseConnection()
         {
-            return View();
+            return View("DatabaseConnection", "Home");
         }
 
         public IActionResult Selection()
@@ -33,7 +34,10 @@ namespace TFG.Controllers
             DataSet dsTables = new DataSet();
             DataSet dsColumns = new DataSet();
 
-            adp.SelectCommand = new SqlCommand("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'", HomeController.con);
+            this.con = new SqlConnection(HttpContext.Session.GetString("connectionString"));
+            this.con.Open();
+
+            adp.SelectCommand = new SqlCommand("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'", con);
             adp.Fill(dsTables, "tables");
             DataTable dtTables = dsTables.Tables["tables"];
             DataTable dtColumns;
@@ -44,7 +48,7 @@ namespace TFG.Controllers
                 rows = dtTables.Rows[i];
                 string com = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '" + rows[0] + "'";
 
-                adp.SelectCommand = new SqlCommand(com, HomeController.con);
+                adp.SelectCommand = new SqlCommand(com, con);
                 adp.Fill(dsColumns, "columns");
                 dtColumns = dsColumns.Tables["columns"];
 
@@ -64,7 +68,7 @@ namespace TFG.Controllers
 
         public IActionResult Help()
         {
-            return View();
+            return View("Help", "Home");
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
@@ -79,17 +83,23 @@ namespace TFG.Controllers
             //string strcon;
             //Get connection string from web.config file
             //strcon = ConfigurationSettings.AppSettings["connectionString"];
-            HomeController.con = new SqlConnection(connectionString);
-            HomeController.con.Open();
+            if (connectionString == null)
+            {
+                return Help();
+            }
+            HttpContext.Session.SetString("connectionString", connectionString);
+            this.con = new SqlConnection(connectionString);
+            this.con.Open();
 
-            bool boo = (HomeController.con.State == System.Data.ConnectionState.Open);
+            bool boo = (this.con.State == System.Data.ConnectionState.Open);
             if (boo)
             {
+                this.con.Close();
                 return View("Index", "Home");
             }
             else
             {
-                return Error();
+                return Help();
             }
         }
         public IActionResult GoToSelection(string functionalitySelected)

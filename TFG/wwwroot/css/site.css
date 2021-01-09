@@ -70,7 +70,6 @@ body {
 /* divs */
 
 .left-half {
-    text-align: center;
     float: left;
     margin: 0;
     padding: 0;
@@ -85,29 +84,43 @@ body {
     padding: 0;
     box-sizing: border-box;
 }
-
-div#Local, div#Remote {
+{ /*
+div#Local {
     height: 65vh;
     width: 50%;
 }
+*/
+}
+div#Remote {
+    padding-left: 15vw;
+    padding-right: 15vw;
+    height: 65vh;
+    text-align: center;
+    box-sizing: border-box;
+}
 
 div#Datacleaning, div#Tuning {
+    text-align: center;
     height: 80vh;
     width: 50%;
 }
 
 div#accordion {
-    height: 75vh;
+    height: 80vh;
 }
 
 .centeredBig {
-    padding-left: 15vw;
-    padding-right: 15vw;
+    padding-left: 5vw;
+    padding-right: 5vw;
     align-content: center;
 }
 
-#selection-top {
+#selection-top, div#Top-container, div#controls{
     text-align: center;
+}
+
+div#middle_container {
+    width:75vw;
 }
 
 div#Bottom-container {
@@ -145,6 +158,7 @@ div#remote_inside {
     text-align: center;
     display: inline-flex;
     align-items: center;
+    padding-top: 5vh;
 }
 
 .functionality {

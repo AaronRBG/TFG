@@ -1,29 +1,31 @@
 ﻿@{
     ViewData["Title"] = "Database Connection";
 }
-<nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-    <div id="Top-container">
-        <p>This version works with SQL Server 2019 Databases. You can either add a local database or connect to a remote one More specific procedure about file types and connection strings masking.</p>
-        <p>Esta version funciona con bases de datos en SQL Server 2019 Puedes añadir una base de datos local o conectarte a una remota.</p>
-        <p>Cosas mas especificas sobre los tipos de datos y mascaras de string de conexion.</p>
-    </div>
-</nav>
-<div id="Local" class="left-half">
-    <div class="middle-container">
-        <h1>Add a local database</h1>
-        <div id="local_inside">
-            <span class='file_icon'></span>
-            <span class="top-text">Selected file</span>
-            <input type="file" id="fileLoader" name="files" title="Load File" />
-            <button type="button" class="btn btn-default" onclick="openfileDialog();"><span class='add_icon'></span></button>
-        </div>
-    </div>
+
+<div id="Top-container">
+    <p>This version works with SQL Server 2019 Databases. You can either add a local database or connect to a remote one More specific procedure about file types and connection strings masking.</p>
+    <p>Esta version funciona con bases de datos en SQL Server 2019 Puedes añadir una base de datos local o conectarte a una remota.</p>
+    <p>Cosas mas especificas sobre los tipos de datos y mascaras de string de conexion.</p>
 </div>
-<div id="Remote" class="right-half">
+
+@{/*
+                                        <div id="Local" class="left-half"}>
+                                            <div class="middle-container">
+                                                <h1>Add a local database</h1>
+                                                <div id="local_inside">
+                                                    <span class='file_icon'></span>
+                                                    <span class="top-text">Selected file</span>
+                                                    <input type="file" id="fileLoader" name="files" title="Load File" />
+                                                    <button type="button" class="btn btn-default" onclick="openfileDialog();"><span class='add_icon'></span></button>
+                                                </div>
+                                            </div>
+                                        </div>
+*/}
+<div id="Remote" class="centeredBig">
     <div class="middle-container">
         <h1>Connect to a remote database</h1>
         <div id="remote_inside">
-            <textarea id="constr" placeholder="Introduce your connection string"></textarea>
+            <textarea id="constr" placeholder="Introduce your connection String"></textarea>
             @using (Html.BeginForm("Connect", "Home"))
             {
                 <input type="text" id="connectionString" name="connectionString" />
@@ -35,8 +37,8 @@
 <div id="Bottom-container">
     <div id="Bottom">
         <div class="btn-group" role="group">
-            <button type="button" class="btn btn-outline-primary">Connect to Local</button>
-            <button type="button" onclick="connect()" class="btn btn-outline-dark">Connect to Remote</button>
+            @{/*<button type="button" class="btn btn-outline-primary">Connect to Local</button>*/}
+            <button type="button" onclick="connect()" class="btn btn-outline-primary">Connect to Remote</button>
         </div>
     </div>
 </div>

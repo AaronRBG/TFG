@@ -14,7 +14,7 @@
         </div>
     </div>
 </nav>
-<div id="middle_container">
+<div id="middle_container" class="left-half">
     <div id="selection-top" class="centeredBig">
         <h3>
             <span>Table and or columns selection</span>
@@ -25,9 +25,9 @@
         {
             string collapse = "#collapse" + table[0];
             <div class="card">
-                <div class="card-header" id="@table[0]">
+                <div class="card-header" id="@table[0]Div">
                     <h5>
-                        <input type="checkbox" />
+                        <input type="checkbox" id="@table[0]CheckBox" onclick="checkChilds('@table[0]CheckBox')" />
                         <button class="btn btn-link" data-toggle="collapse" data-target="@collapse" aria-expanded="true" aria-controls="collapseOne">
                             @table[0]
                         </button>
@@ -38,7 +38,7 @@
                     <div class="card-body">
                         @for (int i = 1; i < ((string[])table).Length; i++)
                         {
-                            <input type="checkbox" /> <span>@table[i]</span>
+                            <input type="checkbox" id="@table[i]" data-parent="@table[0]CheckBox" /> <span>@table[i]</span>
                             <br />
                         }
                     </div>
@@ -46,9 +46,14 @@
             </div>
         }
     </div>
-    <div id="Bottom-container">
-        <div id="Bottom">
-                <button type="button" class="btn btn-outline-primary">Confirm and run</button>
-        </div>
+</div>
+<div id="controls" class="middle-container">
+    <div class="btn-group" role="group">
+        <button type="button" onclick="selectAll()" class="btn btn-outline-primary">Select All</button>
+        <button type="button" onclick="selectNone()" class="btn btn-outline-dark">Select None</button>
     </div>
+    <div id="controls-inside">
+        <button type="button" class="btn btn-outline-primary">Confirm and run</button>
+    </div>
+    <span><text><script>getColumns()</script>selected</text></span>
 </div>
