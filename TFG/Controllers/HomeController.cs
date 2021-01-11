@@ -11,31 +11,41 @@ namespace TFG.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        private SqlConnection con;
             
         public HomeController(ILogger<HomeController> logger)
         {
             _logger = logger;
         }
 
-        public IActionResult Index()
+        // loads the MainPage View saving the database name in the viewdata to be accesed later
+        public IActionResult MainPage()
         {
-            return View("Index", "Home");
+            ViewData["database"] = HttpContext.Session.GetString("database");
+            return View("MainPage", "Home");
         }
 
+        // loads the DatabaseConnection View
         public IActionResult DatabaseConnection()
         {
             return View("DatabaseConnection", "Home");
         }
 
+        // loads the Selection View saving the database name in the viewdata to be accesed later
         public IActionResult Selection()
         {
             SqlDataAdapter adp = new SqlDataAdapter();
             DataSet dsTables = new DataSet();
             DataSet dsColumns = new DataSet();
 
-            this.con = new SqlConnection(HttpContext.Session.GetString("connectionString"));
-            this.con.Open();
+            // gets the connection String stored in the session and opens it
+
+            ViewData["database"] = HttpContext.Session.GetString("database");
+            SqlConnection con = new SqlConnection(HttpContext.Session.GetString("connectionString"));
+            con.Open();
+
+            // then it runs a query that returns all the tables names from that database
+            // then processes the result to run a nested for loop which itself runs another query that returns all the column names of that table
+            // when the for loop is finished we have a double string array which stores for each table its name and the names of all its columns, then saves this in the viewbag
 
             adp.SelectCommand = new SqlCommand("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'", con);
             adp.Fill(dsTables, "tables");
@@ -66,8 +76,10 @@ namespace TFG.Controllers
             return View("Selection", "Home");
         }
 
+        // loads the Help View saving the database name in the viewdata to be accesed later
         public IActionResult Help()
         {
+            ViewData["database"] = HttpContext.Session.GetString("database");
             return View("Help", "Home");
         }
 
@@ -80,30 +92,45 @@ namespace TFG.Controllers
         [HttpPost]
         public IActionResult Connect(string connectionString)
         {
-            //string strcon;
-            //Get connection string from web.config file
-            //strcon = ConfigurationSettings.AppSettings["connectionString"];
-            if (connectionString == null)
+            // this method checks the connection string to see it is not empty
+            if (connectionString == null || connectionString == "")
             {
                 return Help();
             }
-            HttpContext.Session.SetString("connectionString", connectionString);
-            this.con = new SqlConnection(connectionString);
-            this.con.Open();
 
-            bool boo = (this.con.State == System.Data.ConnectionState.Open);
+            // then tries to open it to see if it is valid
+            SqlConnection con = new SqlConnection(connectionString);
+            con.Open();
+
+            bool boo = (con.State == System.Data.ConnectionState.Open);
             if (boo)
             {
-                this.con.Close();
-                return View("Index", "Home");
+                // if it is valid it gets the database name
+                string[] splits = connectionString.Split(';');
+                foreach (string splitted in splits)
+                {
+                    if (splitted.Contains("database"))
+                    {
+                        splits = splitted.Split('=');
+                        break;
+                    }
+                }
+
+                // and saves both the database name and the connection String in the session for later access and changes the view
+                HttpContext.Session.SetString("database", splits[1]);
+                HttpContext.Session.SetString("connectionString", connectionString);
+                con.Close();
+                return MainPage();
             }
             else
             {
+                // if it is not valid it return the Help View
                 return Help();
             }
         }
         public IActionResult GoToSelection(string functionalitySelected)
         {
+            // this method is used to go to the Selection page while sending the corresponding functionality
             ViewData["functionalitySelected"] = functionalitySelected;
             return Selection();
         }

@@ -1,11 +1,13 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
 }
+<!-- A navegation bar which does not navigate, it only shows the chosen database name along with a button that
+    allows the user to go to the corresponding page to change it, if needed and show the current page -->
 <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
     <div id="Top-container">
         <div id="Top">
             <span class='database_icon'></span>
-            <span class="top-text">Selected file</span>
+            <span class="top-text">@ViewData["database"]</span>
             <button type="button" onclick='window.location.href="DatabaseConnection"' class="btn btn-default" data-toggle="tooltip" data-placement="auto" title="Change database"><span class='folder_icon'></span></button>
             <ol class="breadcrumb">
                 <li class="breadcrumb-item active" aria-current="page">Home</li>
@@ -13,11 +15,15 @@
         </div>
     </div>
 </nav>
+
+<!-- This part consists of a text input and a button both hidden whose importance can be seen in the site.js file
+    The Html.BeginForm part is used to send information to a controller method-->
 @using (Html.BeginForm("GoToSelection", "Home"))
 {
     <input type="text" id="functionalitySelected" name="functionalitySelected" />
     <input id="hidden-btn2" class="hidden-btn" type="submit" style="display: none;" />
 }
+<!-- Everything on here is just visual, 2 divs one to the left and one to the right with 5 divs of functionality each which in turn have a help button, their name and their option buttons -->
 <div id="Datacleaning" class="left-half">
     <h1>Datacleaning</h1>
     <div id="datacleaning_inside">

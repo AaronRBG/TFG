@@ -84,13 +84,14 @@ body {
     padding: 0;
     box-sizing: border-box;
 }
-{ /*
+
+/*
 div#Local {
     height: 65vh;
     width: 50%;
 }
 */
-}
+
 div#Remote {
     padding-left: 15vw;
     padding-right: 15vw;
@@ -115,12 +116,12 @@ div#accordion {
     align-content: center;
 }
 
-#selection-top, div#Top-container, div#controls{
+#selection-top, div#Top-container, div#controls {
     text-align: center;
 }
 
 div#middle_container {
-    width:75vw;
+    width: 75vw;
 }
 
 div#Bottom-container {
@@ -212,6 +213,13 @@ div#remote_inside {
     vertical-align: middle;
     padding-right: 3vw;
     padding-left: 1vw;
+}
+
+#selection-text {
+    display: inline-flex;
+    padding-top: 25vh;
+    padding-bottom: 5vh;
+    text-align: center;
 }
 
 .functionality-text {

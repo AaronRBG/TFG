@@ -1,19 +1,24 @@
 ﻿@{
     ViewData["Title"] = "Database Connection";
 }
+<!-- A navegation bar which does not navigate, it only shows the chosen database name along with a button that
+    allows the user to go to the corresponding page to change it, if needed and show the current page (receiving the functionality selected from the controller)-->
 <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
     <div id="Top-container">
         <div id="Top">
             <span class='database_icon'></span>
-            <span class="top-text">Selected file</span>
+            <span class="top-text">@ViewData["database"]</span>
             <button type="button" onclick='window.location.href="DatabaseConnection"' class="btn btn-default" data-toggle="tooltip" data-placement="auto" title="Change database"><span class='folder_icon'></span></button>
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="Index" Index">Home</a></li>
+                <li class="breadcrumb-item"><a href="MainPage" MainPage">Home</a></li>
                 <li class="breadcrumb-item active" aria-current="page"><text>@ViewData["functionalitySelected"]</text> Selection</li>
             </ol>
         </div>
     </div>
 </nav>
+<!-- This part is the most complicated of this view
+    It gets the data sent from the controller (double array with the database table names and column names of each table)
+    Then it creates for each table an item of an accordion which when expanded shows its columns with checkboxes for all of those items-->
 <div id="middle_container" class="left-half">
     <div id="selection-top" class="centeredBig">
         <h3>
@@ -38,7 +43,7 @@
                     <div class="card-body">
                         @for (int i = 1; i < ((string[])table).Length; i++)
                         {
-                            <input type="checkbox" id="@table[i]" data-parent="@table[0]CheckBox" /> <span>@table[i]</span>
+                            <input type="checkbox" id="@table[i]" onclick="checkParent('@table[0]CheckBox', '@table[i]')" data-parent="@table[0]CheckBox" /> <span>@table[i]</span>
                             <br />
                         }
                     </div>
@@ -47,13 +52,15 @@
         }
     </div>
 </div>
-<div id="controls" class="middle-container">
-    <div class="btn-group" role="group">
+<!-- This part is perform whole actions like selecting everything or nothing and running the functionality with the selected items -->
+<div id="controls">
+    <div class="btn-group" role="group" style="padding-top: 20vh;">
         <button type="button" onclick="selectAll()" class="btn btn-outline-primary">Select All</button>
         <button type="button" onclick="selectNone()" class="btn btn-outline-dark">Select None</button>
     </div>
+    <br />
+    <span id="selection-text">None selected</span>
     <div id="controls-inside">
         <button type="button" class="btn btn-outline-primary">Confirm and run</button>
     </div>
-    <span><text><script>getColumns()</script>selected</text></span>
 </div>
