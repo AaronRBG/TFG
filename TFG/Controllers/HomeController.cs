@@ -29,6 +29,75 @@ namespace TFG.Controllers
         {
             return View("DatabaseConnection", "Home");
         }
+        // loads the data_masking View
+        public IActionResult data_masking()
+        {
+            ViewData["database"] = HttpContext.Session.GetString("database");
+            return View("data_masking", "Home");
+        }
+
+        // loads the data_unification View
+        public IActionResult data_unification()
+        {
+            ViewData["database"] = HttpContext.Session.GetString("database");
+            return View("data_unification", "Home");
+        }
+
+        // loads the remove_duplicates View
+        public IActionResult remove_duplicates()
+        {
+            ViewData["database"] = HttpContext.Session.GetString("database");
+            return View("remove_duplicates", "Home");
+        }
+
+        // loads the constraints View
+        public IActionResult constraints()
+        {
+            ViewData["database"] = HttpContext.Session.GetString("database");
+            return View("constraints", "Home");
+        }
+
+        // loads the missing_values View
+        public IActionResult missing_values()
+        {
+            ViewData["database"] = HttpContext.Session.GetString("database");
+            return View("missing_values", "Home");
+        }
+
+        // loads the improve_datatypes View
+        public IActionResult improve_datatypes()
+        {
+            ViewData["database"] = HttpContext.Session.GetString("database");
+            return View("improve_datatypes", "Home");
+        }
+
+        // loads the primary_keys View
+        public IActionResult primary_keys()
+        {
+            ViewData["database"] = HttpContext.Session.GetString("database");
+            return View("primary_keys", "Home");
+        }
+
+        // loads the foreign_keys View
+        public IActionResult foreign_keys()
+        {
+            ViewData["database"] = HttpContext.Session.GetString("database");
+            return View("foreign_keys", "Home");
+        }
+
+        // loads the table_defragmentation View
+        public IActionResult table_defragmentation()
+        {
+            ViewData["database"] = HttpContext.Session.GetString("database");
+            return View("table_defragmentation", "Home");
+        }
+
+        // loads the improve_indexes View
+        public IActionResult improve_indexes()
+        {
+            ViewData["database"] = HttpContext.Session.GetString("database");
+            return View("improve_indexes", "Home");
+        } 
 
         // loads the Selection View saving the database name in the viewdata to be accesed later
         public IActionResult Selection()

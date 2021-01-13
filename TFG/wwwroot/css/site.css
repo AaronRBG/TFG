@@ -170,8 +170,13 @@ div#remote_inside {
     padding-right: 5vw;
 }
 
-/* icons */
+.section-functionality {
+    padding-left: 10vw;
+    padding-top: 5vh;
+    padding-right: 20vw;
+}
 
+/* icons */
 .database_icon {
     background: url('https://img.icons8.com/ios-filled/32/000000/database.png');
     width: 32px;
@@ -240,4 +245,9 @@ div#remote_inside {
 
 #fileLoader, #connectionString, #functionalitySelected {
     display: none;
+}
+
+#performance-button {
+    position: absolute;
+    right: 1vw;
 }

@@ -97,3 +97,7 @@ function getColumns() {
         });
     return checked;
 }
+
+function goToPage(functionality) {
+    window.location.href = functionality;
+}

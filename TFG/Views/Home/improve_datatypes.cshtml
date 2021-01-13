@@ -1,22 +1,5 @@
 ﻿@{
     ViewData["Title"] = "Database Connection";
-
-    // Creating some structures to ensure code reusability and prevent code duplication
-    Dictionary<string, string> functionalities_text = new Dictionary<string, string>();
-
-    // Datacleaning functionalities
-    functionalities_text.Add("data_masking", "Data Masking");
-    functionalities_text.Add("data_unification", "Data Unification");
-    functionalities_text.Add("remove_duplicates", "Remove Duplicates");
-    functionalities_text.Add("constraints", "Constraints");
-    functionalities_text.Add("missing_values", "Treating Missing Values");
-
-    // Tuning functionalities
-    functionalities_text.Add("improve_datatypes", "Improve Datatypes");
-    functionalities_text.Add("primary_keys", "Add/Improve Primary Keys");
-    functionalities_text.Add("foreign_keys", "Add/Improve Foreign Keys");
-    functionalities_text.Add("table_defragmentation", "Table Defragmentation");
-    functionalities_text.Add("improve_indexes", "Index Cleaning & Generation");
 }
 <!-- A navegation bar which does not navigate, it only shows the chosen database name along with a button that
     allows the user to go to the corresponding page to change it, if needed and show the current page (receiving the functionality selected from the controller)-->
@@ -28,7 +11,7 @@
             <button type="button" onclick='window.location.href="DatabaseConnection"' class="btn btn-default" data-toggle="tooltip" data-placement="auto" title="Change database"><span class='folder_icon'></span></button>
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="MainPage" MainPage">Home</a></li>
-                <li class="breadcrumb-item active" aria-current="page"><text>@functionalities_text[(string)ViewData["functionalitySelected"]]</text> Selection</li>
+                <li class="breadcrumb-item active" aria-current="page"><text>@ViewData["functionalitySelected"]</text> Selection</li>
             </ol>
         </div>
     </div>
@@ -78,6 +61,6 @@
     <br />
     <span id="selection-text">None selected</span>
     <div id="controls-inside">
-        <button type="button" onclick='goToPage("@ViewData["functionalitySelected"]")' class="btn btn-outline-primary">Confirm and run</button>
+        <button type="button" class="btn btn-outline-primary">Confirm and run</button>
     </div>
 </div>
