@@ -1,5 +1,23 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
+
+    // Creating some structures to ensure code reusability and prevent code duplication
+    String[] functionalities = { "data_masking", "data_unification", "remove_duplicates", "constraints", "missing_values", "improve_datatypes", "primary_keys", "foreign_keys", "table_defragmentation", "improve_indexes" };
+    Dictionary<string, string> functionalities_text = new Dictionary<string, string>();
+
+    // Datacleaning functionalities
+    functionalities_text.Add("data_masking", "Data Masking");
+    functionalities_text.Add("data_unification", "Data Unification");
+    functionalities_text.Add("remove_duplicates", "Remove Duplicates");
+    functionalities_text.Add("constraints", "Constraints");
+    functionalities_text.Add("missing_values", "Treating Missing Values");
+
+    // Tuning functionalities
+    functionalities_text.Add("improve_datatypes", "Improve Datatypes");
+    functionalities_text.Add("primary_keys", "Add/Improve Primary Keys");
+    functionalities_text.Add("foreign_keys", "Add/Improve Foreign Keys");
+    functionalities_text.Add("table_defragmentation", "Table Defragmentation");
+    functionalities_text.Add("improve_indexes", "Index Cleaning & Generation");
 }
 <!-- A navegation bar which does not navigate, it only shows the chosen database name along with a button that
     allows the user to go to the corresponding page to change it, if needed and show the current page -->
@@ -12,6 +30,7 @@
             <ol class="breadcrumb">
                 <li class="breadcrumb-item active" aria-current="page">Home</li>
             </ol>
+            <button id="performance-button" onclick='window.location.href="Performance"' type="button" class="btn btn-outline-success">Performance</button>
         </div>
     </div>
 </nav>
@@ -27,90 +46,33 @@
 <div id="Datacleaning" class="left-half">
     <h1>Datacleaning</h1>
     <div id="datacleaning_inside">
-        <div id="data_masking" class="functionality">
-            <button type="button" onclick='window.location.href="Help"' class="btn btn-default" data-toggle="tooltip" data-placement="auto" title="Help"><span class='info_icon'></span></button>
-            <span class="functionality-text">Data Masking</span>
-            <div class="btn-group" role="group">
-                <button type="button" class="btn btn-outline-primary">Run on full database</button>
-                <button type="button" onclick="goToSelection('Data Masking')" class="btn btn-outline-dark">Select what to run</button>
+        @for (int i = 0; i < 5; i++)
+        {
+            <div id="@functionalities[i]" class="functionality">
+                <button type="button" onclick='window.location.href="Help#@functionalities[i]"' class="btn btn-default" data-toggle="tooltip" data-placement="auto" title="Help"><span class='info_icon'></span></button>
+                <span class="functionality-text">@functionalities_text[@functionalities[i]]</span>
+                <div class="btn-group" role="group">
+                    <button type="button" onclick='goToPage("@functionalities[i]")' class="btn btn-outline-primary">Run on full database</button>
+                    <button type="button" onclick="goToSelection('@functionalities[i]')" class="btn btn-outline-dark">Select what to run</button>
+                </div>
             </div>
-        </div>
-        <div id="data_unification" class="functionality">
-            <button type="button" onclick='window.location.href="Help"' class="btn btn-default" data-toggle="tooltip" data-placement="auto" title="Help"><span class='info_icon'></span></button>
-            <span class="functionality-text">Data Unification</span>
-            <div class="btn-group" role="group">
-                <button type="button" class="btn btn-outline-primary">Run on full database</button>
-                <button type="button" onclick="goToSelection('Data Unification')" class="btn btn-outline-dark">Select what to run</button>
-            </div>
-        </div>
-        <div id="remove_duplicates" class="functionality">
-            <button type="button" onclick='window.location.href="Help"' class="btn btn-default" data-toggle="tooltip" data-placement="auto" title="Help"><span class='info_icon'></span></button>
-            <span class="functionality-text">Remove Duplicates</span>
-            <div class="btn-group" role="group">
-                <button type="button" class="btn btn-outline-primary">Run on full database</button>
-                <button type="button" onclick="goToSelection('Remove Duplicates')" class="btn btn-outline-dark">Select what to run</button>
-            </div>
-        </div>
-        <div id="constraints" class="functionality">
-            <button type="button" onclick='window.location.href="Help"' class="btn btn-default" data-toggle="tooltip" data-placement="auto" title="Help"><span class='info_icon'></span></button>
-            <span class="functionality-text">Constraints</span>
-            <div class="btn-group" role="group">
-                <button type="button" class="btn btn-outline-primary">Run on full database</button>
-                <button type="button" onclick="goToSelection('Constraints')" class="btn btn-outline-dark">Select what to run</button>
-            </div>
-        </div>
-        <div id="missing_values" class="functionality">
-            <button type="button" onclick='window.location.href="Help"' class="btn btn-default" data-toggle="tooltip" data-placement="auto" title="Help"><span class='info_icon'></span></button>
-            <span class="functionality-text">Treating Missing Values</span>
-            <div class="btn-group" role="group">
-                <button type="button" class="btn btn-outline-primary">Run on full database</button>
-                <button type="button" onclick="goToSelection('Treating Missing Values')" class="btn btn-outline-dark">Select what to run</button>
-            </div>
-        </div>
+
+        }
     </div>
 </div>
 <div id="Tuning" class="right-half">
     <h1>Tuning</h1>
     <div id="tuning_inside">
-        <div id="improve_datatypes" class="functionality">
-            <button type="button" onclick='window.location.href="Help"' class="btn btn-default" data-toggle="tooltip" data-placement="auto" title="Help"><span class='info_icon'></span></button>
-            <span class="functionality-text">Improve Datatypes</span>
-            <div class="btn-group" role="group">
-                <button type="button" class="btn btn-outline-primary">Run on full database</button>
-                <button type="button" onclick="goToSelection('Improve Datatypes')" class="btn btn-outline-dark">Select what to run</button>
+        @for (int i = 5; i < 10; i++)
+        {
+            <div id="@functionalities[i]" class="functionality">
+                <button type="button" onclick='window.location.href="Help#@functionalities[i]"' class="btn btn-default" data-toggle="tooltip" data-placement="auto" title="Help"><span class='info_icon'></span></button>
+                <span class="functionality-text">@functionalities_text[@functionalities[i]]</span>
+                <div class="btn-group" role="group">
+                    <button type="button" onclick='goToPage("@functionalities[i]")' class="btn btn-outline-primary">Run on full database</button>
+                    <button type="button" onclick="goToSelection('@functionalities[i]')" class="btn btn-outline-dark">Select what to run</button>
+                </div>
             </div>
-        </div>
-        <div id="primary_keys" class="functionality">
-            <button type="button" onclick='window.location.href="Help"' class="btn btn-default" data-toggle="tooltip" data-placement="auto" title="Help"><span class='info_icon'></span></button>
-            <span class="functionality-text">Add/Improve Primary Keys</span>
-            <div class="btn-group" role="group">
-                <button type="button" class="btn btn-outline-primary">Run on full database</button>
-                <button type="button" onclick="goToSelection('Add/Improve Primary Keys')" class="btn btn-outline-dark">Select what to run</button>
-            </div>
-        </div>
-        <div id="foreign_keys" class="functionality">
-            <button type="button" onclick='window.location.href="Help"' class="btn btn-default" data-toggle="tooltip" data-placement="auto" title="Help"><span class='info_icon'></span></button>
-            <span class="functionality-text">Add/Improve Foreign Keys</span>
-            <div class="btn-group" role="group">
-                <button type="button" class="btn btn-outline-primary">Run on full database</button>
-                <button type="button" onclick="goToSelection('Add/Improve Foreign Keys')" class="btn btn-outline-dark">Select what to run</button>
-            </div>
-        </div>
-        <div id="table_defragmentation" class="functionality">
-            <button type="button" onclick='window.location.href="Help"' class="btn btn-default" data-toggle="tooltip" data-placement="auto" title="Help"><span class='info_icon'></span></button>
-            <span class="functionality-text">Table Defragmentation</span>
-            <div class="btn-group" role="group">
-                <button type="button" class="btn btn-outline-primary">Run on full database</button>
-                <button type="button" onclick="goToSelection('Table Defragmentation')" class="btn btn-outline-dark">Select what to run</button>
-            </div>
-        </div>
-        <div id="improve_indexes" class="functionality">
-            <button type="button" onclick='window.location.href="Help"' class="btn btn-default" data-toggle="tooltip" data-placement="auto" title="Help"><span class='info_icon'></span></button>
-            <span class="functionality-text">Index Cleaning & Generation</span>
-            <div class="btn-group" role="group">
-                <button type="button" class="btn btn-outline-primary">Run on full database</button>
-                <button type="button" onclick="goToSelection('Index Cleaning & Generation')" class="btn btn-outline-dark">Select what to run</button>
-            </div>
-        </div>
+        }
     </div>
 </div>
