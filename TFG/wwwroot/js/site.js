@@ -98,6 +98,23 @@ function getColumns() {
     return checked;
 }
 
+//
 function goToPage(functionality) {
     window.location.href = functionality;
 }
+
+// This function controls the vertical tabs in some views like reports
+function openTab(event, name) {
+    // Declare all variables
+    var i, tabcontent, tablinks;
+
+    // Get all elements with class="tabcontent" and hide them
+    tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+    }
+
+    // Show the current tab, and add an "active" class to the link that opened the tab
+    document.getElementById(name).style.display = "block";
+    event.currentTarget.className += " active";
+} 

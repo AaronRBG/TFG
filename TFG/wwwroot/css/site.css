@@ -75,6 +75,7 @@ body {
     padding: 0;
     box-sizing: border-box;
     border-right: 0.4vw solid #000000;
+    padding-right: 1vw;
 }
 
 .right-half {
@@ -83,6 +84,7 @@ body {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    padding-left: 1vw;
 }
 
 /*
@@ -108,6 +110,17 @@ div#Datacleaning, div#Tuning {
 
 div#accordion {
     height: 80vh;
+}
+
+div#controls {
+    width: 25vw;
+    position: absolute;
+    right: 0;
+}
+
+div#Tab-contents {
+    padding-left: 1vw;
+    text-align: center;
 }
 
 .centeredBig {
