@@ -225,8 +225,14 @@ div#remote_inside {
     display: inline-block;
 }
 
-/* text */
+.download_icon {
+    background: url('https://img.icons8.com/android/32/000000/download.png');
+    width: 32px;
+    height: 32px;
+    display: inline-block;
+}
 
+/* text */
 .top-text {
     vertical-align: middle;
     padding-right: 3vw;

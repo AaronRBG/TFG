@@ -36,7 +36,7 @@
         </nav>*/}
     </header>
     <div class="container">
-        <main role="main" class="main">
+        <main id="main" role="main" class="main">
             @RenderBody()
         </main>
     </div>
@@ -48,6 +48,7 @@
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @RenderSection("Scripts", required: false)
 </body>

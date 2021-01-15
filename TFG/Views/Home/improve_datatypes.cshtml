@@ -1,5 +1,5 @@
 ﻿@{
-    ViewData["Title"] = "Database Connection";
+    ViewData["Title"] = "Improve Datatypes Report";
 }
 <!-- A navegation bar which does not navigate, it only shows the chosen database name along with a button that
     allows the user to go to the corresponding page to change it, if needed and show the current page (receiving the functionality selected from the controller)-->
@@ -11,7 +11,7 @@
             <button type="button" onclick='window.location.href="DatabaseConnection"' class="btn btn-default" data-toggle="tooltip" data-placement="auto" title="Change database"><span class='folder_icon'></span></button>
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="MainPage" MainPage">Home</a></li>
-                <li class="breadcrumb-item active" aria-current="page"><text>@ViewData["functionalitySelected"]</text> Selection</li>
+                <li class="breadcrumb-item active" aria-current="page">Improve Datatypes Report</li>
             </ol>
         </div>
     </div>
@@ -22,45 +22,47 @@
 <div id="middle_container" class="left-half">
     <div id="selection-top" class="centeredBig">
         <h3>
-            <span>Table and or columns selection</span>
+            <span>Data Masking Report</span>
         </h3>
     </div>
-    <div id="accordion" class="overflow-auto centeredBig">
-        @foreach (var table in ViewBag.tableData)
-        {
-            string collapse = "#collapse" + table[0];
-            <div class="card">
-                <div class="card-header" id="@table[0]Div">
-                    <h5>
-                        <input type="checkbox" id="@table[0]CheckBox" onclick="checkChilds('@table[0]CheckBox')" />
-                        <button class="btn btn-link" data-toggle="collapse" data-target="@collapse" aria-expanded="true" aria-controls="collapseOne">
-                            @table[0]
-                        </button>
-                    </h5>
-                </div>
-
-                <div id="@collapse.Substring(1)" class="collapse hide" aria-labelledby="@table[0]" data-parent="#accordion">
-                    <div class="card-body">
-                        @for (int i = 1; i < ((string[])table).Length; i++)
-                        {
-                            <input type="checkbox" id="@table[i]" onclick="checkParent('@table[0]CheckBox', '@table[i]')" data-parent="@table[0]CheckBox" /> <span>@table[i]</span>
-                            <br />
-                        }
-                    </div>
-                </div>
+    <div id="accordion" class="overflow-auto left-half" style="width:15vw;">
+        <div class="card">
+            <div class="card-header">
+                <h5>
+                    <button class="btn btn-link" onclick="openTab(event, 'Tokyo')">Tokyo</button>
+                </h5>
             </div>
-        }
+        </div>
+    </div>
+    <div id="Tab-contents" class="overflow-auto">
+        <div id="Tokyo" class="tabcontent">
+            <table class="table table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">First</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th scope="row">1</th>
+                        <td>Mark</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 <!-- This part is perform whole actions like selecting everything or nothing and running the functionality with the selected items -->
 <div id="controls">
-    <div class="btn-group" role="group" style="padding-top: 20vh;">
-        <button type="button" onclick="selectAll()" class="btn btn-outline-primary">Select All</button>
-        <button type="button" onclick="selectNone()" class="btn btn-outline-dark">Select None</button>
+    <div class="btn-group-vertical" role="group" style="padding-top: 20vh;">
+        <button type="button" onclick="selectAll()" class="btn btn-outline-primary">Select all</button>
+        <button type="button" onclick="selectNone()" class="btn btn-outline-danger">Select none</button>
+        <button type="button" onclick="selectNone()" class="btn btn-outline-secondary">Confirm and run</button>
     </div>
     <br />
     <span id="selection-text">None selected</span>
     <div id="controls-inside">
-        <button type="button" class="btn btn-outline-primary">Confirm and run</button>
+        <button type="button" onclick="download()" class="btn btn-outline-primary"><span class='download_icon'></span></button>
     </div>
 </div>

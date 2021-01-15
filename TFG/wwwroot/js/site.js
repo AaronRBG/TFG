@@ -1,9 +1,4 @@
-﻿// Please see documentation at https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
-
-// Write your JavaScript code.
-
-// it was used to open a dialog to choose a database .mdf file currently in disuse
+﻿// it was used to open a dialog to choose a database .mdf file currently in disuse
 function openfileDialog() {
     $("#fileLoader").click();
 }
@@ -26,7 +21,7 @@ function goToSelection(functionality) {
 // then applies that value to all columns checkbox of that table and updates the output text
 function checkChilds(CheckBoxparent) {
     var boo = document.getElementById(CheckBoxparent).checked;
-    document.querySelectorAll('[ data-parent='+CheckBoxparent+']').forEach(
+    document.querySelectorAll('[ data-parent=' + CheckBoxparent + ']').forEach(
         function (item) {
             item.checked = boo;
         });
@@ -117,4 +112,18 @@ function openTab(event, name) {
     // Show the current tab, and add an "active" class to the link that opened the tab
     document.getElementById(name).style.display = "block";
     event.currentTarget.className += " active";
-} 
+}
+
+function download() {
+    var doc = new jsPDF();
+    var specialElementHandlers = {
+        '#editor': function (element, renderer) {
+            return true;
+        }
+    };
+    doc.fromHTML($('main').html(), 15, 15, {
+        'width': 170,
+        'elementHandlers': specialElementHandlers
+    });
+    doc.save('sample-file.pdf');
+}

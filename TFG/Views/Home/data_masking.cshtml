@@ -56,7 +56,7 @@
 </div>
 <!-- This part is perform whole actions like selecting everything or nothing and running the functionality with the selected items -->
 <div id="controls">
-    <div class="btn-group " role="group" style="padding-top: 20vh;">
+    <div class="btn-group-vertical" role="group" style="padding-top: 20vh;">
         <button type="button" onclick="selectAll()" class="btn btn-outline-primary">Remove extra-characters</button>
         <button type="button" onclick="selectNone()" class="btn btn-outline-danger">Remove non-compliant rows</button>
         <button type="button" onclick="selectNone()" class="btn btn-outline-secondary">Use manually user-inputs</button>
@@ -65,6 +65,6 @@
     <br />
     <span id="selection-text">None selected</span>
     <div id="controls-inside">
-        <button type="button" class="btn btn-outline-primary">Download report in pdf</button>
+        <button type="button" onclick="download()" class="btn btn-outline-primary"><span class='download_icon'></span></button>
     </div>
 </div>
