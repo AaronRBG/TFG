@@ -1,0 +1,69 @@
+﻿@{
+    ViewData["Title"] = "Data Masking Report";
+}
+<!-- A navegation bar which does not navigate, it only shows the chosen database name along with a button that
+    allows the user to go to the corresponding page to change it, if needed and show the current page (receiving the functionality selected from the controller)-->
+<nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+    <div id="Top-container">
+        <div id="Top">
+            <span class='database_icon'></span>
+            <span class="top-text">@ViewData["database"]</span>
+            <button type="button" onclick='window.location.href="DatabaseConnection"' class="btn btn-default" data-toggle="tooltip" data-placement="auto" title="Change database"><span class='folder_icon'></span></button>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="MainPage" MainPage">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Create Constraints</li>
+            </ol>
+        </div>
+    </div>
+</nav>
+<!-- This part is the most complicated of this view
+    It gets the data sent from the controller (double array with the database table names and column names of each table)
+    Then it creates for each table an item of an accordion which when expanded shows its columns with checkboxes for all of those items-->
+<div id="middle_container" class="left-half">
+    <div id="selection-top" class="centeredBig">
+        <h3>
+            <span>Data Masking Report</span>
+        </h3>
+    </div>
+    <div id="accordion" class="overflow-auto left-half" style="width:15vw;">
+        <div class="card">
+            <div class="card-header">
+                <h5>
+                    <button class="btn btn-link" onclick="openTab(event, 'Tokyo')">Tokyo</button>
+                </h5>
+            </div>
+        </div>
+    </div>
+    <div id="Tab-contents" class="overflow-auto">
+        <div id="Tokyo" class="tabcontent">
+            <table class="table table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">First</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th scope="row">1</th>
+                        <td>Mark</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<!-- This part is perform whole actions like selecting everything or nothing and running the functionality with the selected items -->
+<div id="controls">
+    <div class="btn-group-vertical" role="group" style="padding-top: 20vh;">
+        <button type="button" onclick="selectAll()" class="btn btn-outline-primary">Remove extra-characters</button>
+        <button type="button" onclick="selectNone()" class="btn btn-outline-danger">Remove non-compliant rows</button>
+        <button type="button" onclick="selectNone()" class="btn btn-outline-secondary">Use manually user-inputs</button>
+        <button type="button" onclick="selectNone()" class="btn btn-outline-dark">Go back to mask creation</button>
+    </div>
+    <br />
+    <span id="selection-text">None selected</span>
+    <div id="controls-inside">
+        <button type="button" onclick="download()" class="btn btn-outline-primary"><span class='download_icon'></span></button>
+    </div>
+</div>

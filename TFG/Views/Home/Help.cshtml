@@ -1,23 +1,91 @@
 ﻿@{
     ViewData["Title"] = "Help";
 }
+<!-- A navegation bar which does not navigate, it only shows the chosen database name along with a button that
+    allows the user to go to the corresponding page to change it, if needed and show the current page -->
 <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
     <div id="Top-container">
         <div id="Top">
-            <span class='database_icon'></span>
-            <span class="top-text">Selected file</span>
+            <!--
+                    <span class='database_icon'></span>
+            <span class="top-text">@ViewData["database"]</span>
+                -->
             <button type="button" onclick='window.location.href="DatabaseConnection"' class="btn btn-default" data-toggle="tooltip" data-placement="auto" title="Change database"><span class='folder_icon'></span></button>
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="Index" Index">Home</a></li>
-                @{/*<li class="breadcrumb-item"><a href="#">Library</a></li>*/}
                 <li class="breadcrumb-item active" aria-current="page">Help</li>
             </ol>
         </div>
     </div>
 </nav>
 <div>
-    <p>This version works with SQL Server 2019 Databases. You can either add a local database or connect to a remote one More specific procedure about file types and connection strings masking.</p>
-    <p>Esta version funciona con bases de datos en SQL Server 2019 Puedes añadir una base de datos local o conectarte a una remota.</p>
-    <p>Cosas mas especificas sobre los tipos de datos y mascaras de string de conexion.</p>
-    </div>
+    <section id="database_connection" class="section-functionality">
+        <h2>Connecting to your database</h2>
+        <br />
+
+        <p>The connection string should follow one of the following formats:</p>
+        <ul>
+            <li>Server=myServerAddress;Database=myDataBase;uid=myUsername;Password=myPassword;</li>
+            <li>Server=myServerAddress;Database=myDataBase;Trusted_Connection=True;</li>
+            <li>Server=myServerName\myInstanceName;Database=myDataBase;User Id=myUsername;Password=myPassword;</li>
+            <li>Server=myServerName,myPortNumber;Database=myDataBase;User Id=myUsername;Password=myPassword;</li>
+            <li>Data Source=190.190.200.100,1433;Network Library=DBMSSOCN;Initial Catalog=myDataBase;User ID=myUsername;Password=myPassword;</li>
+        </ul>
+        <p>
+            1433 is the default port number and could be ommited.
+            DBMSSOCN is the default value of the Network Library field, and ensures the usage of TCP/IP.
+            User ID and uid are the same field.
+            Server address can be set to localhost.
+        </p>
+    </section>
+    <section id="data_masking" class="section-functionality">
+        <h2>Data Masking</h2>
+        <br />
+        <p>This functionality allows the user to create masks for some selected columns, in order to have a fixed structure for the data.</p>
+    </section>
+    <section id="data_unification" class="section-functionality">
+        <h2>Data Unification</h2>
+        <br />
+        <p>This functionality allows the user to unify in one, several ocurrences that are very likely to be refering to the same thing.</p>
+    </section>
+    <section id="remove_duplicates" class="section-functionality">
+        <h2>Remove Duplicates</h2>
+        <br />
+        <p>This functionality allows the user to delete repeated values, in case that they make no sense.</p>
+    </section>
+    <section id="constraints" class="section-functionality">
+        <h2>Constraints</h2>
+        <br />
+        <p>This functionality allows the user to create constraints of several fixed types. This constraints permit a higher level control of the data quality.</p>
+    </section>
+    <section id="missing_values" class="section-functionality">
+        <h2>Treating Missing Values</h2>
+        <br />
+        <p>This functionality allows the user to fix incomplete records or delete them, to prevent the errors related to missing values.</p>
+    </section>
+    <section id="improve_datatypes" class="section-functionality">
+        <h2>Improve Datatypes</h2>
+        <br />
+        <p>This functionality suggests better datatypes for the selected columns, improving maintainability and performance,</p>
+    </section>
+    <section id="primary_keys" class="section-functionality">
+        <h2>Add/Improve Primary Keys</h2>
+        <br />
+        <p>This functionality allows the user to add suggested primary keys to the tables that are missing them and/or change the ones that are already set.</p>
+    </section>
+    <section id="foreign_keys" class="section-functionality">
+        <h2>Add/Improve Foreign Keys</h2>
+        <br />
+        <p>This functionality allows the user to add suggested foreign keys and/or remove one that are already set.</p>
+    </section>
+    <section id="table_defragmentation" class="section-functionality">
+        <h2>Table Defragmentation</h2>
+        <br />
+        <p>This functionality allows the user to defragmentate the selected tables.</p>
+    </section>
+    <section id="improve_indexes" class="section-functionality">
+        <h2>Index Cleaning & Generation</h2>
+        <br />
+        <p>This functionality allows the user to add suggested indexes and/or remove ones that are already set.</p>
+    </section>
+</div>
 

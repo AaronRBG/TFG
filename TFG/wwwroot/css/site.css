@@ -70,12 +70,12 @@ body {
 /* divs */
 
 .left-half {
-    text-align: center;
     float: left;
     margin: 0;
     padding: 0;
     box-sizing: border-box;
     border-right: 0.4vw solid #000000;
+    padding-right: 1vw;
 }
 
 .right-half {
@@ -84,26 +84,67 @@ body {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    padding-left: 1vw;
 }
 
-div#Local, div#Remote {
+/*
+div#Local {
     height: 65vh;
     width: 50%;
 }
+*/
+
+div#Remote {
+    padding-left: 15vw;
+    padding-right: 15vw;
+    height: 65vh;
+    text-align: center;
+    box-sizing: border-box;
+}
 
 div#Datacleaning, div#Tuning {
+    text-align: center;
     height: 80vh;
     width: 50%;
 }
 
+div#accordion {
+    height: 80vh;
+}
+
+div#controls {
+    width: 25vw;
+    position: absolute;
+    right: 0;
+}
+
+div#Tab-contents {
+    padding-left: 1vw;
+    text-align: center;
+}
+
+.centeredBig {
+    padding-left: 5vw;
+    padding-right: 5vw;
+    align-content: center;
+}
+
+#selection-top, div#Top-container, div#controls {
+    text-align: center;
+}
+
+div#middle_container {
+    width: 75vw;
+}
+
 div#Bottom-container {
+    display: inline;
     text-align: center;
     padding-left: 35vw;
     padding-right: 35vw;
-    width: 50%;
 }
 
-div#Top, div#Bottom {
+div#Top {
     text-align: center;
     display: inline-flex;
     align-items: center;
@@ -131,6 +172,7 @@ div#remote_inside {
     text-align: center;
     display: inline-flex;
     align-items: center;
+    padding-top: 5vh;
 }
 
 .functionality {
@@ -141,8 +183,13 @@ div#remote_inside {
     padding-right: 5vw;
 }
 
-/* icons */
+.section-functionality {
+    padding-left: 10vw;
+    padding-top: 5vh;
+    padding-right: 20vw;
+}
 
+/* icons */
 .database_icon {
     background: url('https://img.icons8.com/ios-filled/32/000000/database.png');
     width: 32px;
@@ -178,12 +225,25 @@ div#remote_inside {
     display: inline-block;
 }
 
-/* text */
+.download_icon {
+    background: url('https://img.icons8.com/android/32/000000/download.png');
+    width: 32px;
+    height: 32px;
+    display: inline-block;
+}
 
+/* text */
 .top-text {
     vertical-align: middle;
     padding-right: 3vw;
     padding-left: 1vw;
+}
+
+#selection-text {
+    display: inline-flex;
+    padding-top: 25vh;
+    padding-bottom: 5vh;
+    text-align: center;
 }
 
 .functionality-text {
@@ -202,6 +262,11 @@ div#remote_inside {
     resize: none;
 }
 
-#fileLoader, #connectionString {
+#fileLoader, #connectionString, #functionalitySelected {
     display: none;
+}
+
+#performance-button {
+    position: absolute;
+    right: 1vw;
 }

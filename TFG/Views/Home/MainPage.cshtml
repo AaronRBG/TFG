@@ -1,0 +1,78 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+
+    // Creating some structures to ensure code reusability and prevent code duplication
+    String[] functionalities = { "data_masking", "data_unification", "remove_duplicates", "constraints", "missing_values", "improve_datatypes", "primary_keys", "foreign_keys", "table_defragmentation", "improve_indexes" };
+    Dictionary<string, string> functionalities_text = new Dictionary<string, string>();
+
+    // Datacleaning functionalities
+    functionalities_text.Add("data_masking", "Data Masking");
+    functionalities_text.Add("data_unification", "Data Unification");
+    functionalities_text.Add("remove_duplicates", "Remove Duplicates");
+    functionalities_text.Add("constraints", "Constraints");
+    functionalities_text.Add("missing_values", "Treating Missing Values");
+
+    // Tuning functionalities
+    functionalities_text.Add("improve_datatypes", "Improve Datatypes");
+    functionalities_text.Add("primary_keys", "Add/Improve Primary Keys");
+    functionalities_text.Add("foreign_keys", "Add/Improve Foreign Keys");
+    functionalities_text.Add("table_defragmentation", "Table Defragmentation");
+    functionalities_text.Add("improve_indexes", "Index Cleaning & Generation");
+}
+<!-- A navegation bar which does not navigate, it only shows the chosen database name along with a button that
+    allows the user to go to the corresponding page to change it, if needed and show the current page -->
+<nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+    <div id="Top-container">
+        <div id="Top">
+            <span class='database_icon'></span>
+            <span class="top-text">@ViewData["database"]</span>
+            <button type="button" onclick='window.location.href="DatabaseConnection"' class="btn btn-default" data-toggle="tooltip" data-placement="auto" title="Change database"><span class='folder_icon'></span></button>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item active" aria-current="page">Home</li>
+            </ol>
+            <button id="performance-button" onclick='window.location.href="Performance"' type="button" class="btn btn-outline-success">Performance</button>
+        </div>
+    </div>
+</nav>
+
+<!-- This part consists of a text input and a button both hidden whose importance can be seen in the site.js file
+    The Html.BeginForm part is used to send information to a controller method-->
+@using (Html.BeginForm("GoToSelection", "Home"))
+{
+    <input type="text" id="functionalitySelected" name="functionalitySelected" />
+    <input id="hidden-btn2" class="hidden-btn" type="submit" style="display: none;" />
+}
+<!-- Everything on here is just visual, 2 divs one to the left and one to the right with 5 divs of functionality each which in turn have a help button, their name and their option buttons -->
+<div id="Datacleaning" class="left-half">
+    <h1>Datacleaning</h1>
+    <div id="datacleaning_inside">
+        @for (int i = 0; i < 5; i++)
+        {
+            <div id="@functionalities[i]" class="functionality">
+                <button type="button" onclick='window.location.href="Help#@functionalities[i]"' class="btn btn-default" data-toggle="tooltip" data-placement="auto" title="Help"><span class='info_icon'></span></button>
+                <span class="functionality-text">@functionalities_text[@functionalities[i]]</span>
+                <div class="btn-group" role="group">
+                    <button type="button" onclick='goToPage("@functionalities[i]")' class="btn btn-outline-primary">Run on full database</button>
+                    <button type="button" onclick="goToSelection('@functionalities[i]')" class="btn btn-outline-dark">Select what to run</button>
+                </div>
+            </div>
+
+        }
+    </div>
+</div>
+<div id="Tuning" class="right-half">
+    <h1>Tuning</h1>
+    <div id="tuning_inside">
+        @for (int i = 5; i < 10; i++)
+        {
+            <div id="@functionalities[i]" class="functionality">
+                <button type="button" onclick='window.location.href="Help#@functionalities[i]"' class="btn btn-default" data-toggle="tooltip" data-placement="auto" title="Help"><span class='info_icon'></span></button>
+                <span class="functionality-text">@functionalities_text[@functionalities[i]]</span>
+                <div class="btn-group" role="group">
+                    <button type="button" onclick='goToPage("@functionalities[i]")' class="btn btn-outline-primary">Run on full database</button>
+                    <button type="button" onclick="goToSelection('@functionalities[i]')" class="btn btn-outline-dark">Select what to run</button>
+                </div>
+            </div>
+        }
+    </div>
+</div>
