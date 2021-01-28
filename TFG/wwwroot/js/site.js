@@ -25,7 +25,15 @@ function checkChilds(CheckBoxparent) {
         function (item) {
             item.checked = boo;
         });
-    document.getElementById('selection-text').innerHTML = getColumns() + ' columns selected from ' + getTables() + ' different tables.'
+    if (getColumns() == 0) {
+        if (getTables() != 0) {
+            document.getElementById('selection-text').innerHTML = getTables() + ' tables selected'
+        } else {
+            document.getElementById('selection-text').innerHTML = 'None selected'
+        }
+    } else {
+        document.getElementById('selection-text').innerHTML = getColumns() + ' columns selected from ' + getTables() + ' different tables.'
+    }
 }
 
 // this method parameter is the id of the table checkbox and the id of the column checkbox clicked
@@ -48,7 +56,15 @@ function checkParent(CheckBoxparent, child) {
     if (!boo) {
         document.getElementById(CheckBoxparent).checked = boo;
     }
-    document.getElementById('selection-text').innerHTML = getColumns() + ' columns selected from ' + getTables() + ' different tables.'
+    if (getColumns() == 0) {
+        if (getTables() != 0) {
+            document.getElementById('selection-text').innerHTML = getTables() + ' tables selected'
+        } else {
+            document.getElementById('selection-text').innerHTML = 'None selected'
+        }
+    } else {
+        document.getElementById('selection-text').innerHTML = getColumns() + ' columns selected from ' + getTables() + ' different tables.'
+    }
 }
 
 // this method parameter checks all the checkboxes and updates the output text
@@ -57,7 +73,11 @@ function selectAll() {
         function (item) {
             item.checked = true;
         });
-    document.getElementById('selection-text').innerHTML = getColumns() + ' columns selected from ' + getTables() + ' different tables.'
+    if (getColumns() == 0) {
+        document.getElementById('selection-text').innerHTML = getTables() + ' tables selected'
+    } else {
+        document.getElementById('selection-text').innerHTML = getColumns() + ' columns selected from ' + getTables() + ' different tables.'
+    }
 }
 
 // this method parameter unchecks all the checkboxes and updates the output text
@@ -66,7 +86,7 @@ function selectNone() {
         function (item) {
             item.checked = false;
         });
-    document.getElementById('selection-text').innerHTML = 'None Selected'
+    document.getElementById('selection-text').innerHTML = 'None selected'
 }
 
 // this method parameter returns the number of table checkboxes that are clicked
@@ -113,7 +133,7 @@ function openTab(event, name) {
     document.getElementById(name).style.display = "block";
     event.currentTarget.className += " active";
 }
-
+// This function more or less lets you download the page in pdf format
 function download() {
     var doc = new jsPDF();
     var specialElementHandlers = {
