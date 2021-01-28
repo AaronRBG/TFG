@@ -97,7 +97,13 @@ namespace TFG.Controllers
         {
             ViewData["database"] = HttpContext.Session.GetString("database");
             return View("improve_indexes", "Home");
-        } 
+        }
+
+        public IActionResult Performance()
+        {
+            ViewData["database"] = HttpContext.Session.GetString("database");
+            return View("Performance", "Home");
+        }
 
         // loads the Selection View saving the database name in the viewdata to be accesed later
         public IActionResult Selection()
