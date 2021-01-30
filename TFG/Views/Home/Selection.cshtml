@@ -45,6 +45,13 @@
         </div>
     </div>
 </nav>
+
+@using (Html.BeginForm("GoToPage", "Home"))
+{
+    <input type="text" id="functionalitySelected2" name="functionalitySelected" />
+    <input id="hidden-btn3" class="hidden-btn" type="submit" style="display: none;" />
+}
+
 <!-- This part is the most complicated of this view
     It gets the data sent from the controller (double array with the database table names and column names of each table)
     Then it creates for each table an item of an accordion which when expanded shows its columns with checkboxes for all of those items-->
@@ -58,28 +65,28 @@
         @foreach (var table in ViewBag.tableData)
         {
             string collapse = "#collapse" + table[0];
-        <div class="card">
-            <div class="card-header" id="@table[0]Div">
-                <h5>
-                    <input type="checkbox" id="@table[0]CheckBox" onclick="checkChilds('@table[0]CheckBox')" />
-                    <button class="btn btn-link" data-toggle="collapse" data-target="@collapse" aria-expanded="true" aria-controls="collapseOne">
-                        @table[0]
-                    </button>
-                </h5>
-            </div>
-            @if(@functionalities_need_columns[(string)ViewData["functionalitySelected"]])
-            {
-            <div id="@collapse.Substring(1)" class="collapse hide" aria-labelledby="@table[0]" data-parent="#accordion">
-                <div class="card-body">
-                    @for (int i = 1; i < ((string[])table).Length; i++)
-                    {
-                        <input type="checkbox" id="@table[i]" onclick="checkParent('@table[0]CheckBox', '@table[i]')" data-parent="@table[0]CheckBox" /> <span>@table[i]</span>
-                        <br />
-                    }
+            <div class="card">
+                <div class="card-header" id="@table[0]Div">
+                    <h5>
+                        <input type="checkbox" id="@table[0]CheckBox" onclick="checkChilds('@table[0]CheckBox')" />
+                        <button class="btn btn-link" data-toggle="collapse" data-target="@collapse" aria-expanded="true" aria-controls="collapseOne">
+                            @table[0]
+                        </button>
+                    </h5>
                 </div>
+                @if (@functionalities_need_columns[(string)ViewData["functionalitySelected"]])
+                {
+                    <div id="@collapse.Substring(1)" class="collapse hide" aria-labelledby="@table[0]" data-parent="#accordion">
+                        <div class="card-body">
+                            @for (int i = 1; i < ((string[])table).Length; i++)
+                            {
+                                <input type="checkbox" id="@table[i]" onclick="checkParent('@table[0]CheckBox', '@table[i]')" data-parent="@table[0]CheckBox" /> <span>@table[i]</span>
+                                <br />
+                            }
+                        </div>
+                    </div>
+                }
             </div>
-            }
-        </div>
         }
     </div>
 </div>

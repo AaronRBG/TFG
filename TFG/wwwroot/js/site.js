@@ -15,6 +15,12 @@ function goToSelection(functionality) {
     $("#hidden-btn2").click();
 }
 
+// used as a middleware to activate a hidden button which is the one who connects to the controller and also inputs the functionality to a hidden input connected to the controller
+function goToPage(functionality) {
+    document.getElementById("functionalitySelected2").value = functionality;
+    $("#hidden-btn3").click();
+}
+
 // this method parameter is the id of the table checkbox
 // this method is called when the table checkbox is clicked
 // first checks if that checkbox is checked
@@ -111,11 +117,6 @@ function getColumns() {
             }
         });
     return checked;
-}
-
-//
-function goToPage(functionality) {
-    window.location.href = functionality;
 }
 
 // This function controls the vertical tabs in some views like reports

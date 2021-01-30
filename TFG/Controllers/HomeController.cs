@@ -209,6 +209,12 @@ namespace TFG.Controllers
             ViewData["functionalitySelected"] = functionalitySelected;
             return Selection();
         }
+        public IActionResult GoToPage(string functionalitySelected)
+        {
+            // this method is used to go to the Selection page while sending the corresponding functionality
+            ViewData["functionalitySelected"] = functionalitySelected;
+            return View(functionalitySelected, "Home");
+        }
     }
 }
 
