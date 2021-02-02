@@ -99,6 +99,17 @@ namespace TFG.Controllers
             return View("improve_indexes", "Home");
         }
 
+        public IActionResult create_masks()
+        {
+            ViewData["database"] = HttpContext.Session.GetString("database");
+            return View("create_masks", "Home");
+        }
+        public IActionResult create_constraints()
+        {
+            ViewData["database"] = HttpContext.Session.GetString("database");
+            return View("create_constraints", "Home");
+        }
+
         public IActionResult Performance()
         {
             ViewData["database"] = HttpContext.Session.GetString("database");
@@ -195,25 +206,25 @@ namespace TFG.Controllers
                 HttpContext.Session.SetString("database", splits[1]);
                 HttpContext.Session.SetString("connectionString", connectionString);
                 con.Close();
-                return MainPage();
+                return RedirectToAction("MainPage");
             }
             else
             {
                 // if it is not valid it return the Help View
-                return Help();
+                return RedirectToAction("Help");
             }
         }
         public IActionResult GoToSelection(string functionalitySelected)
         {
             // this method is used to go to the Selection page while sending the corresponding functionality
-            ViewData["functionalitySelected"] = functionalitySelected;
-            return Selection();
+            TempData["functionalitySelected"] = functionalitySelected;
+            return RedirectToAction("Selection");
         }
         public IActionResult GoToPage(string functionalitySelected)
         {
             // this method is used to go to the Selection page while sending the corresponding functionality
-            ViewData["functionalitySelected"] = functionalitySelected;
-            return View(functionalitySelected, "Home");
+            TempData["functionalitySelected"] = functionalitySelected;
+            return RedirectToAction(functionalitySelected);
         }
     }
 }

@@ -53,6 +53,7 @@
         </div>
     </div>
 </div>
+<text>@TempData["selected"]</text>
 <!-- This part is perform whole actions like selecting everything or nothing and running the functionality with the selected items -->
 <div id="controls">
     @using (Html.BeginForm("GoToSelection", "Home"))
@@ -63,6 +64,6 @@
     <br />
     <span id="selection-text">None selected</span>
     <div id="controls-inside">
-        <button type="button" onclick='goToPage("@ViewData["functionalitySelected"]")' class="btn btn-outline-primary">Confirm and run</button>
+        <button type="button" onclick='goToPage("@TempData["functionalitySelected"]")' class="btn btn-outline-primary">Confirm and run</button>
     </div>
 </div>

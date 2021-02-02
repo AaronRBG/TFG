@@ -17,6 +17,12 @@ function goToSelection(functionality) {
 
 // used as a middleware to activate a hidden button which is the one who connects to the controller and also inputs the functionality to a hidden input connected to the controller
 function goToPage(functionality) {
+    if (functionality == 'data_masking') {
+        functionality = 'create_masks';
+    }
+    if (functionality == 'constraints') {
+        functionality = 'create_constraints';
+    }
     document.getElementById("functionalitySelected2").value = functionality;
     $("#hidden-btn3").click();
 }
