@@ -23,8 +23,42 @@ function goToPage(functionality) {
     if (functionality == 'constraints') {
         functionality = 'create_constraints';
     }
-    document.getElementById("functionalitySelected2").value = functionality;
-    $("#hidden-btn3").click();
+
+    var selected = new Array();
+    i = 0;
+
+    document.querySelectorAll('input[type=checkbox][id$=CheckBox]').forEach(
+        function (item) {
+            if (item.checked) {
+                var aux = new Array();
+                counter = 1;
+                aux[0] = item.name;
+
+                document.querySelectorAll('[ data-parent=' + aux[0] + 'CheckBox]').forEach(
+                    function (column) {
+                        if (column.checked) {
+                            aux[counter] = column.id;
+                            counter++;
+                        }
+                    });
+
+                selected[i] = aux;
+                i++;
+            }
+        });
+
+    var postData = { values: selected, functionalitySelected: functionality };
+
+    $.ajax({
+        type: "POST",
+        url: "/Home/GoToPage",
+        data: postData,
+        error: function () {
+            window.location.href = functionality;
+        },
+        dataType: "json",
+        traditional: true
+    });
 }
 
 // this method parameter is the id of the table checkbox

@@ -5,19 +5,22 @@ using TFG.Models;
 using Microsoft.Data.SqlClient;
 using System.Data;
 using Microsoft.AspNetCore.Http;
+using System.Collections.Generic;
 
 namespace TFG.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-            
+
         public HomeController(ILogger<HomeController> logger)
         {
             _logger = logger;
         }
 
         // loads the MainPage View saving the database name in the viewdata to be accesed later
+
+        [HttpGet]
         public IActionResult MainPage()
         {
             ViewData["database"] = HttpContext.Session.GetString("database");
@@ -25,11 +28,13 @@ namespace TFG.Controllers
         }
 
         // loads the DatabaseConnection View
+        [HttpGet]
         public IActionResult DatabaseConnection()
         {
             return View("DatabaseConnection", "Home");
         }
         // loads the data_masking View
+        [HttpGet]
         public IActionResult data_masking()
         {
             ViewData["database"] = HttpContext.Session.GetString("database");
@@ -37,6 +42,7 @@ namespace TFG.Controllers
         }
 
         // loads the data_unification View
+        [HttpGet]
         public IActionResult data_unification()
         {
             ViewData["database"] = HttpContext.Session.GetString("database");
@@ -44,6 +50,7 @@ namespace TFG.Controllers
         }
 
         // loads the remove_duplicates View
+        [HttpGet]
         public IActionResult remove_duplicates()
         {
             ViewData["database"] = HttpContext.Session.GetString("database");
@@ -51,6 +58,7 @@ namespace TFG.Controllers
         }
 
         // loads the constraints View
+        [HttpGet]
         public IActionResult constraints()
         {
             ViewData["database"] = HttpContext.Session.GetString("database");
@@ -58,6 +66,7 @@ namespace TFG.Controllers
         }
 
         // loads the missing_values View
+        [HttpGet]
         public IActionResult missing_values()
         {
             ViewData["database"] = HttpContext.Session.GetString("database");
@@ -65,6 +74,7 @@ namespace TFG.Controllers
         }
 
         // loads the improve_datatypes View
+        [HttpGet]
         public IActionResult improve_datatypes()
         {
             ViewData["database"] = HttpContext.Session.GetString("database");
@@ -72,6 +82,7 @@ namespace TFG.Controllers
         }
 
         // loads the primary_keys View
+        [HttpGet]
         public IActionResult primary_keys()
         {
             ViewData["database"] = HttpContext.Session.GetString("database");
@@ -79,6 +90,7 @@ namespace TFG.Controllers
         }
 
         // loads the foreign_keys View
+        [HttpGet]
         public IActionResult foreign_keys()
         {
             ViewData["database"] = HttpContext.Session.GetString("database");
@@ -86,6 +98,7 @@ namespace TFG.Controllers
         }
 
         // loads the table_defragmentation View
+        [HttpGet]
         public IActionResult table_defragmentation()
         {
             ViewData["database"] = HttpContext.Session.GetString("database");
@@ -93,23 +106,27 @@ namespace TFG.Controllers
         }
 
         // loads the improve_indexes View
+        [HttpGet]
         public IActionResult improve_indexes()
         {
             ViewData["database"] = HttpContext.Session.GetString("database");
             return View("improve_indexes", "Home");
         }
 
+        [HttpGet]
         public IActionResult create_masks()
         {
             ViewData["database"] = HttpContext.Session.GetString("database");
             return View("create_masks", "Home");
         }
+        [HttpGet]
         public IActionResult create_constraints()
         {
             ViewData["database"] = HttpContext.Session.GetString("database");
             return View("create_constraints", "Home");
         }
 
+        [HttpGet]
         public IActionResult Performance()
         {
             ViewData["database"] = HttpContext.Session.GetString("database");
@@ -117,6 +134,7 @@ namespace TFG.Controllers
         }
 
         // loads the Selection View saving the database name in the viewdata to be accesed later
+        [HttpGet]
         public IActionResult Selection()
         {
             SqlDataAdapter adp = new SqlDataAdapter();
@@ -163,6 +181,7 @@ namespace TFG.Controllers
         }
 
         // loads the Help View saving the database name in the viewdata to be accesed later
+        [HttpGet]
         public IActionResult Help()
         {
             ViewData["database"] = HttpContext.Session.GetString("database");
@@ -170,6 +189,7 @@ namespace TFG.Controllers
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        [HttpGet]
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
@@ -214,18 +234,28 @@ namespace TFG.Controllers
                 return RedirectToAction("Help");
             }
         }
+        [HttpPost]
         public IActionResult GoToSelection(string functionalitySelected)
         {
             // this method is used to go to the Selection page while sending the corresponding functionality
             TempData["functionalitySelected"] = functionalitySelected;
             return RedirectToAction("Selection");
         }
-        public IActionResult GoToPage(string functionalitySelected)
+        [HttpPost]
+        public void GoToPage(List<List<string>> values, string functionalitySelected)
         {
             // this method is used to go to the Selection page while sending the corresponding functionality
             TempData["functionalitySelected"] = functionalitySelected;
-            return RedirectToAction(functionalitySelected);
+            string[][] selected = new string[values.Count][];
+
+            for (int i=0; i< values.Count; i++)
+            {
+                string[] aux = values[i][0].Split(',');
+                selected[i] = aux;
+            }
+
         }
+
     }
 }
 
