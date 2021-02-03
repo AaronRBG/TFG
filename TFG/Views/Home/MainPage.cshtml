@@ -4,20 +4,31 @@
     // Creating some structures to ensure code reusability and prevent code duplication
     String[] functionalities = { "data_masking", "data_unification", "remove_duplicates", "constraints", "missing_values", "improve_datatypes", "primary_keys", "foreign_keys", "table_defragmentation", "improve_indexes" };
     Dictionary<string, string> functionalities_text = new Dictionary<string, string>();
+    Dictionary<string, bool> functionalities_need_columns = new Dictionary<string, bool>();
 
     // Datacleaning functionalities
     functionalities_text.Add("data_masking", "Data Masking");
+    functionalities_need_columns.Add("data_masking", true);
     functionalities_text.Add("data_unification", "Data Unification");
+    functionalities_need_columns.Add("data_unification", true);
     functionalities_text.Add("remove_duplicates", "Remove Duplicates");
+    functionalities_need_columns.Add("remove_duplicates", true);
     functionalities_text.Add("constraints", "Constraints");
+    functionalities_need_columns.Add("constraints", false);
     functionalities_text.Add("missing_values", "Treating Missing Values");
+    functionalities_need_columns.Add("missing_values", true);
 
     // Tuning functionalities
     functionalities_text.Add("improve_datatypes", "Improve Datatypes");
+    functionalities_need_columns.Add("improve_datatypes", true);
     functionalities_text.Add("primary_keys", "Add/Improve Primary Keys");
+    functionalities_need_columns.Add("primary_keys", false);
     functionalities_text.Add("foreign_keys", "Add/Improve Foreign Keys");
+    functionalities_need_columns.Add("foreign_keys", false);
     functionalities_text.Add("table_defragmentation", "Table Defragmentation");
+    functionalities_need_columns.Add("table_defragmentation", false);
     functionalities_text.Add("improve_indexes", "Index Cleaning & Generation");
+    functionalities_need_columns.Add("improve_indexes", false);
 }
 <!-- A navegation bar which does not navigate, it only shows the chosen database name along with a button that
     allows the user to go to the corresponding page to change it, if needed and show the current page -->
@@ -42,6 +53,13 @@
     <input type="text" id="functionalitySelected" name="functionalitySelected" />
     <input id="hidden-btn2" class="hidden-btn" type="submit" style="display: none;" />
 }
+
+@using (Html.BeginForm("GoToPageAll", "Home"))
+{
+    <input type="text" id="functionalitySelected2" name="functionalitySelected" />
+    <input id="hidden-btn3" class="hidden-btn" type="submit" style="display: none;" />
+}
+
 <!-- Everything on here is just visual, 2 divs one to the left and one to the right with 5 divs of functionality each which in turn have a help button, their name and their option buttons -->
 <div id="Datacleaning" class="left-half">
     <h1>Datacleaning</h1>
@@ -52,7 +70,7 @@
                 <button type="button" onclick='window.location.href="Help#@functionalities[i]"' class="btn btn-default" data-toggle="tooltip" data-placement="auto" title="Help"><span class='info_icon'></span></button>
                 <span class="functionality-text">@functionalities_text[@functionalities[i]]</span>
                 <div class="btn-group" role="group">
-                    <button type="button" onclick='goToPage("@functionalities[i]")' class="btn btn-outline-primary">Run on full database</button>
+                    <button type="button" onclick='goToPageAll("@functionalities[i]")' class="btn btn-outline-primary">Run on full database</button>
                     <button type="button" onclick="goToSelection('@functionalities[i]')" class="btn btn-outline-dark">Select what to run</button>
                 </div>
             </div>
@@ -69,7 +87,7 @@
                 <button type="button" onclick='window.location.href="Help#@functionalities[i]"' class="btn btn-default" data-toggle="tooltip" data-placement="auto" title="Help"><span class='info_icon'></span></button>
                 <span class="functionality-text">@functionalities_text[@functionalities[i]]</span>
                 <div class="btn-group" role="group">
-                    <button type="button" onclick='goToPage("@functionalities[i]")' class="btn btn-outline-primary">Run on full database</button>
+                    <button type="button" onclick='goToPageAll("@functionalities[i]")' class="btn btn-outline-primary">Run on full database</button>
                     <button type="button" onclick="goToSelection('@functionalities[i]')" class="btn btn-outline-dark">Select what to run</button>
                 </div>
             </div>

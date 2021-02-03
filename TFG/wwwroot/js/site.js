@@ -15,6 +15,51 @@ function goToSelection(functionality) {
     $("#hidden-btn2").click();
 }
 
+// used as a middleware to activate a hidden button which is the one who connects to the controller and also inputs the functionality to a hidden input connected to the controller
+function goToPageAll(functionality) {
+    if (functionality == 'data_masking') {
+        functionality = 'create_masks';
+    }
+    if (functionality == 'constraints') {
+        functionality = 'create_constraints';
+    }
+    document.getElementById("functionalitySelected2").value = functionality;
+    $("#hidden-btn3").click();
+}
+
+// used as a middleware to activate a hidden button which is the one who connects to the controller and also inputs the functionality to a hidden input connected to the controller
+function goToPage(functionality) {
+    if (functionality == 'data_masking') {
+        functionality = 'create_masks';
+    }
+    if (functionality == 'constraints') {
+        functionality = 'create_constraints';
+    }
+
+    var selected;
+
+    document.querySelectorAll('input[type=checkbox][id$=CheckBox]').forEach(
+        function (item) {
+            if (item.checked) {
+                selected += "/";
+                selected += item.name;
+
+                document.querySelectorAll('[ data-parent=' + item.id + ']').forEach(
+                    function (column) {
+                        if (column.checked) {
+                            selected += ",";
+                            selected += column.id;
+                        }
+                    });
+            }
+        });
+
+    document.getElementById("functionalitySelected3").value = functionality;
+    document.getElementById("selection").value = selected;
+    $("#hidden-btn4").click();
+ 
+}
+
 // this method parameter is the id of the table checkbox
 // this method is called when the table checkbox is clicked
 // first checks if that checkbox is checked
@@ -25,7 +70,15 @@ function checkChilds(CheckBoxparent) {
         function (item) {
             item.checked = boo;
         });
-    document.getElementById('selection-text').innerHTML = getColumns() + ' columns selected from ' + getTables() + ' different tables.'
+    if (getColumns() == 0) {
+        if (getTables() != 0) {
+            document.getElementById('selection-text').innerHTML = getTables() + ' tables selected'
+        } else {
+            document.getElementById('selection-text').innerHTML = 'None selected'
+        }
+    } else {
+        document.getElementById('selection-text').innerHTML = getColumns() + ' columns selected from ' + getTables() + ' different tables.'
+    }
 }
 
 // this method parameter is the id of the table checkbox and the id of the column checkbox clicked
@@ -48,7 +101,15 @@ function checkParent(CheckBoxparent, child) {
     if (!boo) {
         document.getElementById(CheckBoxparent).checked = boo;
     }
-    document.getElementById('selection-text').innerHTML = getColumns() + ' columns selected from ' + getTables() + ' different tables.'
+    if (getColumns() == 0) {
+        if (getTables() != 0) {
+            document.getElementById('selection-text').innerHTML = getTables() + ' tables selected'
+        } else {
+            document.getElementById('selection-text').innerHTML = 'None selected'
+        }
+    } else {
+        document.getElementById('selection-text').innerHTML = getColumns() + ' columns selected from ' + getTables() + ' different tables.'
+    }
 }
 
 // this method parameter checks all the checkboxes and updates the output text
@@ -57,7 +118,11 @@ function selectAll() {
         function (item) {
             item.checked = true;
         });
-    document.getElementById('selection-text').innerHTML = getColumns() + ' columns selected from ' + getTables() + ' different tables.'
+    if (getColumns() == 0) {
+        document.getElementById('selection-text').innerHTML = getTables() + ' tables selected'
+    } else {
+        document.getElementById('selection-text').innerHTML = getColumns() + ' columns selected from ' + getTables() + ' different tables.'
+    }
 }
 
 // this method parameter unchecks all the checkboxes and updates the output text
@@ -66,7 +131,7 @@ function selectNone() {
         function (item) {
             item.checked = false;
         });
-    document.getElementById('selection-text').innerHTML = 'None Selected'
+    document.getElementById('selection-text').innerHTML = 'None selected'
 }
 
 // this method parameter returns the number of table checkboxes that are clicked
@@ -93,11 +158,6 @@ function getColumns() {
     return checked;
 }
 
-//
-function goToPage(functionality) {
-    window.location.href = functionality;
-}
-
 // This function controls the vertical tabs in some views like reports
 function openTab(event, name) {
     // Declare all variables
@@ -113,7 +173,7 @@ function openTab(event, name) {
     document.getElementById(name).style.display = "block";
     event.currentTarget.className += " active";
 }
-
+// This function more or less lets you download the page in pdf format
 function download() {
     var doc = new jsPDF();
     var specialElementHandlers = {

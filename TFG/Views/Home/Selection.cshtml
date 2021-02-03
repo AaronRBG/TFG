@@ -1,22 +1,33 @@
 ﻿@{
     ViewData["Title"] = "Database Connection";
 
-    // Creating some structures to ensure code reusability and prevent code duplication
+    // Creating some structures to ensure code reusability and prevent code duplication and if it's run on columns (true) or tables (false)
     Dictionary<string, string> functionalities_text = new Dictionary<string, string>();
+    Dictionary<string, bool> functionalities_need_columns = new Dictionary<string, bool>();
 
     // Datacleaning functionalities
     functionalities_text.Add("data_masking", "Data Masking");
+    functionalities_need_columns.Add("data_masking", true);
     functionalities_text.Add("data_unification", "Data Unification");
+    functionalities_need_columns.Add("data_unification", true);
     functionalities_text.Add("remove_duplicates", "Remove Duplicates");
+    functionalities_need_columns.Add("remove_duplicates", true);
     functionalities_text.Add("constraints", "Constraints");
+    functionalities_need_columns.Add("constraints", false);
     functionalities_text.Add("missing_values", "Treating Missing Values");
+    functionalities_need_columns.Add("missing_values", true);
 
     // Tuning functionalities
     functionalities_text.Add("improve_datatypes", "Improve Datatypes");
+    functionalities_need_columns.Add("improve_datatypes", true);
     functionalities_text.Add("primary_keys", "Add/Improve Primary Keys");
+    functionalities_need_columns.Add("primary_keys", false);
     functionalities_text.Add("foreign_keys", "Add/Improve Foreign Keys");
+    functionalities_need_columns.Add("foreign_keys", false);
     functionalities_text.Add("table_defragmentation", "Table Defragmentation");
+    functionalities_need_columns.Add("table_defragmentation", false);
     functionalities_text.Add("improve_indexes", "Index Cleaning & Generation");
+    functionalities_need_columns.Add("improve_indexes", false);
 }
 <!-- A navegation bar which does not navigate, it only shows the chosen database name along with a button that
     allows the user to go to the corresponding page to change it, if needed and show the current page (receiving the functionality selected from the controller)-->
@@ -28,18 +39,31 @@
             <button type="button" onclick='window.location.href="DatabaseConnection"' class="btn btn-default" data-toggle="tooltip" data-placement="auto" title="Change database"><span class='folder_icon'></span></button>
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="MainPage" MainPage">Home</a></li>
-                <li class="breadcrumb-item active" aria-current="page"><text>@functionalities_text[(string)ViewData["functionalitySelected"]]</text> Selection</li>
+                <li class="breadcrumb-item active" aria-current="page"><text>@functionalities_text[(string)TempData["functionalitySelected"]]</text> Selection</li>
             </ol>
         </div>
     </div>
 </nav>
+@using (Html.BeginForm("GoToPage", "Home"))
+{
+    <input type="text" id="functionalitySelected3" name="functionalitySelected" />
+    <input type="text" id="selection" name="selection" />
+    <input id="hidden-btn4" class="hidden-btn" type="submit" style="display: none;" />
+}
 <!-- This part is the most complicated of this view
     It gets the data sent from the controller (double array with the database table names and column names of each table)
     Then it creates for each table an item of an accordion which when expanded shows its columns with checkboxes for all of those items-->
 <div id="middle_container" class="left-half">
     <div id="selection-top" class="centeredBig">
         <h3>
-            <span>Table and or columns selection</span>
+            @if (@functionalities_need_columns[(string)TempData["functionalitySelected"]])
+            {
+                <span>Tables and columns selection</span>
+            }
+            else
+            {
+                <span>Tables selection</span>
+            }
         </h3>
     </div>
     <div id="accordion" class="overflow-auto centeredBig">
@@ -49,22 +73,24 @@
             <div class="card">
                 <div class="card-header" id="@table[0]Div">
                     <h5>
-                        <input type="checkbox" id="@table[0]CheckBox" onclick="checkChilds('@table[0]CheckBox')" />
+                        <input type="checkbox" id="@table[0]CheckBox" name="@table[0]" onclick="checkChilds('@table[0]CheckBox')" />
                         <button class="btn btn-link" data-toggle="collapse" data-target="@collapse" aria-expanded="true" aria-controls="collapseOne">
                             @table[0]
                         </button>
                     </h5>
                 </div>
-
-                <div id="@collapse.Substring(1)" class="collapse hide" aria-labelledby="@table[0]" data-parent="#accordion">
-                    <div class="card-body">
-                        @for (int i = 1; i < ((string[])table).Length; i++)
-                        {
-                            <input type="checkbox" id="@table[i]" onclick="checkParent('@table[0]CheckBox', '@table[i]')" data-parent="@table[0]CheckBox" /> <span>@table[i]</span>
-                            <br />
-                        }
+                @if (@functionalities_need_columns[(string)TempData["functionalitySelected"]])
+                {
+                    <div id="@collapse.Substring(1)" class="collapse hide" aria-labelledby="@table[0]" data-parent="#accordion">
+                        <div class="card-body">
+                            @for (int i = 1; i < ((string[])table).Length; i++)
+                            {
+                                <input type="checkbox" id="@table[i]" onclick="checkParent('@table[0]CheckBox', '@table[i]')" data-parent="@table[0]CheckBox" /> <span>@table[i]</span>
+                                <br />
+                            }
+                        </div>
                     </div>
-                </div>
+                }
             </div>
         }
     </div>
@@ -78,6 +104,6 @@
     <br />
     <span id="selection-text">None selected</span>
     <div id="controls-inside">
-        <button type="button" onclick='goToPage("@ViewData["functionalitySelected"]")' class="btn btn-outline-primary">Confirm and run</button>
+        <button type="button" onclick='goToPage("@TempData["functionalitySelected"]")' class="btn btn-outline-primary">Confirm and run</button>
     </div>
 </div>
