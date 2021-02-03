@@ -133,17 +133,13 @@ namespace TFG.Controllers
             return View("Performance", "Home");
         }
 
-        // loads the Selection View saving the database name in the viewdata to be accesed later
-        [HttpGet]
-        public IActionResult Selection()
-        {
+        public string[][] getTableAndColumnData() {
+
             SqlDataAdapter adp = new SqlDataAdapter();
             DataSet dsTables = new DataSet();
             DataSet dsColumns = new DataSet();
 
             // gets the connection String stored in the session and opens it
-
-            ViewData["database"] = HttpContext.Session.GetString("database");
             SqlConnection con = new SqlConnection(HttpContext.Session.GetString("connectionString"));
             con.Open();
 
@@ -176,7 +172,16 @@ namespace TFG.Controllers
                 }
                 dsColumns.Reset();
             }
-            ViewBag.tableData = res;
+
+            return res;
+        }
+
+        // loads the Selection View saving the database name in the viewdata to be accesed later
+        [HttpGet]
+        public IActionResult Selection()
+        {
+            ViewData["database"] = HttpContext.Session.GetString("database"); 
+            ViewBag.tableData = getTableAndColumnData();
             return View("Selection", "Home");
         }
 
@@ -242,24 +247,29 @@ namespace TFG.Controllers
             return RedirectToAction("Selection");
         }
         [HttpPost]
-        public void GoToPage(List<List<string>> values, string functionalitySelected)
+        public IActionResult GoToPage(string functionalitySelected, string selection)
         {
             // this method is used to go to the Selection page while sending the corresponding functionality
             TempData["functionalitySelected"] = functionalitySelected;
-            string[][] selected = new string[values.Count][];
-
-            for (int i=0; i< values.Count; i++)
-            {
-                string[] aux = values[i][0].Split(',');
-                selected[i] = aux;
+            string[] tables = selection.Split('/');
+            string[][] selected = new string[tables.Length-1][];
+            for (int i = 1; i<tables.Length; i++) {
+                string[] columns = tables[i].Split(',');
+                selected[i-1] = columns;
             }
 
+            ViewBag.selected = selected;
+            return View(functionalitySelected, "Home");
+        }
+
+        [HttpPost]
+        public IActionResult GoToPageAll(string functionalitySelected)
+        {
+            TempData["functionalitySelected"] = functionalitySelected;
+            string[][] selected = getTableAndColumnData();
+            ViewBag.selected = selected;
+            return View(functionalitySelected, "Home");
         }
 
     }
 }
-
-
-
-
-

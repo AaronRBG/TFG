@@ -262,7 +262,7 @@ div#remote_inside {
     resize: none;
 }
 
-#fileLoader, #connectionString, #functionalitySelected {
+#fileLoader, #connectionString, #functionalitySelected, #functionalitySelected2, #functionalitySelected3, #selection {
     display: none;
 }
 

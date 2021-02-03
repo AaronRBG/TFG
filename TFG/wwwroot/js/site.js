@@ -16,6 +16,18 @@ function goToSelection(functionality) {
 }
 
 // used as a middleware to activate a hidden button which is the one who connects to the controller and also inputs the functionality to a hidden input connected to the controller
+function goToPageAll(functionality) {
+    if (functionality == 'data_masking') {
+        functionality = 'create_masks';
+    }
+    if (functionality == 'constraints') {
+        functionality = 'create_constraints';
+    }
+    document.getElementById("functionalitySelected2").value = functionality;
+    $("#hidden-btn3").click();
+}
+
+// used as a middleware to activate a hidden button which is the one who connects to the controller and also inputs the functionality to a hidden input connected to the controller
 function goToPage(functionality) {
     if (functionality == 'data_masking') {
         functionality = 'create_masks';
@@ -24,41 +36,28 @@ function goToPage(functionality) {
         functionality = 'create_constraints';
     }
 
-    var selected = new Array();
-    i = 0;
+    var selected;
 
     document.querySelectorAll('input[type=checkbox][id$=CheckBox]').forEach(
         function (item) {
             if (item.checked) {
-                var aux = new Array();
-                counter = 1;
-                aux[0] = item.name;
+                selected += "/";
+                selected += item.name;
 
-                document.querySelectorAll('[ data-parent=' + aux[0] + 'CheckBox]').forEach(
+                document.querySelectorAll('[ data-parent=' + item.id + ']').forEach(
                     function (column) {
                         if (column.checked) {
-                            aux[counter] = column.id;
-                            counter++;
+                            selected += ",";
+                            selected += column.id;
                         }
                     });
-
-                selected[i] = aux;
-                i++;
             }
         });
 
-    var postData = { values: selected, functionalitySelected: functionality };
-
-    $.ajax({
-        type: "POST",
-        url: "/Home/GoToPage",
-        data: postData,
-        error: function () {
-            window.location.href = functionality;
-        },
-        dataType: "json",
-        traditional: true
-    });
+    document.getElementById("functionalitySelected3").value = functionality;
+    document.getElementById("selection").value = selected;
+    $("#hidden-btn4").click();
+ 
 }
 
 // this method parameter is the id of the table checkbox

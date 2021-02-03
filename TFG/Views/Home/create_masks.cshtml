@@ -26,14 +26,17 @@
         </h3>
     </div>
     <div id="accordion" class="overflow-auto left-half" style="width:15vw;">
-        <div class="card">
-            <div class="card-header">
-                <h5>
-                    <button class="btn btn-link" onclick="openTab(event, 'Tokyo')">Tokyo</button>
-                </h5>
+        @foreach (string[] table in ViewBag.selected)
+        {
+            <div class="card">
+                <div class="card-header">
+                    <h5>
+                        <button class="btn btn-link" onclick="openTab(event, '@table[0]')">@table[0]</button>
+                    </h5>
+                </div>
             </div>
-        </div>
-    </div>
+        }
+        </div>        
     <div id="Tab-contents" class="overflow-auto">
         <div id="Tokyo" class="tabcontent">
             <table class="table table-striped">
@@ -53,7 +56,6 @@
         </div>
     </div>
 </div>
-<text>@TempData["selected"]</text>
 <!-- This part is perform whole actions like selecting everything or nothing and running the functionality with the selected items -->
 <div id="controls">
     @using (Html.BeginForm("GoToSelection", "Home"))
@@ -64,6 +66,6 @@
     <br />
     <span id="selection-text">None selected</span>
     <div id="controls-inside">
-        <button type="button" onclick='goToPage("@TempData["functionalitySelected"]")' class="btn btn-outline-primary">Confirm and run</button>
-    </div>
+            <button type="button" onclick='goToPage("@TempData["functionalitySelected"]")' class="btn btn-outline-primary">Confirm and run</button>
+        </div>
 </div>

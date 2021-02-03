@@ -44,7 +44,12 @@
         </div>
     </div>
 </nav>
-
+@using (Html.BeginForm("GoToPage", "Home"))
+{
+    <input type="text" id="functionalitySelected3" name="functionalitySelected" />
+    <input type="text" id="selection" name="selection" />
+    <input id="hidden-btn4" class="hidden-btn" type="submit" style="display: none;" />
+}
 <!-- This part is the most complicated of this view
     It gets the data sent from the controller (double array with the database table names and column names of each table)
     Then it creates for each table an item of an accordion which when expanded shows its columns with checkboxes for all of those items-->
