@@ -16,6 +16,13 @@ function goToSelection(functionality) {
 }
 
 // used as a middleware to activate a hidden button which is the one who connects to the controller and also inputs the functionality to a hidden input connected to the controller
+function goToPageAfterCreate(functionality) {
+
+    document.getElementById("functionalitySelected4").value = functionality;
+    $("#hidden-btn5").click();
+}
+
+// used as a middleware to activate a hidden button which is the one who connects to the controller and also inputs the functionality to a hidden input connected to the controller
 function goToPageAll(functionality) {
     if (functionality == 'data_masking') {
         functionality = 'create_masks';
@@ -29,35 +36,42 @@ function goToPageAll(functionality) {
 
 // used as a middleware to activate a hidden button which is the one who connects to the controller and also inputs the functionality to a hidden input connected to the controller
 function goToPage(functionality) {
-    if (functionality == 'data_masking') {
-        functionality = 'create_masks';
+
+    if (getColumns()==0 && getTables()==0) {
+        alert('You have to select at least one column');
+    } else {
+
+        if (functionality == 'data_masking') {
+            functionality = 'create_masks';
+        }
+        if (functionality == 'constraints') {
+            functionality = 'create_constraints';
+        }
+
+        var selected;
+
+        document.querySelectorAll('input[type=checkbox][id$=CheckBox]').forEach(
+            function (item) {
+                if (item.checked) {
+                    selected += "/";
+                    selected += item.name;
+
+                    document.querySelectorAll('[ data-parent=' + item.id + ']').forEach(
+                        function (column) {
+                            if (column.checked) {
+                                selected += ",";
+                                selected += column.id;
+                            }
+                        });
+                }
+            });
+
+        document.getElementById("functionalitySelected3").value = functionality;
+        document.getElementById("selection").value = selected;
+        $("#hidden-btn4").click();
+
     }
-    if (functionality == 'constraints') {
-        functionality = 'create_constraints';
-    }
 
-    var selected;
-
-    document.querySelectorAll('input[type=checkbox][id$=CheckBox]').forEach(
-        function (item) {
-            if (item.checked) {
-                selected += "/";
-                selected += item.name;
-
-                document.querySelectorAll('[ data-parent=' + item.id + ']').forEach(
-                    function (column) {
-                        if (column.checked) {
-                            selected += ",";
-                            selected += column.id;
-                        }
-                    });
-            }
-        });
-
-    document.getElementById("functionalitySelected3").value = functionality;
-    document.getElementById("selection").value = selected;
-    $("#hidden-btn4").click();
- 
 }
 
 // this method parameter is the id of the table checkbox

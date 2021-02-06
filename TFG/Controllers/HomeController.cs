@@ -117,6 +117,7 @@ namespace TFG.Controllers
         public IActionResult create_masks()
         {
             ViewData["database"] = HttpContext.Session.GetString("database");
+            ViewBag.selected = getSelection();
             return View("create_masks", "Home");
         }
         [HttpGet]
@@ -133,7 +134,8 @@ namespace TFG.Controllers
             return View("Performance", "Home");
         }
 
-        public string[][] getTableAndColumnData() {
+        public string[][] getTableAndColumnData()
+        {
 
             SqlDataAdapter adp = new SqlDataAdapter();
             DataSet dsTables = new DataSet();
@@ -180,7 +182,7 @@ namespace TFG.Controllers
         [HttpGet]
         public IActionResult Selection()
         {
-            ViewData["database"] = HttpContext.Session.GetString("database"); 
+            ViewData["database"] = HttpContext.Session.GetString("database");
             ViewBag.tableData = getTableAndColumnData();
             return View("Selection", "Home");
         }
@@ -198,6 +200,28 @@ namespace TFG.Controllers
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        [HttpGet]
+        public string[][] getSelection()
+        {
+            string selection = HttpContext.Session.GetString("selected");
+            string[][] selected;
+            if (selection != null && selection!="all")
+            {
+                string[] tables = selection.Split('/');
+                selected = new string[tables.Length - 1][];
+                for (int i = 1; i < tables.Length; i++)
+                {
+                    string[] columns = tables[i].Split(',');
+                    selected[i - 1] = columns;
+                }
+            }
+            else
+            {
+                selected = getTableAndColumnData();
+            }
+            return selected;
         }
 
         [HttpPost]
@@ -251,24 +275,32 @@ namespace TFG.Controllers
         {
             // this method is used to go to the Selection page while sending the corresponding functionality
             TempData["functionalitySelected"] = functionalitySelected;
-            string[] tables = selection.Split('/');
-            string[][] selected = new string[tables.Length-1][];
-            for (int i = 1; i<tables.Length; i++) {
-                string[] columns = tables[i].Split(',');
-                selected[i-1] = columns;
-            }
-
-            ViewBag.selected = selected;
-            return View(functionalitySelected, "Home");
+            HttpContext.Session.SetString("selected", selection);
+            return RedirectToAction(functionalitySelected, "Home");
         }
 
         [HttpPost]
         public IActionResult GoToPageAll(string functionalitySelected)
         {
             TempData["functionalitySelected"] = functionalitySelected;
-            string[][] selected = getTableAndColumnData();
-            ViewBag.selected = selected;
-            return View(functionalitySelected, "Home");
+            HttpContext.Session.SetString("selected", "all");
+            return RedirectToAction(functionalitySelected, "Home");
+        }
+
+        [HttpPost]
+        public IActionResult GoToPageAfterCreate(string functionalitySelected)
+        {
+            if (functionalitySelected == "create_masks")
+            {
+                TempData["functionalitySelected"] = "data_masking";
+                return RedirectToAction("data_masking", "Home");
+            }
+            else
+            {
+                TempData["functionalitySelected"] = "constraints";
+                return RedirectToAction("constraints", "Home");
+            }
+
         }
 
     }
