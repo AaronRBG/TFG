@@ -3,7 +3,7 @@
 }
 <!-- A navegation bar which does not navigate, it only shows the chosen database name along with a button that
     allows the user to go to the corresponding page to change it, if needed and show the current page (receiving the functionality selected from the controller)-->
-<nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+<nav class="navbar nav_color">
     <div id="Top-container">
         <div id="Top">
             <span class='database_icon'></span>
@@ -29,7 +29,7 @@
         @foreach (var table in ViewBag.selected)
         {
             string collapse = "#collapse" + table[0];
-            <div class="card">
+            <div class="card nav_color">
                 <div class="card-header" id="@table[0]">
                     <h5>
                         <button class="btn btn-link" data-toggle="collapse" data-target="@collapse" aria-expanded="true" aria-controls="collapseOne">

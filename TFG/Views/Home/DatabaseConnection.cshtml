@@ -27,7 +27,7 @@
     <div class="middle-container">
         <h1>Connect to a remote database</h1>
         <div id="remote_inside">
-            <textarea id="constr" placeholder="Introduce your connection String"></textarea>
+            <textarea id="constr" style="background: rgba(255,255,255,0.5);" placeholder="Introduce your connection String"></textarea>
             @using (Html.BeginForm("Connect", "Home"))
             {
                 <input type="text" id="connectionString" name="connectionString" />

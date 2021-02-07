@@ -9,8 +9,12 @@ a.navbar-brand {
 
 /* Provide sufficient contrast against white background */
 a {
-    color: #0366d6;
+    color: orange;
 }
+    a:hover {
+        color: #fde164;
+        text-decoration: underline;
+    }
 
 .btn-primary {
     color: #fff;
@@ -110,6 +114,7 @@ div#Datacleaning, div#Tuning {
 
 div#accordion {
     height: 80vh;
+    background: rgba(0,0,0,0);
 }
 
 div#controls {
@@ -189,6 +194,10 @@ div#remote_inside {
     padding-right: 20vw;
 }
 
+.nav_color {
+    background: rgba(25,50,75,0.8);
+}
+
 /* icons */
 .database_icon {
     background: url('https://img.icons8.com/ios-filled/32/000000/database.png');
@@ -232,9 +241,27 @@ div#remote_inside {
     display: inline-block;
 }
 
+.background-image {
+    /* The image used */
+    background-image: url('https://cdn.pixabay.com/photo/2017/07/01/19/48/background-2462431_960_720.jpg');
+    /* Add the blur effect */
+    filter: blur(8px);
+    -webkit-filter: blur(8px);
+    /* Full height */
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    z-index: -50;
+    /* Center and scale the image nicely */
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
 /* text */
 .top-text {
     vertical-align: middle;
+    color: white;
     padding-right: 3vw;
     padding-left: 1vw;
 }

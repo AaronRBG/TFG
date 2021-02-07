@@ -2928,10 +2928,10 @@ fieldset:disabled a.btn {
   text-decoration: none;
 }
 
-.btn-link:hover {
-  color: #0056b3;
-  text-decoration: underline;
-}
+    .btn-link:hover {
+        color: #4bc8ff;
+        text-decoration: underline;
+    }
 
 .btn-link:focus, .btn-link.focus {
   text-decoration: underline;
@@ -4120,16 +4120,17 @@ input[type="button"].btn-block {
 }
 
 .navbar {
-  position: relative;
-  display: -ms-flexbox;
-  display: flex;
-  -ms-flex-wrap: wrap;
-  flex-wrap: wrap;
-  -ms-flex-align: center;
-  align-items: center;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-  padding: 0.5rem 1rem;
+    position: relative;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    -ms-flex-align: center;
+    align-items: center;
+    -ms-flex-pack: justify;
+    justify-content: space-between;
+    padding: 0.5rem 1rem;
+    background: rgba(255,255,255,0.3);
 }
 
 .navbar > .container,
@@ -4774,7 +4775,7 @@ input[type="button"].btn-block {
 }
 
 .breadcrumb-item.active {
-  color: #6c757d;
+  color: white;
 }
 
 .pagination {
