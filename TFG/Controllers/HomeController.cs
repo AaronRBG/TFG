@@ -23,8 +23,8 @@ namespace TFG.Controllers
         [HttpGet]
         public IActionResult MainPage()
         {
-            ViewData["database"] = HttpContext.Session.GetString("database");
-            return View("MainPage", "Home");
+            ScriptsResults model = new ScriptsResults(HttpContext.Session.GetString("database"));
+            return View("MainPage", model);
         }
 
         // loads the DatabaseConnection View
@@ -37,101 +37,100 @@ namespace TFG.Controllers
         [HttpGet]
         public IActionResult data_masking()
         {
-            ViewData["database"] = HttpContext.Session.GetString("database");
-            return View("data_masking", "Home");
+            ScriptsResults model = new ScriptsResults(HttpContext.Session.GetString("database"), (string)TempData["functionalitySelected"]);
+            return View("data_masking", model);
         }
 
         // loads the data_unification View
         [HttpGet]
         public IActionResult data_unification()
         {
-            ViewData["database"] = HttpContext.Session.GetString("database");
-            return View("data_unification", "Home");
+            ScriptsResults model = new ScriptsResults(HttpContext.Session.GetString("database"), (string)TempData["functionalitySelected"]);
+            return View("data_unification", model);
         }
 
         // loads the remove_duplicates View
         [HttpGet]
         public IActionResult remove_duplicates()
         {
-            ViewData["database"] = HttpContext.Session.GetString("database");
-            return View("remove_duplicates", "Home");
+            ScriptsResults model = new ScriptsResults(HttpContext.Session.GetString("database"), (string)TempData["functionalitySelected"]);
+            return View("remove_duplicates", model);
         }
 
         // loads the constraints View
         [HttpGet]
         public IActionResult constraints()
         {
-            ViewData["database"] = HttpContext.Session.GetString("database");
-            return View("constraints", "Home");
+            ScriptsResults model = new ScriptsResults(HttpContext.Session.GetString("database"), (string)TempData["functionalitySelected"]);
+            return View("constraints", model);
         }
 
         // loads the missing_values View
         [HttpGet]
         public IActionResult missing_values()
         {
-            ViewData["database"] = HttpContext.Session.GetString("database");
-            return View("missing_values", "Home");
+            ScriptsResults model = new ScriptsResults(HttpContext.Session.GetString("database"), (string)TempData["functionalitySelected"]);
+            return View("missing_values", model);
         }
 
         // loads the improve_datatypes View
         [HttpGet]
         public IActionResult improve_datatypes()
         {
-            ViewData["database"] = HttpContext.Session.GetString("database");
-            return View("improve_datatypes", "Home");
+            ScriptsResults model = new ScriptsResults(HttpContext.Session.GetString("database"), (string)TempData["functionalitySelected"]);
+            return View("improve_datatypes", model);
         }
 
         // loads the primary_keys View
         [HttpGet]
         public IActionResult primary_keys()
         {
-            ViewData["database"] = HttpContext.Session.GetString("database");
-            return View("primary_keys", "Home");
+            ScriptsResults model = new ScriptsResults(HttpContext.Session.GetString("database"), (string)TempData["functionalitySelected"]);
+            return View("primary_keys", model);
         }
 
         // loads the foreign_keys View
         [HttpGet]
         public IActionResult foreign_keys()
         {
-            ViewData["database"] = HttpContext.Session.GetString("database");
-            return View("foreign_keys", "Home");
+            ScriptsResults model = new ScriptsResults(HttpContext.Session.GetString("database"), (string)TempData["functionalitySelected"]);
+            return View("foreign_keys", model);
         }
 
         // loads the table_defragmentation View
         [HttpGet]
         public IActionResult table_defragmentation()
         {
-            ViewData["database"] = HttpContext.Session.GetString("database");
-            return View("table_defragmentation", "Home");
+            ScriptsResults model = new ScriptsResults(HttpContext.Session.GetString("database"), (string)TempData["functionalitySelected"]);
+            return View("table_defragmentation", model);
         }
 
         // loads the improve_indexes View
         [HttpGet]
         public IActionResult improve_indexes()
         {
-            ViewData["database"] = HttpContext.Session.GetString("database");
-            return View("improve_indexes", "Home");
+            ScriptsResults model = new ScriptsResults(HttpContext.Session.GetString("database"), (string)TempData["functionalitySelected"]);
+            return View("improve_indexes", model);
         }
 
         [HttpGet]
         public IActionResult create_masks()
         {
-            ViewData["database"] = HttpContext.Session.GetString("database");
-            ViewBag.selected = getSelection();
-            return View("create_masks", "Home");
+            ScriptsResults model = new ScriptsResults(HttpContext.Session.GetString("database"), (string)TempData["functionalitySelected"], getSelection());
+            return View("create_masks", model);
         }
         [HttpGet]
         public IActionResult create_constraints()
         {
-            ViewData["database"] = HttpContext.Session.GetString("database");
-            return View("create_constraints", "Home");
+            ScriptsResults model = new ScriptsResults(HttpContext.Session.GetString("database"), (string)TempData["functionalitySelected"]);
+            return View("create_constraints", model);
         }
 
         [HttpGet]
         public IActionResult Performance()
         {
-            ViewData["database"] = HttpContext.Session.GetString("database");
-            return View("Performance", "Home");
+            ScriptsResults model = new ScriptsResults(HttpContext.Session.GetString("database"));
+            return View("Performance", model);
         }
 
         public string[][] getTableAndColumnData()
@@ -182,17 +181,15 @@ namespace TFG.Controllers
         [HttpGet]
         public IActionResult Selection()
         {
-            ViewData["database"] = HttpContext.Session.GetString("database");
-            ViewBag.tableData = getTableAndColumnData();
-            return View("Selection", "Home");
+            ScriptsResults model = new ScriptsResults(HttpContext.Session.GetString("database"), (string)TempData["functionalitySelected"], getTableAndColumnData());
+            return View("Selection", model);
         }
 
         // loads the Help View saving the database name in the viewdata to be accesed later
         [HttpGet]
         public IActionResult Help()
         {
-            ViewData["database"] = HttpContext.Session.GetString("database");
-            return View("Help", "Home");
+            return View("Help");
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
@@ -255,6 +252,7 @@ namespace TFG.Controllers
                 HttpContext.Session.SetString("database", splits[1]);
                 HttpContext.Session.SetString("connectionString", connectionString);
                 con.Close();
+                ScriptsResults model = new ScriptsResults(splits[1]);
                 return RedirectToAction("MainPage");
             }
             else

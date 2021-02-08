@@ -1,4 +1,7 @@
 ﻿@{
+    @using TFG.Models
+    @model TFG.Models.ScriptsResults
+
     ViewData["Title"] = "Missing Values Report";
 }
 <!-- A navegation bar which does not navigate, it only shows the chosen database name along with a button that
@@ -7,7 +10,7 @@
     <div id="Top-container">
         <div id="Top">
             <span class='database_icon'></span>
-            <span class="top-text">@ViewData["database"]</span>
+            <span class="top-text">@Model.database</span>
             <button type="button" onclick='window.location.href="DatabaseConnection"' class="btn btn-default" data-toggle="tooltip" data-placement="auto" title="Change database"><span class='folder_icon'></span></button>
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="MainPage" MainPage">Home</a></li>

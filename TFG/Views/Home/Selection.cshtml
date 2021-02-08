@@ -1,4 +1,7 @@
 ﻿@{
+    @using TFG.Models
+    @model TFG.Models.ScriptsResults
+
     ViewData["Title"] = "Database Connection";
 
     // Creating some structures to ensure code reusability and prevent code duplication and if it's run on columns (true) or tables (false)
@@ -35,11 +38,11 @@
     <div id="Top-container">
         <div id="Top">
             <span class='database_icon'></span>
-            <span class="top-text">@ViewData["database"]</span>
+            <span class="top-text">@Model.database</span>
             <button type="button" onclick='window.location.href="DatabaseConnection"' class="btn btn-default" data-toggle="tooltip" data-placement="auto" title="Change database"><span class='folder_icon'></span></button>
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="MainPage" MainPage">Home</a></li>
-                <li class="breadcrumb-item active" aria-current="page"><text>@functionalities_text[(string)TempData["functionalitySelected"]]</text> Selection</li>
+                <li class="breadcrumb-item active" aria-current="page"><text>@functionalities_text[Model.functionality]</text> Selection</li>
             </ol>
         </div>
     </div>
@@ -56,7 +59,7 @@
 <div id="middle_container" class="left-half">
     <div id="selection-top" class="centeredBig">
         <h3>
-            @if (@functionalities_need_columns[(string)TempData["functionalitySelected"]])
+            @if (@functionalities_need_columns[Model.functionality])
             {
                 <span>Tables and columns selection</span>
             }
@@ -67,7 +70,7 @@
         </h3>
     </div>
     <div id="accordion" class="overflow-auto centeredBig">
-        @foreach (var table in ViewBag.tableData)
+        @foreach (var table in Model.results)
         {
             string collapse = "#collapse" + table[0];
             <div class="card nav_color">
@@ -79,7 +82,7 @@
                         </button>
                     </h5>
                 </div>
-                @if (@functionalities_need_columns[(string)TempData["functionalitySelected"]])
+                @if (@functionalities_need_columns[Model.functionality])
                 {
                     <div id="@collapse.Substring(1)" class="collapse hide" aria-labelledby="@table[0]" data-parent="#accordion">
                         <div class="card-body">
@@ -104,6 +107,6 @@
     <br />
     <span id="selection-text">None selected</span>
     <div id="controls-inside">
-        <button type="button" onclick='goToPage("@TempData["functionalitySelected"]")' class="btn btn-outline-primary">Confirm and run</button>
+        <button type="button" onclick='goToPage("@Model.functionality")' class="btn btn-outline-primary">Confirm and run</button>
     </div>
 </div>
