@@ -23,8 +23,7 @@ namespace TFG.Controllers
         [HttpGet]
         public IActionResult MainPage()
         {
-            ScriptsResults model = new ScriptsResults(HttpContext.Session.GetString("database"));
-            return View("MainPage", model);
+            return View("MainPage", Manager.Instance().selections[HttpContext.Session.Id]);
         }
 
         // loads the DatabaseConnection View
@@ -37,155 +36,95 @@ namespace TFG.Controllers
         [HttpGet]
         public IActionResult data_masking()
         {
-            ScriptsResults model = new ScriptsResults(HttpContext.Session.GetString("database"), (string)TempData["functionalitySelected"]);
-            return View("data_masking", model);
+            return View("data_masking", Manager.Instance().selections[HttpContext.Session.Id]);
         }
 
         // loads the data_unification View
         [HttpGet]
         public IActionResult data_unification()
         {
-            ScriptsResults model = new ScriptsResults(HttpContext.Session.GetString("database"), (string)TempData["functionalitySelected"]);
-            return View("data_unification", model);
+            return View("data_unification", Manager.Instance().selections[HttpContext.Session.Id]);
         }
 
         // loads the remove_duplicates View
         [HttpGet]
         public IActionResult remove_duplicates()
         {
-            ScriptsResults model = new ScriptsResults(HttpContext.Session.GetString("database"), (string)TempData["functionalitySelected"]);
-            return View("remove_duplicates", model);
+            return View("remove_duplicates", Manager.Instance().selections[HttpContext.Session.Id]);
         }
 
         // loads the constraints View
         [HttpGet]
         public IActionResult constraints()
         {
-            ScriptsResults model = new ScriptsResults(HttpContext.Session.GetString("database"), (string)TempData["functionalitySelected"]);
-            return View("constraints", model);
+            return View("constraints", Manager.Instance().selections[HttpContext.Session.Id]);
         }
 
         // loads the missing_values View
         [HttpGet]
         public IActionResult missing_values()
         {
-            ScriptsResults model = new ScriptsResults(HttpContext.Session.GetString("database"), (string)TempData["functionalitySelected"]);
-            return View("missing_values", model);
+            return View("missing_values", Manager.Instance().selections[HttpContext.Session.Id]);
         }
 
         // loads the improve_datatypes View
         [HttpGet]
         public IActionResult improve_datatypes()
         {
-            ScriptsResults model = new ScriptsResults(HttpContext.Session.GetString("database"), (string)TempData["functionalitySelected"]);
-            return View("improve_datatypes", model);
+            return View("improve_datatypes", Manager.Instance().selections[HttpContext.Session.Id]);
         }
 
         // loads the primary_keys View
         [HttpGet]
         public IActionResult primary_keys()
         {
-            ScriptsResults model = new ScriptsResults(HttpContext.Session.GetString("database"), (string)TempData["functionalitySelected"]);
-            return View("primary_keys", model);
+            return View("primary_keys", Manager.Instance().selections[HttpContext.Session.Id]);
         }
 
         // loads the foreign_keys View
         [HttpGet]
         public IActionResult foreign_keys()
         {
-            ScriptsResults model = new ScriptsResults(HttpContext.Session.GetString("database"), (string)TempData["functionalitySelected"]);
-            return View("foreign_keys", model);
+            return View("foreign_keys", Manager.Instance().selections[HttpContext.Session.Id]);
         }
 
         // loads the table_defragmentation View
         [HttpGet]
         public IActionResult table_defragmentation()
         {
-            ScriptsResults model = new ScriptsResults(HttpContext.Session.GetString("database"), (string)TempData["functionalitySelected"]);
-            return View("table_defragmentation", model);
+            return View("table_defragmentation", Manager.Instance().selections[HttpContext.Session.Id]);
         }
 
         // loads the improve_indexes View
         [HttpGet]
         public IActionResult improve_indexes()
         {
-            ScriptsResults model = new ScriptsResults(HttpContext.Session.GetString("database"), (string)TempData["functionalitySelected"]);
-            return View("improve_indexes", model);
+            return View("improve_indexes", Manager.Instance().selections[HttpContext.Session.Id]);
         }
 
         [HttpGet]
         public IActionResult create_masks()
         {
-            ScriptsResults model = new ScriptsResults(HttpContext.Session.GetString("database"), (string)TempData["functionalitySelected"], getSelection());
-            return View("create_masks", model);
+            return View("create_masks", Manager.Instance().selections[HttpContext.Session.Id]);
         }
         [HttpGet]
         public IActionResult create_constraints()
         {
-            ScriptsResults model = new ScriptsResults(HttpContext.Session.GetString("database"), (string)TempData["functionalitySelected"]);
-            return View("create_constraints", model);
+            return View("create_constraints", Manager.Instance().selections[HttpContext.Session.Id]);
         }
 
         [HttpGet]
         public IActionResult Performance()
         {
-            ScriptsResults model = new ScriptsResults(HttpContext.Session.GetString("database"));
-            return View("Performance", model);
+            return View("Performance", Manager.Instance().selections[HttpContext.Session.Id]);
         }
 
-        public string[][] getTableAndColumnData()
-        {
-
-            SqlDataAdapter adp = new SqlDataAdapter();
-            DataSet dsTables = new DataSet();
-            DataSet dsColumns = new DataSet();
-
-            // gets the connection String stored in the session and opens it
-            SqlConnection con = new SqlConnection(HttpContext.Session.GetString("connectionString"));
-            con.Open();
-
-            // then it runs a query that returns all the tables names from that database
-            // then processes the result to run a nested for loop which itself runs another query that returns all the column names of that table
-            // when the for loop is finished we have a double string array which stores for each table its name and the names of all its columns, then saves this in the viewbag
-
-            adp.SelectCommand = new SqlCommand("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'", con);
-            adp.Fill(dsTables, "tables");
-            DataTable dtTables = dsTables.Tables["tables"];
-            DataTable dtColumns;
-            DataRow rows;
-            string[][] res = new string[dtTables.Rows.Count][];
-            for (int i = 0; i < dtTables.Rows.Count; i++)
-            {
-                rows = dtTables.Rows[i];
-                string com = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '" + rows[0] + "'";
-
-                adp.SelectCommand = new SqlCommand(com, con);
-                adp.Fill(dsColumns, "columns");
-                dtColumns = dsColumns.Tables["columns"];
-
-                res[i] = new string[dtColumns.Rows.Count + 1];
-                res[i][0] = (string)rows[0];
-
-                for (int j = 1; j < dtColumns.Rows.Count + 1; j++)
-                {
-                    rows = dtColumns.Rows[j - 1];
-                    res[i][j] = (string)rows[0];
-                }
-                dsColumns.Reset();
-            }
-
-            return res;
-        }
-
-        // loads the Selection View saving the database name in the viewdata to be accesed later
         [HttpGet]
         public IActionResult Selection()
         {
-            ScriptsResults model = new ScriptsResults(HttpContext.Session.GetString("database"), (string)TempData["functionalitySelected"], getTableAndColumnData());
-            return View("Selection", model);
+            return View("Selection", Manager.Instance().selections[HttpContext.Session.Id]);
         }
 
-        // loads the Help View saving the database name in the viewdata to be accesed later
         [HttpGet]
         public IActionResult Help()
         {
@@ -197,28 +136,6 @@ namespace TFG.Controllers
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
-
-        [HttpGet]
-        public string[][] getSelection()
-        {
-            string selection = HttpContext.Session.GetString("selected");
-            string[][] selected;
-            if (selection != null && selection!="all")
-            {
-                string[] tables = selection.Split('/');
-                selected = new string[tables.Length - 1][];
-                for (int i = 1; i < tables.Length; i++)
-                {
-                    string[] columns = tables[i].Split(',');
-                    selected[i - 1] = columns;
-                }
-            }
-            else
-            {
-                selected = getTableAndColumnData();
-            }
-            return selected;
         }
 
         [HttpPost]
@@ -234,8 +151,7 @@ namespace TFG.Controllers
             SqlConnection con = new SqlConnection(connectionString);
             con.Open();
 
-            bool boo = (con.State == System.Data.ConnectionState.Open);
-            if (boo)
+            if (con.State == System.Data.ConnectionState.Open)
             {
                 // if it is valid it gets the database name
                 string[] splits = connectionString.Split(';');
@@ -248,11 +164,17 @@ namespace TFG.Controllers
                     }
                 }
 
-                // and saves both the database name and the connection String in the session for later access and changes the view
-                HttpContext.Session.SetString("database", splits[1]);
-                HttpContext.Session.SetString("connectionString", connectionString);
-                con.Close();
-                ScriptsResults model = new ScriptsResults(splits[1]);
+                // Save a init variable in the session to stop it for resetting, then save the connection and the database name
+                HttpContext.Session.SetInt32("init", 0);
+                if (Manager.Instance().connections.ContainsKey(HttpContext.Session.Id))
+                {
+                    Manager.Instance().connections.Remove(HttpContext.Session.Id);
+                    Manager.Instance().selections.Remove(HttpContext.Session.Id);
+                }
+
+                Manager.Instance().connections.Add(HttpContext.Session.Id, con);
+                Manager.Instance().selections.Add(HttpContext.Session.Id, new ScriptsResults(splits[1]));
+
                 return RedirectToAction("MainPage");
             }
             else
@@ -264,39 +186,40 @@ namespace TFG.Controllers
         [HttpPost]
         public IActionResult GoToSelection(string functionalitySelected)
         {
-            // this method is used to go to the Selection page while sending the corresponding functionality
-            TempData["functionalitySelected"] = functionalitySelected;
+            // this method is used to go to the Selection page while saving the functionality selected and the table and column data
+            Manager.Instance().selections[HttpContext.Session.Id].functionality = functionalitySelected;
+            Manager.Instance().selections[HttpContext.Session.Id].results = Manager.Instance().getTableAndColumnData(HttpContext.Session.Id);
             return RedirectToAction("Selection");
         }
         [HttpPost]
         public IActionResult GoToPage(string functionalitySelected, string selection)
         {
-            // this method is used to go to the Selection page while sending the corresponding functionality
-            TempData["functionalitySelected"] = functionalitySelected;
-            HttpContext.Session.SetString("selected", selection);
-            return RedirectToAction(functionalitySelected, "Home");
+            // this method is used to go to the selected page while sending the corresponding functionality name and the selected columns and tables
+            Manager.Instance().saveSelections(selection, HttpContext.Session.Id);
+            return RedirectToAction(functionalitySelected, Manager.Instance().selections[HttpContext.Session.Id]);
         }
 
         [HttpPost]
         public IActionResult GoToPageAll(string functionalitySelected)
         {
-            TempData["functionalitySelected"] = functionalitySelected;
-            HttpContext.Session.SetString("selected", "all");
-            return RedirectToAction(functionalitySelected, "Home");
+            // this method is like the one above but when every column and table is selected
+            Manager.Instance().selections[HttpContext.Session.Id].results = Manager.Instance().getTableAndColumnData(HttpContext.Session.Id);
+            return RedirectToAction(functionalitySelected, Manager.Instance().selections[HttpContext.Session.Id]);
         }
 
         [HttpPost]
         public IActionResult GoToPageAfterCreate(string functionalitySelected)
         {
+            // this method is only used for the 2 functionalities with extra steps to redirect after the create step
             if (functionalitySelected == "create_masks")
             {
-                TempData["functionalitySelected"] = "data_masking";
-                return RedirectToAction("data_masking", "Home");
+                Manager.Instance().selections[HttpContext.Session.Id].functionality = "data_masking";
+                return RedirectToAction("data_masking", Manager.Instance().selections[HttpContext.Session.Id]);
             }
             else
             {
-                TempData["functionalitySelected"] = "constraints";
-                return RedirectToAction("constraints", "Home");
+                Manager.Instance().selections[HttpContext.Session.Id].functionality = functionalitySelected;
+                return RedirectToAction("constraints", Manager.Instance().selections[HttpContext.Session.Id]);
             }
 
         }
