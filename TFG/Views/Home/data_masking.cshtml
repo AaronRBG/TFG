@@ -30,31 +30,66 @@
         </h3>
     </div>
     <div id="accordion" class="overflow-auto left-half" style="width:15vw;">
-        <div class="card nav_color">
-            <div class="card-header">
-                <h5>
-                    <button class="btn btn-link" onclick="openTab(event, 'Tokyo')">Tokyo</button>
-                </h5>
+        @foreach (KeyValuePair<string, string[]> entry in Model.ColumnsSelected)
+        {
+            string collapse = "#collapse" + entry.Key;
+
+            <div class="card nav_color">
+                <div class="card-header" id="@entry.Key">
+                    <h5>
+                        <button class="btn btn-link" data-toggle="collapse" data-target="@collapse" aria-expanded="true" aria-controls="collapseOne">
+                            @entry.Key
+                        </button>
+                    </h5>
+                </div>
+
+                <div id="@collapse.Substring(1)" class="collapse hide" aria-labelledby="@entry.Key" data-parent="#accordion">
+                    <div class="card-body">
+                        @for (int i = 0; i < ((string[])entry.Value).Length; i++)
+                        {
+                            string name = @entry.Key + '.' + @entry.Value[i];
+
+                            <button class="btn btn-link" onclick="openTab(event, '@name')">@entry.Value[i]</button>
+                            <br />
+                        }
+                    </div>
+                </div>
+
             </div>
-        </div>
+        }
     </div>
     <div id="Tab-contents" class="overflow-auto">
-        <div id="Tokyo" class="tabcontent">
-            <table class="table table-striped">
-                <thead class="thead-dark">
-                    <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">First</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <th scope="row">1</th>
-                        <td>Mark</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+        @foreach (KeyValuePair<string, string[]> entry in Model.ColumnsSelected)
+        {
+            for (int i = 0; i < entry.Value.Length; i++)
+            {
+                string name = @entry.Key + '.' + @entry.Value[i];
+                string[] record = Model.records[name];
+
+                <div id="@name" class="tabcontent" style="display: none;">
+                    <table class="table table-striped overflow-auto">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">@entry.Value[i]</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (int j = 1; j <= record.Length; j++)
+                            {
+                                <tr>
+                                    <th scope="row">@j</th>
+
+                                    <td>@record[j - 1]</td>
+
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+            }
+        }
     </div>
 </div>
 <!-- This part is perform whole actions like selecting everything or nothing and running the functionality with the selected items -->

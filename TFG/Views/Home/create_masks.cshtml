@@ -20,8 +20,8 @@
     </div>
 </nav>
 <!-- This part is the most complicated of this view
-    It gets the data sent from the controller (double array with the database table names and column names of each table)
-    Then it creates for each table an item of an accordion which when expanded shows its columns with checkboxes for all of those items-->
+    It gets the data sent from the controller (double array with the database entry.Value names and column names of each entry.Value)
+    Then it creates for each entry.Value an item of an accordion which when expanded shows its columns with checkboxes for all of those items-->
 <div id="middle_container" class="left-half">
     <div id="selection-top" class="centeredBig">
         <h3>
@@ -29,23 +29,26 @@
         </h3>
     </div>
     <div id="accordion" class="overflow-auto left-half" style="width:15vw;">
-        @foreach (var table in Model.results)
+        @foreach (KeyValuePair<string, string[]> entry in Model.ColumnsSelected)
         {
-            string collapse = "#collapse" + table[0];
+            string collapse = "#collapse" + entry.Key;
+
             <div class="card nav_color">
-                <div class="card-header" id="@table[0]">
+                <div class="card-header" id="@entry.Key">
                     <h5>
                         <button class="btn btn-link" data-toggle="collapse" data-target="@collapse" aria-expanded="true" aria-controls="collapseOne">
-                            @table[0]
+                            @entry.Key
                         </button>
                     </h5>
                 </div>
 
-                <div id="@collapse.Substring(1)" class="collapse hide" aria-labelledby="@table[0]" data-parent="#accordion">
+                <div id="@collapse.Substring(1)" class="collapse hide" aria-labelledby="@entry.Key" data-parent="#accordion">
                     <div class="card-body">
-                        @for (int i = 1; i < ((string[])table).Length; i++)
+                        @for (int i = 0; i < ((string[])entry.Value).Length; i++)
                         {
-                            <button class="btn btn-link" onclick="openTab(event, '@table[i]')">@table[i]</button>
+                            string name = @entry.Key + '.' + @entry.Value[i];
+
+                            <button class="btn btn-link" onclick="openTab(event, '@name')">@entry.Value[i]</button>
                             <br />
                         }
                     </div>
@@ -55,40 +58,72 @@
         }
     </div>
     <div id="Tab-contents" class="overflow-auto">
-        @foreach (string[] table in Model.results)
+        @foreach (KeyValuePair<string, string[]> entry in Model.ColumnsSelected)
         {
-            for (int i = 1; i < table.Length; i++)
+            for (int i = 0; i < entry.Value.Length; i++)
             {
-                <div id="@table[i]" class="tabcontent" style="display: none;">
-                    <table class="table table-striped">
+                string name = @entry.Key + '.' + @entry.Value[i];
+                string[] record = Model.records[name];
+
+                <div id="@name" class="tabcontent" style="display: none;">
+                    <table class="table table-striped overflow-auto">
                         <thead class="thead-dark">
                             <tr>
                                 <th scope="col">#</th>
-                                <th scope="col">@table[i]</th>
+                                <th scope="col">@entry.Value[i]</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <th scope="row">1</th>
-                                <td>Mark</td>
-                            </tr>
+                            @for (int j = 1; j <= record.Length; j++)
+                            {
+                                <tr>
+                                    <th scope="row">@j</th>
+
+                                    <td>@record[j - 1]</td>
+
+                                </tr>
+                            }
                         </tbody>
                     </table>
                 </div>
+
             }
         }
     </div>
 </div>
 <!-- This part is perform whole actions like selecting everything or nothing and running the functionality with the selected items -->
 <div id="controls">
-    @using (Html.BeginForm("GoToPageAfterCreate", "Home"))
-    {
-        <input type="text" id="functionalitySelected4" name="functionalitySelected" />
-        <input id="hidden-btn5" class="hidden-btn" type="submit" style="display: none;" />
-    }
-    <br />
-    <span id="selection-text">None selected</span>
     <div id="controls-inside">
-        <button type="button" onclick='goToPageAfterCreate("@Model.functionality")' class="btn btn-outline-primary">Confirm and run</button>
+        <span>Select a mask type</span>
+        @foreach (KeyValuePair<string, string[]> entry in Model.ColumnsSelected)
+        {
+            for (int i = 0; i < entry.Value.Length; i++)
+            {
+                string dropdown = @entry.Key + '.' + @entry.Value[i] + "Dropdown";
+                string text = dropdown + "Text";
+
+                <div class="dropdown">
+                    <button class="btn btn-outline-dark dropdown-toggle tabcontent" type="button" id="@dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="display: none;">
+                        <span id="@text">None</span>
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        <a class="dropdown-item" onclick="changeName('@text', 'DNI')">DNI</a>
+                        <a class="dropdown-item" onclick="changeName('@text', 'Phone Number')">Phone Number</a>
+                        <a class="dropdown-item" onclick="changeName('@text', 'Credit card')">Credit card</a>
+                        <a class="dropdown-item" onclick="changeName('@text', 'Email')">Email</a>
+                        <a class="dropdown-item" onclick="changeName('@text', 'None')">None</a>
+                    </div>
+                </div>
+            }
+        }
+        @using (Html.BeginForm("GoToPageAfterCreate", "Home"))
+        {
+            <input type="text" id="functionalitySelected4" name="functionalitySelected" />
+            <input type="text" id="data" name="data" />
+            <input id="hidden-btn5" class="hidden-btn" type="submit" style="display: none;" />
+        }
+        <div id="bottom-buttons">
+            <button type="button" onclick='goToPageAfterCreate("@Model.functionality")' class="btn btn-outline-primary">Confirm and run</button>
+        </div>
     </div>
 </div>

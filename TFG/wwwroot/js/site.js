@@ -19,6 +19,20 @@ function goToSelection(functionality) {
 function goToPageAfterCreate(functionality) {
 
     document.getElementById("functionalitySelected4").value = functionality;
+
+    var data;
+    var array = a = document.querySelectorAll("[id$=DropdownText]");
+    for (i = 0; i < array.length; i++) {
+        if (array[i].innerHTML != 'None') {
+            data += '/';
+            data += array[i].id.replace("DropdownText", '');
+            data += ',';
+            data += array[i].innerHTML;
+        }
+    }
+
+    document.getElementById("data").value = data;
+
     $("#hidden-btn5").click();
 }
 
@@ -37,7 +51,7 @@ function goToPageAll(functionality) {
 // used as a middleware to activate a hidden button which is the one who connects to the controller and also inputs the functionality to a hidden input connected to the controller
 function goToPage(functionality) {
 
-    if (getColumns()==0 && getTables()==0) {
+    if (getColumns() == 0 && getTables() == 0) {
         alert('You have to select at least one column');
     } else {
 
@@ -185,6 +199,7 @@ function openTab(event, name) {
 
     // Show the current tab, and add an "active" class to the link that opened the tab
     document.getElementById(name).style.display = "block";
+    document.getElementById(name + 'Dropdown').style.display = "inline";
     event.currentTarget.className += " active";
 }
 // This function more or less lets you download the page in pdf format
@@ -200,4 +215,10 @@ function download() {
         'elementHandlers': specialElementHandlers
     });
     doc.save('sample-file.pdf');
+}
+
+// For Dropdown menus
+
+function changeName(dropdown, text) {
+    document.getElementById(dropdown).textContent = text;
 }

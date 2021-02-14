@@ -126,6 +126,7 @@ div#controls {
 div#Tab-contents {
     padding-left: 1vw;
     text-align: center;
+    height: 80vh;
 }
 
 .centeredBig {
@@ -178,6 +179,14 @@ div#remote_inside {
     display: inline-flex;
     align-items: center;
     padding-top: 5vh;
+}
+
+div#controls-inside{
+    padding-top: 5vh;
+}
+
+div#bottom-buttons {
+    padding-top: 10vh;
 }
 
 .functionality {
@@ -289,7 +298,7 @@ div#remote_inside {
     resize: none;
 }
 
-#fileLoader, #connectionString, #functionalitySelected, #functionalitySelected2, #functionalitySelected3, #functionalitySelected4, #selection {
+#fileLoader, #connectionString, #functionalitySelected, #functionalitySelected2, #functionalitySelected3, #functionalitySelected4, #data, #selection {
     display: none;
 }
 

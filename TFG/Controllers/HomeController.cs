@@ -105,6 +105,7 @@ namespace TFG.Controllers
         [HttpGet]
         public IActionResult create_masks()
         {
+            Manager.Instance().getRecords(HttpContext.Session.Id);
             return View("create_masks", Manager.Instance().selections[HttpContext.Session.Id]);
         }
         [HttpGet]
@@ -188,7 +189,7 @@ namespace TFG.Controllers
         {
             // this method is used to go to the Selection page while saving the functionality selected and the table and column data
             Manager.Instance().selections[HttpContext.Session.Id].functionality = functionalitySelected;
-            Manager.Instance().selections[HttpContext.Session.Id].results = Manager.Instance().getTableAndColumnData(HttpContext.Session.Id);
+            Manager.Instance().selections[HttpContext.Session.Id].ColumnsSelected = Manager.Instance().getTableAndColumnData(HttpContext.Session.Id);
             return RedirectToAction("Selection");
         }
         [HttpPost]
@@ -203,25 +204,16 @@ namespace TFG.Controllers
         public IActionResult GoToPageAll(string functionalitySelected)
         {
             // this method is like the one above but when every column and table is selected
-            Manager.Instance().selections[HttpContext.Session.Id].results = Manager.Instance().getTableAndColumnData(HttpContext.Session.Id);
+            Manager.Instance().selections[HttpContext.Session.Id].ColumnsSelected = Manager.Instance().getTableAndColumnData(HttpContext.Session.Id);
             return RedirectToAction(functionalitySelected, Manager.Instance().selections[HttpContext.Session.Id]);
         }
 
         [HttpPost]
-        public IActionResult GoToPageAfterCreate(string functionalitySelected)
+        public IActionResult GoToPageAfterCreate(string functionalitySelected, string data)
         {
             // this method is only used for the 2 functionalities with extra steps to redirect after the create step
-            if (functionalitySelected == "create_masks")
-            {
-                Manager.Instance().selections[HttpContext.Session.Id].functionality = "data_masking";
-                return RedirectToAction("data_masking", Manager.Instance().selections[HttpContext.Session.Id]);
-            }
-            else
-            {
-                Manager.Instance().selections[HttpContext.Session.Id].functionality = functionalitySelected;
-                return RedirectToAction("constraints", Manager.Instance().selections[HttpContext.Session.Id]);
-            }
-
+            Manager.Instance().saveTypes(HttpContext.Session.Id, data);
+            return RedirectToAction(functionalitySelected, Manager.Instance().selections[HttpContext.Session.Id]);
         }
 
     }

@@ -4,7 +4,7 @@
 
     ViewData["Title"] = "Database Connection";
 
-    // Creating some structures to ensure code reusability and prevent code duplication and if it's run on columns (true) or tables (false)
+    // Creating some structures to ensure code reusability and prevent code duplication and if it's run on columns (true) or entry.Values (false)
     Dictionary<string, string> functionalities_text = new Dictionary<string, string>();
     Dictionary<string, bool> functionalities_need_columns = new Dictionary<string, bool>();
 
@@ -27,8 +27,8 @@
     functionalities_need_columns.Add("primary_keys", false);
     functionalities_text.Add("foreign_keys", "Add/Improve Foreign Keys");
     functionalities_need_columns.Add("foreign_keys", false);
-    functionalities_text.Add("table_defragmentation", "Table Defragmentation");
-    functionalities_need_columns.Add("table_defragmentation", false);
+    functionalities_text.Add("entry.Value_defragmentation", "Table Defragmentation");
+    functionalities_need_columns.Add("entry.Value_defragmentation", false);
     functionalities_text.Add("improve_indexes", "Index Cleaning & Generation");
     functionalities_need_columns.Add("improve_indexes", false);
 }
@@ -54,8 +54,8 @@
     <input id="hidden-btn4" class="hidden-btn" type="submit" style="display: none;" />
 }
 <!-- This part is the most complicated of this view
-    It gets the data sent from the controller (double array with the database table names and column names of each table)
-    Then it creates for each table an item of an accordion which when expanded shows its columns with checkboxes for all of those items-->
+    It gets the data sent from the controller (double array with the database entry.Value names and column names of each entry.Value)
+    Then it creates for each entry.Value an item of an accordion which when expanded shows its columns with checkboxes for all of those items-->
 <div id="middle_container" class="left-half">
     <div id="selection-top" class="centeredBig">
         <h3>
@@ -70,25 +70,28 @@
         </h3>
     </div>
     <div id="accordion" class="overflow-auto centeredBig">
-        @foreach (var table in Model.results)
+        @foreach (KeyValuePair<string, string[]> entry in Model.ColumnsSelected)
         {
-            string collapse = "#collapse" + table[0];
+            string collapse = "#collapse" + entry.Key;
+            string div = entry.Key + "Div";
+            string CheckBox = entry.Key + "CheckBox";
+
             <div class="card nav_color">
-                <div class="card-header" id="@table[0]Div">
+                <div class="card-header" id="@div">
                     <h5>
-                        <input type="checkbox" id="@table[0]CheckBox" name="@table[0]" onclick="checkChilds('@table[0]CheckBox')" />
+                        <input type="checkbox" id="@CheckBox" name="@entry.Key" onclick="checkChilds('@CheckBox')" />
                         <button class="btn btn-link" data-toggle="collapse" data-target="@collapse" aria-expanded="true" aria-controls="collapseOne">
-                            @table[0]
+                            @entry.Key
                         </button>
                     </h5>
                 </div>
                 @if (@functionalities_need_columns[Model.functionality])
                 {
-                    <div id="@collapse.Substring(1)" class="collapse hide" aria-labelledby="@table[0]" data-parent="#accordion">
+                    <div id="@collapse.Substring(1)" class="collapse hide" aria-labelledby="@entry.Key" data-parent="#accordion">
                         <div class="card-body">
-                            @for (int i = 1; i < ((string[])table).Length; i++)
+                            @for (int i = 0; i < ((string[])entry.Value).Length; i++)
                             {
-                                <input type="checkbox" id="@table[i]" onclick="checkParent('@table[0]CheckBox', '@table[i]')" data-parent="@table[0]CheckBox" /> <span style="color: white;">@table[i]</span>
+                                <input type="checkbox" id="@entry.Value[i]" onclick="checkParent('@CheckBox', '@entry.Value[i]')" data-parent="@CheckBox" /> <span style="color: white;">@entry.Value[i]</span>
                                 <br />
                             }
                         </div>
