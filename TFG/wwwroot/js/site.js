@@ -6,34 +6,13 @@ function openfileDialog() {
 // used as a middleware to activate a hidden button which is the one who connects to the controller and also inputs the texts from a textarea to a hidden input connected to the controller
 function connect() {
     document.getElementById("connectionString").value = document.getElementById("constr").value
-    $("#hidden-btn1").click();
+    $("#hidden-btn").click();
 }
 
 // used as a middleware to activate a hidden button which is the one who connects to the controller and also inputs the functionality to a hidden input connected to the controller
 function goToSelection(functionality) {
-    document.getElementById("functionalitySelected").value = functionality;
-    $("#hidden-btn2").click();
-}
-
-// used as a middleware to activate a hidden button which is the one who connects to the controller and also inputs the functionality to a hidden input connected to the controller
-function goToPageAfterCreate(functionality) {
-
-    document.getElementById("functionalitySelected4").value = functionality;
-
-    var data;
-    var array = a = document.querySelectorAll("[id$=DropdownText]");
-    for (i = 0; i < array.length; i++) {
-        if (array[i].innerHTML != 'None') {
-            data += '/';
-            data += array[i].id.replace("DropdownText", '');
-            data += ',';
-            data += array[i].innerHTML;
-        }
-    }
-
-    document.getElementById("data").value = data;
-
-    $("#hidden-btn5").click();
+    document.getElementById("functionalitySelected1").value = functionality;
+    $("#hidden-btn1").click();
 }
 
 // used as a middleware to activate a hidden button which is the one who connects to the controller and also inputs the functionality to a hidden input connected to the controller
@@ -45,7 +24,7 @@ function goToPageAll(functionality) {
         functionality = 'create_constraints';
     }
     document.getElementById("functionalitySelected2").value = functionality;
-    $("#hidden-btn3").click();
+    $("#hidden-btn2").click();
 }
 
 // used as a middleware to activate a hidden button which is the one who connects to the controller and also inputs the functionality to a hidden input connected to the controller
@@ -82,10 +61,36 @@ function goToPage(functionality) {
 
         document.getElementById("functionalitySelected3").value = functionality;
         document.getElementById("selection").value = selected;
-        $("#hidden-btn4").click();
+        $("#hidden-btn3").click();
 
     }
+}
 
+// used as a middleware to activate a hidden button which is the one who connects to the controller and also inputs the functionality to a hidden input connected to the controller
+function goToPageAfterCreate(functionality) {
+
+    document.getElementById("functionalitySelected4").value = functionality;
+
+    var data;
+    var array = a = document.querySelectorAll("[id$=DropdownText]");
+    for (i = 0; i < array.length; i++) {
+        if (array[i].innerHTML != 'None') {
+            data += '/';
+            data += array[i].id.replace("DropdownText", '');
+            data += ',';
+            data += array[i].innerHTML;
+        }
+    }
+
+    document.getElementById("data").value = data;
+
+    $("#hidden-btn4").click();
+}
+
+// used as a middleware to activate a hidden button which is the one who connects to the controller and also inputs the functionality to a hidden input connected to the controller
+function confirm(functionality) {
+    document.getElementById("functionalitySelected5").value = functionality;
+    $("#hidden-btn5").click();
 }
 
 // this method parameter is the id of the table checkbox
@@ -218,7 +223,6 @@ function download() {
 }
 
 // For Dropdown menus
-
 function changeName(dropdown, text) {
     document.getElementById(dropdown).textContent = text;
 }

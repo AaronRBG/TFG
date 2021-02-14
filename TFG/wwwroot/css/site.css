@@ -298,7 +298,7 @@ div#bottom-buttons {
     resize: none;
 }
 
-#fileLoader, #connectionString, #functionalitySelected, #functionalitySelected2, #functionalitySelected3, #functionalitySelected4, #data, #selection {
+#fileLoader, #connectionString, #functionalitySelected1, #functionalitySelected2, #functionalitySelected3, #functionalitySelected4, #functionalitySelected5, #data, #selection {
     display: none;
 }
 

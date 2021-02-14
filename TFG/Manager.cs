@@ -2,7 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using TFG.Models;
 
@@ -75,7 +77,7 @@ namespace TFG
             }
             selections[id].types = types;
             selections[id].ColumnsSelected = selection;
-            getMaskedRecords(id);
+            selections[id].records = getMaskedRecords(id);
         }
 
         public string getTableSchemaName(string id, string table)
@@ -86,9 +88,33 @@ namespace TFG
             return (string)row[0];
         }
 
-        public void getMaskedRecords(string id)
+        public string getDataType(string id, string column)
         {
-            Dictionary<string, string[]> res = new Dictionary<string, string[]>();
+            DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE COLUMN_NAME = '" + column + "'", connections[id]), "type");
+            DataTable dt = ds.Tables["type"];
+            DataRow row = dt.Rows[0];
+            return (string)row[0];
+        }
+
+        public string[] getPrimaryKey(string id, string table)
+        {
+            string path = Path.Combine(Directory.GetCurrentDirectory(), @"Scripts\getPrimaryKey.sql");
+            string sql = System.IO.File.ReadAllText(path);
+            DataSet ds = Broker.Instance().Run(new SqlCommand(sql + table + "'", connections[id]), "schema");
+            DataTable dt = ds.Tables["schema"];
+            string[] res = new string[dt.Rows.Count];
+
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                res[i] = (string)dt.Rows[i][0];
+            }
+
+            return res;
+        }
+
+        public Dictionary<string, string[]> getMaskedRecords(string id)
+        {
+            Dictionary<string, string[]> res = getRecords(id);
 
             foreach (KeyValuePair<string, string> entry in Manager.Instance().selections[id].types)
             {
@@ -117,13 +143,50 @@ namespace TFG
                 {
                     container[x] = dt.Rows[x][0].ToString();
                 }
-                res.Add(entry.Key, container);
+                res.Add((entry.Key + "Masked"), container);
             }
+            return res;
+        }
+
+        public void getPrimaryKeysRecords(string id, string[] pks, string table)
+        {
+            Dictionary<string, string[]> res = getMaskedRecords(id);
+
+
+            for (int j = 0; j < pks.Length; j++)
+            {
+                DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT [" + pks[j] + "] FROM " + getTableSchemaName(id, table), connections[id]), "records");
+                DataTable dt = ds.Tables["records"];
+                String[] container = new string[dt.Rows.Count];
+                for (int x = 0; x < dt.Rows.Count; x++)
+                {
+                    container[x] = dt.Rows[x][0].ToString();
+                }
+                string key = table + '.' + pks[j];
+                if (!res.ContainsKey(key))
+                {
+                    res.Add(key, container);
+                }
+            }
+
             selections[id].records = res;
         }
 
-        public void getRecords(string id)
+        public Dictionary<string, string[]> getRecords(string id)
         {
+            string path = Path.Combine(Directory.GetCurrentDirectory(), @"Scripts\createDNIMask.sql");
+            string sql = System.IO.File.ReadAllText(path);
+            Broker.Instance().Run(new SqlCommand(sql, connections[id]), "createFunctions");
+            path = Path.Combine(Directory.GetCurrentDirectory(), @"Scripts\createPhoneMask.sql");
+            sql = System.IO.File.ReadAllText(path);
+            Broker.Instance().Run(new SqlCommand(sql, connections[id]), "createFunctions");
+            path = Path.Combine(Directory.GetCurrentDirectory(), @"Scripts\createEmailMask.sql");
+            sql = System.IO.File.ReadAllText(path);
+            Broker.Instance().Run(new SqlCommand(sql, connections[id]), "createFunctions");
+            path = Path.Combine(Directory.GetCurrentDirectory(), @"Scripts\createCreditCardMask.sql");
+            sql = System.IO.File.ReadAllText(path);
+            Broker.Instance().Run(new SqlCommand(sql, connections[id]), "createFunctions");
+
             Dictionary<string, string[]> res = new Dictionary<string, string[]>();
 
             foreach (KeyValuePair<string, string[]> entry in Manager.Instance().selections[id].ColumnsSelected)
@@ -141,7 +204,7 @@ namespace TFG
                     res.Add(key, container);
                 }
             }
-            selections[id].records = res;
+            return res;
         }
 
         public Dictionary<string, string[]> getTableAndColumnData(string id)
@@ -180,5 +243,51 @@ namespace TFG
             return res;
         }
 
+        public void update(string id)
+        {
+            foreach (KeyValuePair<string, string[]> entry in Manager.Instance().selections[id].ColumnsSelected)
+            {
+                string[] pks = getPrimaryKey(id, entry.Key);
+                string[][] pk_data = new string[pks.Length][];
+                getPrimaryKeysRecords(id, pks, entry.Key);
+
+                for (int i = 0; i < pks.Length; i++)
+                {
+                    string aux = entry.Key + '.' + pks[i];
+                    pk_data[i] = selections[id].records[aux];
+                }
+
+                foreach (string column in entry.Value)
+                {
+                    string aux = entry.Key + '.' + column + "Masked";
+                    string[] data = selections[id].records[(aux)];
+
+                    for (int i = 0; i < data.Length; i++)
+                    {
+                        string str = "";
+
+                        for (int j = 0; j < pks.Length; j++)
+                        {
+                            string type = getDataType(id, pks[j]);
+                            str += " " + pks[j] + " = convert(" + type + ", '" + pk_data[j][i];
+                            if (type == "datetime")
+                            {
+                                str += "', 103)";
+                            }
+                            else
+                            {
+                                str += "')";
+                            }
+                            if (j != pks.Length - 1)
+                            {
+                                str += " and";
+                            }
+                        }
+
+                        Broker.Instance().Run(new SqlCommand("UPDATE " + getTableSchemaName(id, entry.Key) + " SET " + column + " = " + data[i] + " WHERE" + str, connections[id]), "update");
+                    }
+                }
+            }
+        }
     }
 }

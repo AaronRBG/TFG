@@ -33,10 +33,12 @@
         @foreach (KeyValuePair<string, string[]> entry in Model.ColumnsSelected)
         {
             string collapse = "#collapse" + entry.Key;
+            string CheckBox = entry.Key + "CheckBox";
 
             <div class="card nav_color">
                 <div class="card-header" id="@entry.Key">
                     <h5>
+                        <input type="checkbox" id="@CheckBox" name="@entry.Key" onclick="checkChilds('@CheckBox')" />
                         <button class="btn btn-link" data-toggle="collapse" data-target="@collapse" aria-expanded="true" aria-controls="collapseOne">
                             @entry.Key
                         </button>
@@ -48,8 +50,7 @@
                         @for (int i = 0; i < ((string[])entry.Value).Length; i++)
                         {
                             string name = @entry.Key + '.' + @entry.Value[i];
-
-                            <button class="btn btn-link" onclick="openTab(event, '@name')">@entry.Value[i]</button>
+                            <input type="checkbox" id="@entry.Value[i]" onclick="checkParent('@CheckBox', '@entry.Value[i]')" data-parent="@CheckBox" /> <button class="btn btn-link" onclick="openTab(event, '@name')">@entry.Value[i]</button>
                             <br />
                         }
                     </div>
@@ -58,13 +59,21 @@
             </div>
         }
     </div>
+    @using (Html.BeginForm("Confirm", "Home"))
+    {
+        <input type="text" id="functionalitySelected5" name="functionalitySelected" />
+        <input type="text" id="data" name="data" />
+        <input id="hidden-btn5" class="hidden-btn" type="submit" style="display: none;" />
+    }
     <div id="Tab-contents" class="overflow-auto">
         @foreach (KeyValuePair<string, string[]> entry in Model.ColumnsSelected)
         {
             for (int i = 0; i < entry.Value.Length; i++)
             {
                 string name = @entry.Key + '.' + @entry.Value[i];
+                string masked = name + "Masked";
                 string[] record = Model.records[name];
+                string[] recordMasked = Model.records[masked];
 
                 <div id="@name" class="tabcontent" style="display: none;">
                     <table class="table table-striped overflow-auto">
@@ -72,6 +81,7 @@
                             <tr>
                                 <th scope="col">#</th>
                                 <th scope="col">@entry.Value[i]</th>
+                                <th scope="col">@entry.Value[i]Masked</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -81,6 +91,8 @@
                                     <th scope="row">@j</th>
 
                                     <td>@record[j - 1]</td>
+
+                                    <td>@recordMasked[j - 1]</td>
 
                                 </tr>
                             }
@@ -94,14 +106,16 @@
 </div>
 <!-- This part is perform whole actions like selecting everything or nothing and running the functionality with the selected items -->
 <div id="controls">
-    <div class="btn-group-vertical" role="group" style="padding-top: 20vh;">
-        <button type="button" onclick="selectAll()" class="btn btn-outline-primary">Remove extra-characters</button>
-        <button type="button" onclick="selectNone()" class="btn btn-outline-danger">Remove non-compliant rows</button>
-        <button type="button" onclick="selectNone()" class="btn btn-outline-secondary">Use manually user-inputs</button>
-        <button type="button" onclick="selectNone()" class="btn btn-outline-dark">Go back to mask creation</button>
+    <div class="btn-group" role="group" style="padding-top: 20vh;">
+        <button type="button" onclick="selectAll()" class="btn btn-outline-primary">Select All</button>
+        <button type="button" onclick="selectNone()" class="btn btn-outline-dark">Select None</button>
     </div>
     <br />
     <span id="selection-text">None selected</span>
+    <div id="controls-inside">
+        <button type="button" onclick='confirm("@Model.functionality")' class="btn btn-outline-primary">Confirm and run</button>
+    </div>
+    <br />
     <div id="controls-inside">
         <button type="button" onclick="download()" class="btn btn-outline-primary"><span class='download_icon'></span></button>
     </div>

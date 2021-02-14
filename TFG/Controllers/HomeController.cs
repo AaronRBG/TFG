@@ -6,6 +6,7 @@ using Microsoft.Data.SqlClient;
 using System.Data;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
+using System;
 
 namespace TFG.Controllers
 {
@@ -105,7 +106,7 @@ namespace TFG.Controllers
         [HttpGet]
         public IActionResult create_masks()
         {
-            Manager.Instance().getRecords(HttpContext.Session.Id);
+            Manager.Instance().selections[HttpContext.Session.Id].records = Manager.Instance().getRecords(HttpContext.Session.Id);
             return View("create_masks", Manager.Instance().selections[HttpContext.Session.Id]);
         }
         [HttpGet]
@@ -214,6 +215,15 @@ namespace TFG.Controllers
             // this method is only used for the 2 functionalities with extra steps to redirect after the create step
             Manager.Instance().saveTypes(HttpContext.Session.Id, data);
             return RedirectToAction(functionalitySelected, Manager.Instance().selections[HttpContext.Session.Id]);
+        }
+
+        [HttpPost]
+        public IActionResult Confirm(string functionalitySelected)
+        {
+            // this method is only used to confirm the changes to the database
+            Manager.Instance().update(HttpContext.Session.Id);
+            Manager.Instance().selections[HttpContext.Session.Id].log += functionalitySelected + "\t" + DateTime.Now.ToString();
+            return RedirectToAction("MainPage", Manager.Instance().selections[HttpContext.Session.Id]);
         }
 
     }

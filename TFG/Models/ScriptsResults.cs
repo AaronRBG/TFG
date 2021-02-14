@@ -32,6 +32,7 @@ namespace TFG.Models
 
         public string database { get; set; }
         public string functionality { get; set; }
+        public string log { get; set; }
         public string[] tablesSelected { get; set; }
         public Dictionary<string, string[]> ColumnsSelected { get; set; }
         public Dictionary<string, string> types { get; set; }
