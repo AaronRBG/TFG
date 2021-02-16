@@ -49,8 +49,8 @@
 </nav>
 @using (Html.BeginForm("GoToPage", "Home"))
 {
-    <input type="text" id="functionalitySelected3" name="functionalitySelected" />
-    <input type="text" id="selection" name="selection" />
+    <input type="text" id="functionalitySelected3" class="functionalitySelected" name="functionalitySelected" />
+    <input type="text" id="selection" class="functionalitySelected" name="selection" />
     <input id="hidden-btn3" class="hidden-btn" type="submit" style="display: none;" />
 }
 <!-- This part is the most complicated of this view
@@ -110,6 +110,6 @@
     <br />
     <span id="selection-text">None selected</span>
     <div id="controls-inside">
-        <button type="button" onclick='goToPage("@Model.functionality")' class="btn btn-outline-primary">Confirm and run</button>
+        <button type="button" onclick='goToPage("@Model.functionality", true)' class="btn btn-outline-primary">Confirm and run</button>
     </div>
 </div>

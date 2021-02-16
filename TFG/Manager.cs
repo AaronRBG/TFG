@@ -77,7 +77,7 @@ namespace TFG
             }
             selections[id].types = types;
             selections[id].ColumnsSelected = selection;
-            selections[id].records = getMaskedRecords(id);
+            getMaskedRecords(id);
         }
 
         public string getTableSchemaName(string id, string table)
@@ -112,9 +112,9 @@ namespace TFG
             return res;
         }
 
-        public Dictionary<string, string[]> getMaskedRecords(string id)
+        public void getMaskedRecords(string id)
         {
-            Dictionary<string, string[]> res = getRecords(id);
+            Dictionary<string, string[]> res = selections[id].records;
 
             foreach (KeyValuePair<string, string> entry in Manager.Instance().selections[id].types)
             {
@@ -145,30 +145,33 @@ namespace TFG
                 }
                 res.Add((entry.Key + "Masked"), container);
             }
-            return res;
+            selections[id].records = res;
         }
 
-        public void getPrimaryKeysRecords(string id, string[] pks, string table)
+        public void getPrimaryKeysRecords(string id)
         {
-            Dictionary<string, string[]> res = getMaskedRecords(id);
+            Dictionary<string, string[]> res = getRecords(id);
 
-
-            for (int j = 0; j < pks.Length; j++)
+            foreach (KeyValuePair<string, string> entry in Manager.Instance().selections[id].types)
             {
-                DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT [" + pks[j] + "] FROM " + getTableSchemaName(id, table), connections[id]), "records");
-                DataTable dt = ds.Tables["records"];
-                String[] container = new string[dt.Rows.Count];
-                for (int x = 0; x < dt.Rows.Count; x++)
+                string[] pks = getPrimaryKey(id, entry.Key);
+
+                for (int j = 0; j < pks.Length; j++)
                 {
-                    container[x] = dt.Rows[x][0].ToString();
-                }
-                string key = table + '.' + pks[j];
-                if (!res.ContainsKey(key))
-                {
-                    res.Add(key, container);
+                    DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT [" + pks[j] + "] FROM " + getTableSchemaName(id, entry.Key), connections[id]), "records");
+                    DataTable dt = ds.Tables["records"];
+                    String[] container = new string[dt.Rows.Count];
+                    for (int x = 0; x < dt.Rows.Count; x++)
+                    {
+                        container[x] = dt.Rows[x][0].ToString();
+                    }
+                    string key = entry.Key + '.' + pks[j];
+                    if (!res.ContainsKey(key))
+                    {
+                        res.Add(key, container);
+                    }
                 }
             }
-
             selections[id].records = res;
         }
 
@@ -249,7 +252,6 @@ namespace TFG
             {
                 string[] pks = getPrimaryKey(id, entry.Key);
                 string[][] pk_data = new string[pks.Length][];
-                getPrimaryKeysRecords(id, pks, entry.Key);
 
                 for (int i = 0; i < pks.Length; i++)
                 {

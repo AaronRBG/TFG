@@ -282,6 +282,11 @@ div#bottom-buttons {
     text-align: center;
 }
 
+#selection-a:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
 .functionality-text {
     vertical-align: middle;
     font-size: 1.5rem;
@@ -298,7 +303,7 @@ div#bottom-buttons {
     resize: none;
 }
 
-#fileLoader, #connectionString, #functionalitySelected1, #functionalitySelected2, #functionalitySelected3, #functionalitySelected4, #functionalitySelected5, #data, #selection {
+#fileLoader, #connectionString, .functionalitySelected {
     display: none;
 }
 

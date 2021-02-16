@@ -44,7 +44,7 @@
             <ol class="breadcrumb">
                 <li class="breadcrumb-item active" aria-current="page">Home</li>
             </ol>
-            <button id="performance-button" onclick='window.location.href="Performance"' type="button" class="btn btn-outline-success">Performance</button>
+            <button id="performance-button" onclick="goToPage('Performance', false)" type="button" class="btn btn-outline-success">Performance</button>
         </div>
     </div>
 </nav>
@@ -53,14 +53,18 @@
     The Html.BeginForm part is used to send information to a controller method-->
 @using (Html.BeginForm("GoToSelection", "Home"))
 {
-    <input type="text" id="functionalitySelected1" name="functionalitySelected" />
+    <input type="text" id="functionalitySelected1" class="functionalitySelected" name="functionalitySelected" />
     <input id="hidden-btn1" class="hidden-btn" type="submit" style="display: none;" />
 }
-
-@using (Html.BeginForm("GoToPageAll", "Home"))
+@using (Html.BeginForm("GoBackToPage", "Home"))
 {
-    <input type="text" id="functionalitySelected2" name="functionalitySelected" />
-    <input id="hidden-btn2" class="hidden-btn" type="submit" style="display: none;" />
+    <input type="text" id="functionalitySelected3" class="functionalitySelected" name="functionalitySelected" />
+    <input id="hidden-btn3" class="hidden-btn" type="submit" style="display: none;" />
+}
+@using (Html.BeginForm("GoToSelection", "Home"))
+{
+    <input type="text" id="functionalitySelected1" class="functionalitySelected" name="functionalitySelected" />
+    <input id="hidden-btn1" class="hidden-btn" type="submit" style="display: none;" />
 }
 
 <!-- Everything on here is just visual, 2 divs one to the left and one to the right with 5 divs of functionality each which in turn have a help button, their name and their option buttons -->

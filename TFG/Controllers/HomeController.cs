@@ -175,7 +175,7 @@ namespace TFG.Controllers
                 }
 
                 Manager.Instance().connections.Add(HttpContext.Session.Id, con);
-                Manager.Instance().selections.Add(HttpContext.Session.Id, new ScriptsResults(splits[1]));
+                Manager.Instance().selections.Add(HttpContext.Session.Id, new ScriptsResults(splits[1], HttpContext.Session.Id));
 
                 return RedirectToAction("MainPage");
             }
@@ -198,6 +198,13 @@ namespace TFG.Controllers
         {
             // this method is used to go to the selected page while sending the corresponding functionality name and the selected columns and tables
             Manager.Instance().saveSelections(selection, HttpContext.Session.Id);
+            return RedirectToAction(functionalitySelected, Manager.Instance().selections[HttpContext.Session.Id]);
+        }
+
+        [HttpPost]
+        public IActionResult GoBackToPage(string functionalitySelected)
+        {
+            // this method is used to go to the selected page while sending the corresponding functionality name and the selected columns and tables
             return RedirectToAction(functionalitySelected, Manager.Instance().selections[HttpContext.Session.Id]);
         }
 
