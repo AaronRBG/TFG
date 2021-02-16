@@ -28,9 +28,9 @@ function goToPageAll(functionality) {
 }
 
 // used as a middleware to activate a hidden button which is the one who connects to the controller and also inputs the functionality to a hidden input connected to the controller
-function goToPage(functionality) {
+function goToPage(functionality, page) {
 
-    if (getColumns() == 0 && getTables() == 0) {
+    if (page && getColumns() == 0 && getTables() == 0) {
         alert('You have to select at least one column');
     } else {
 
@@ -60,7 +60,10 @@ function goToPage(functionality) {
             });
 
         document.getElementById("functionalitySelected3").value = functionality;
-        document.getElementById("selection").value = selected;
+
+        if (page) {
+            document.getElementById("selection").value = selected; 
+        }
         $("#hidden-btn3").click();
 
     }
@@ -208,18 +211,47 @@ function openTab(event, name) {
     event.currentTarget.className += " active";
 }
 // This function more or less lets you download the page in pdf format
-function download() {
-    var doc = new jsPDF();
-    var specialElementHandlers = {
-        '#editor': function (element, renderer) {
-            return true;
-        }
-    };
-    doc.fromHTML($('main').html(), 15, 15, {
-        'width': 170,
-        'elementHandlers': specialElementHandlers
-    });
-    doc.save('sample-file.pdf');
+function downloadCSV(csv, filename) {
+    var csvFile;
+    var downloadLink;
+
+    // CSV file
+    csvFile = new Blob([csv], { type: "text/csv" });
+
+    // Download link
+    downloadLink = document.createElement("a");
+
+    // File name
+    downloadLink.download = filename;
+
+    // Create a link to the file
+    downloadLink.href = window.URL.createObjectURL(csvFile);
+
+    // Hide download link
+    downloadLink.style.display = "none";
+
+    // Add the link to DOM
+    document.body.appendChild(downloadLink);
+
+    // Click download link
+    downloadLink.click();
+}
+
+function exportTableToCSV(filename) {
+    var csv = [];
+    var rows = document.querySelectorAll("table tr");
+
+    for (var i = 0; i < rows.length; i++) {
+        var row = [], cols = rows[i].querySelectorAll("td, th");
+
+        for (var j = 0; j < cols.length; j++)
+            row.push(cols[j].innerText);
+
+        csv.push(row.join(","));
+    }
+
+    // Download CSV file
+    downloadCSV(csv.join("\n"), filename);
 }
 
 // For Dropdown menus
