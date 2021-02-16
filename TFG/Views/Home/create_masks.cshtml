@@ -4,6 +4,11 @@
 
     ViewData["Title"] = "Data Masking Report";
 }
+@using (Html.BeginForm("GoToSelection", "Home"))
+{
+    <input type="text" id="functionalitySelected1" class="functionalitySelected" name="functionalitySelected" />
+    <input id="hidden-btn1" class="hidden-btn" type="submit" style="display: none;" />
+}
 <!-- A navegation bar which does not navigate, it only shows the chosen database name along with a button that
     allows the user to go to the corresponding page to change it, if needed and show the current page (receiving the functionality selected from the controller)-->
 <nav class="navbar nav_color">
@@ -14,6 +19,7 @@
             <button type="button" onclick='window.location.href="DatabaseConnection"' class="btn btn-default" data-toggle="tooltip" data-placement="auto" title="Change database"><span class='folder_icon'></span></button>
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="MainPage" MainPage">Home</a></li>
+                <li class="breadcrumb-item"><a id="selection-a" onclick="goToSelection('@Model.functionality')" style="color: orange;" Selection">Selection</a></li>
                 <li class="breadcrumb-item active" aria-current="page">Create Masks</li>
             </ol>
         </div>
@@ -28,7 +34,9 @@
             <span>Data Masking Report</span>
         </h3>
     </div>
-    <div id="accordion" class="overflow-auto left-half" style="width:15vw;">
+    <div id="accordion" class="overflow-auto left-half" style="width:20vw;">
+        <span class="font-weight-bold">Tables:</span>
+        <br />
         @foreach (KeyValuePair<string, string[]> entry in Model.ColumnsSelected)
         {
             string collapse = "#collapse" + entry.Key;
@@ -44,6 +52,8 @@
 
                 <div id="@collapse.Substring(1)" class="collapse hide" aria-labelledby="@entry.Key" data-parent="#accordion">
                     <div class="card-body">
+                        <span style="color: white;">@entry.Key columns: </span>
+                        <br />
                         @for (int i = 0; i < ((string[])entry.Value).Length; i++)
                         {
                             string name = @entry.Key + '.' + @entry.Value[i];
@@ -69,8 +79,8 @@
                     <table class="table table-striped overflow-auto">
                         <thead class="thead-dark">
                             <tr>
-                                <th scope="col">#</th>
-                                <th scope="col">@entry.Value[i]</th>
+                                <th scope="col">@entry.Key Record Number</th>
+                                <th scope="col">Column data (@entry.Value[i])</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -118,8 +128,8 @@
         }
         @using (Html.BeginForm("GoToPageAfterCreate", "Home"))
         {
-            <input type="text" id="functionalitySelected4" name="functionalitySelected" />
-            <input type="text" id="data" name="data" />
+            <input type="text" id="functionalitySelected4" class="functionalitySelected" name="functionalitySelected" />
+            <input type="text" id="data" class="functionalitySelected" name="data" />
             <input id="hidden-btn4" class="hidden-btn" type="submit" style="display: none;" />
         }
         <div id="bottom-buttons">
