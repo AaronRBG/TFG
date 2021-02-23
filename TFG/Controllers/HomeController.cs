@@ -185,7 +185,6 @@ namespace TFG.Controllers
         {
             try
             {
-                //Manager.Instance().selections[HttpContext.Session.Id].records = Manager.Instance().getRecords(HttpContext.Session.Id);
                 Manager.Instance().selections[HttpContext.Session.Id].records = new Dictionary<string, string[]>();
                 return View("create_masks", Manager.Instance().selections[HttpContext.Session.Id]);
             }
@@ -341,6 +340,7 @@ namespace TFG.Controllers
             // this method is like the one above but when every column and table is selected
             try
             {
+                Manager.Instance().selections[HttpContext.Session.Id].functionality = functionalitySelected;
                 Manager.Instance().selections[HttpContext.Session.Id].ColumnsSelected = Manager.Instance().getTableAndColumnData(HttpContext.Session.Id);
                 return RedirectToAction(functionalitySelected, Manager.Instance().selections[HttpContext.Session.Id]);
             }
@@ -374,6 +374,21 @@ namespace TFG.Controllers
                 Manager.Instance().update(HttpContext.Session.Id);
                 Manager.Instance().selections[HttpContext.Session.Id].log += functionalitySelected + "\t" + DateTime.Now.ToString();
                 return RedirectToAction("MainPage", Manager.Instance().selections[HttpContext.Session.Id]);
+            }
+            catch (KeyNotFoundException)
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
+        }
+
+        [HttpPost]
+        public IActionResult GetRecord(string record, string functionalitySelected)
+        {
+            // this method is only used to confirm the changes to the database
+            try
+            {
+                Manager.Instance().selections[HttpContext.Session.Id].records = Manager.Instance().getRecords(HttpContext.Session.Id, record);
+                return View(functionalitySelected, Manager.Instance().selections[HttpContext.Session.Id]);
             }
             catch (KeyNotFoundException)
             {

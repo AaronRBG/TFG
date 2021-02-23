@@ -114,6 +114,7 @@ namespace TFG
 
         public void getMaskedRecords(string id)
         {
+            getPrimaryKeysRecords(id);
             Dictionary<string, string[]> res = selections[id].records;
 
             foreach (KeyValuePair<string, string> entry in Manager.Instance().selections[id].types)
@@ -150,22 +151,24 @@ namespace TFG
 
         public void getPrimaryKeysRecords(string id)
         {
-            Dictionary<string, string[]> res = getRecords(id);
+            Dictionary<string, string[]> res = selections[id].records;
 
-            foreach (KeyValuePair<string, string> entry in Manager.Instance().selections[id].types)
+            foreach (KeyValuePair<string, string> entry in selections[id].types)
             {
-                string[] pks = getPrimaryKey(id, entry.Key);
+                string[] table = entry.Key.Split('.');
+
+                string[] pks = getPrimaryKey(id, table[0]);
 
                 for (int j = 0; j < pks.Length; j++)
                 {
-                    DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT [" + pks[j] + "] FROM " + getTableSchemaName(id, entry.Key), connections[id]), "records");
+                    DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT [" + pks[j] + "] FROM " + getTableSchemaName(id, table[0]), connections[id]), "records");
                     DataTable dt = ds.Tables["records"];
                     String[] container = new string[dt.Rows.Count];
                     for (int x = 0; x < dt.Rows.Count; x++)
                     {
                         container[x] = dt.Rows[x][0].ToString();
                     }
-                    string key = entry.Key + '.' + pks[j];
+                    string key = table[0] + '.' + pks[j];
                     if (!res.ContainsKey(key))
                     {
                         res.Add(key, container);
@@ -175,7 +178,7 @@ namespace TFG
             selections[id].records = res;
         }
 
-        public Dictionary<string, string[]> getRecords(string id)
+        public Dictionary<string, string[]> getRecords(string id, string record)
         {
             string path = Path.Combine(Directory.GetCurrentDirectory(), @"Scripts\createDNIMask.sql");
             string sql = System.IO.File.ReadAllText(path);
@@ -190,23 +193,18 @@ namespace TFG
             sql = System.IO.File.ReadAllText(path);
             Broker.Instance().Run(new SqlCommand(sql, connections[id]), "createFunctions");
 
-            Dictionary<string, string[]> res = new Dictionary<string, string[]>();
+            Dictionary<string, string[]> res = Manager.Instance().selections[id].records;
 
-            foreach (KeyValuePair<string, string[]> entry in Manager.Instance().selections[id].ColumnsSelected)
+            string[] column = record.Split('.');
+
+            DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT [" + column[1] + "] FROM " + getTableSchemaName(id, column[0]), connections[id]), "records");
+            DataTable dt = ds.Tables["records"];
+            String[] container = new string[dt.Rows.Count];
+            for (int x = 0; x < dt.Rows.Count; x++)
             {
-                for (int j = 0; j < entry.Value.Length; j++)
-                {
-                    DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT [" + entry.Value[j] + "] FROM " + getTableSchemaName(id, entry.Key), connections[id]), "records");
-                    DataTable dt = ds.Tables["records"];
-                    String[] container = new string[dt.Rows.Count];
-                    for (int x = 0; x < dt.Rows.Count; x++)
-                    {
-                        container[x] = dt.Rows[x][0].ToString();
-                    }
-                    string key = entry.Key + '.' + entry.Value[j];
-                    res.Add(key, container);
-                }
+                container[x] = dt.Rows[x][0].ToString();
             }
+            res.Add(record, container);
             return res;
         }
 
@@ -243,7 +241,8 @@ namespace TFG
                     if (!isSpacial(type))
                     {
                         aux[j] = (string)rows[0];
-                    } else
+                    }
+                    else
                     {
                         index--;
                     }
@@ -271,7 +270,7 @@ namespace TFG
 
         private bool isSpacial(string type)
         {
-            if(type == "geometry")
+            if (type == "geometry")
             {
                 return true;
             }

@@ -9,6 +9,12 @@
     <input type="text" id="functionalitySelected1" class="functionalitySelected" name="functionalitySelected" />
     <input id="hidden-btn1" class="hidden-btn" type="submit" style="display: none;" />
 }
+@using (Html.BeginForm("GetRecord", "Home"))
+{
+    <input type="text" id="record" class="functionalitySelected" name="record" />
+    <input type="text" id="functionalitySelected6" class="functionalitySelected" name="functionalitySelected" />
+    <input id="hidden-btn6" class="hidden-btn" type="submit" style="display: none;" />
+}
 <!-- A navegation bar which does not navigate, it only shows the chosen database name along with a button that
     allows the user to go to the corresponding page to change it, if needed and show the current page (receiving the functionality selected from the controller)-->
 <nav class="navbar nav_color">
@@ -57,9 +63,16 @@
                         @for (int i = 0; i < ((string[])entry.Value).Length; i++)
                         {
                             string name = @entry.Key + '.' + @entry.Value[i];
-
-                            <button class="btn btn-link" onclick="openTab(event, '@name')">@entry.Value[i]</button>
-                            <br />
+                            if (Model.records.ContainsKey(name))
+                            {
+                                <button class="btn btn-link" onclick="openTab(event, '@name')">@entry.Value[i]</button>
+                                <br />
+                            }
+                            else
+                            {
+                                <button class="btn btn-link" onclick="checkRecord(event, '@name', '@Model.functionality')">@entry.Value[i]</button>
+                                <br />
+                            }
                         }
                     </div>
                 </div>
@@ -73,30 +86,32 @@
             for (int i = 0; i < entry.Value.Length; i++)
             {
                 string name = @entry.Key + '.' + @entry.Value[i];
-                string[] record = Model.records[name];
+                if (Model.records.ContainsKey(name))
+                {
+                    string[] record = Model.records[name];
 
-                <div id="@name" class="tabcontent" style="display: none;">
-                    <table class="table table-striped overflow-auto">
-                        <thead class="thead-dark">
-                            <tr>
-                                <th scope="col">@entry.Key Record Number</th>
-                                <th scope="col">Column data (@entry.Value[i])</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @for (int j = 1; j <= record.Length; j++)
-                            {
+                    <div id="@name" class="tabcontent" style="display: none;">
+                        <table class="table table-striped overflow-auto">
+                            <thead class="thead-dark">
                                 <tr>
-                                    <th scope="row">@j</th>
-
-                                    <td>@record[j - 1]</td>
-
+                                    <th scope="col">@entry.Key Record Number</th>
+                                    <th scope="col">Column data (@entry.Value[i])</th>
                                 </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
+                            </thead>
+                            <tbody>
+                                @for (int j = 1; j <= record.Length; j++)
+                                {
+                                    <tr>
+                                        <th scope="row">@j</th>
 
+                                        <td>@record[j - 1]</td>
+
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
             }
         }
     </div>

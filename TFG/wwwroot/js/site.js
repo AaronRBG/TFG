@@ -11,6 +11,12 @@ function connect() {
 
 // used as a middleware to activate a hidden button which is the one who connects to the controller and also inputs the functionality to a hidden input connected to the controller
 function goToSelection(functionality) {
+    if (functionality == 'data_masking') {
+        functionality = 'create_masks';
+    }
+    if (functionality == 'constraints') {
+        functionality = 'create_constraints';
+    }
     document.getElementById("functionalitySelected1").value = functionality;
     $("#hidden-btn1").click();
 }
@@ -62,7 +68,7 @@ function goToPage(functionality, page) {
         document.getElementById("functionalitySelected3").value = functionality;
 
         if (page) {
-            document.getElementById("selection").value = selected; 
+            document.getElementById("selection").value = selected;
         }
         $("#hidden-btn3").click();
 
@@ -71,6 +77,13 @@ function goToPage(functionality, page) {
 
 // used as a middleware to activate a hidden button which is the one who connects to the controller and also inputs the functionality to a hidden input connected to the controller
 function goToPageAfterCreate(functionality) {
+
+    if (functionality == 'create_masks') {
+    functionality = 'data_masking';
+    }
+    if (functionality == 'create_constraints') {
+        functionality = 'constraints';
+    }
 
     document.getElementById("functionalitySelected4").value = functionality;
 
@@ -192,6 +205,14 @@ function getColumns() {
             }
         });
     return checked;
+}
+
+function checkRecord(event, name, functionality) {
+
+    document.getElementById("record").value = name;
+    document.getElementById("functionalitySelected6").value = functionality;
+    $("#hidden-btn6").click();
+
 }
 
 // This function controls the vertical tabs in some views like reports
