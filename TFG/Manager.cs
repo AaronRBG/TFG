@@ -234,16 +234,56 @@ namespace TFG
                 aux = new string[dtC.Rows.Count];
                 tablename = (string)rows[0];
 
+                int index = dtC.Rows.Count;
+
                 for (int j = 0; j < dtC.Rows.Count; j++)
                 {
                     rows = dtC.Rows[j];
-                    aux[j] = (string)rows[0];
+                    string type = getDataType(id, (string)rows[0]);
+                    if (!isSpacial(type))
+                    {
+                        aux[j] = (string)rows[0];
+                    } else
+                    {
+                        index--;
+                    }
                 }
+
+                string[] other = new string[index];
+                index = 0;
+
+                for (int j = 0; j < dtC.Rows.Count; j++)
+                {
+                    if (aux[j] != null)
+                    {
+                        other[index] = aux[j];
+                        index++;
+                    }
+                }
+                aux = other;
+
                 dsC.Reset();
                 res.Add(tablename, aux);
             }
 
             return res;
+        }
+
+        private bool isSpacial(string type)
+        {
+            if(type == "geometry")
+            {
+                return true;
+            }
+            if (type == "geography")
+            {
+                return true;
+            }
+            if (type == "hierarchyid")
+            {
+                return true;
+            }
+            return false;
         }
 
         public void update(string id)

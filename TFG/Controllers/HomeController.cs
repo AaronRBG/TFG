@@ -24,7 +24,14 @@ namespace TFG.Controllers
         [HttpGet]
         public IActionResult MainPage()
         {
-            return View("MainPage", Manager.Instance().selections[HttpContext.Session.Id]);
+            try
+            {
+                return View("MainPage", Manager.Instance().selections[HttpContext.Session.Id]);
+            }
+            catch (KeyNotFoundException)
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
         }
 
         // loads the DatabaseConnection View
@@ -37,94 +44,193 @@ namespace TFG.Controllers
         [HttpGet]
         public IActionResult data_masking()
         {
-            return View("data_masking", Manager.Instance().selections[HttpContext.Session.Id]);
+            try
+            {
+                return View("data_masking", Manager.Instance().selections[HttpContext.Session.Id]);
+            }
+            catch (KeyNotFoundException)
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
         }
 
         // loads the data_unification View
         [HttpGet]
         public IActionResult data_unification()
         {
-            return View("data_unification", Manager.Instance().selections[HttpContext.Session.Id]);
+            try
+            {
+                return View("data_unification", Manager.Instance().selections[HttpContext.Session.Id]);
+            }
+            catch (KeyNotFoundException)
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
         }
 
         // loads the remove_duplicates View
         [HttpGet]
         public IActionResult remove_duplicates()
         {
-            return View("remove_duplicates", Manager.Instance().selections[HttpContext.Session.Id]);
+            try
+            {
+                return View("remove_duplicates", Manager.Instance().selections[HttpContext.Session.Id]);
+            }
+            catch (KeyNotFoundException)
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
         }
 
         // loads the constraints View
         [HttpGet]
         public IActionResult constraints()
         {
-            return View("constraints", Manager.Instance().selections[HttpContext.Session.Id]);
+            try
+            {
+                return View("constraints", Manager.Instance().selections[HttpContext.Session.Id]);
+            }
+            catch (KeyNotFoundException)
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
         }
 
         // loads the missing_values View
         [HttpGet]
         public IActionResult missing_values()
         {
-            return View("missing_values", Manager.Instance().selections[HttpContext.Session.Id]);
+            try
+            {
+                return View("missing_values", Manager.Instance().selections[HttpContext.Session.Id]);
+            }
+            catch (KeyNotFoundException)
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
         }
 
         // loads the improve_datatypes View
         [HttpGet]
         public IActionResult improve_datatypes()
         {
-            return View("improve_datatypes", Manager.Instance().selections[HttpContext.Session.Id]);
+            try
+            {
+                return View("improve_datatypes", Manager.Instance().selections[HttpContext.Session.Id]);
+            }
+            catch (KeyNotFoundException)
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
         }
 
         // loads the primary_keys View
         [HttpGet]
         public IActionResult primary_keys()
         {
-            return View("primary_keys", Manager.Instance().selections[HttpContext.Session.Id]);
+            try
+            {
+                return View("primary_keys", Manager.Instance().selections[HttpContext.Session.Id]);
+            }
+            catch (KeyNotFoundException)
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
         }
 
         // loads the foreign_keys View
         [HttpGet]
         public IActionResult foreign_keys()
         {
-            return View("foreign_keys", Manager.Instance().selections[HttpContext.Session.Id]);
+            try
+            {
+                return View("foreign_keys", Manager.Instance().selections[HttpContext.Session.Id]);
+            }
+            catch (KeyNotFoundException)
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
         }
 
         // loads the table_defragmentation View
         [HttpGet]
         public IActionResult table_defragmentation()
         {
-            return View("table_defragmentation", Manager.Instance().selections[HttpContext.Session.Id]);
+            try
+            {
+                return View("table_defragmentation", Manager.Instance().selections[HttpContext.Session.Id]);
+            }
+            catch (KeyNotFoundException)
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
         }
 
         // loads the improve_indexes View
         [HttpGet]
         public IActionResult improve_indexes()
         {
-            return View("improve_indexes", Manager.Instance().selections[HttpContext.Session.Id]);
+            try
+            {
+                return View("improve_indexes", Manager.Instance().selections[HttpContext.Session.Id]);
+            }
+            catch (KeyNotFoundException)
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
         }
 
         [HttpGet]
         public IActionResult create_masks()
         {
-            Manager.Instance().selections[HttpContext.Session.Id].records = Manager.Instance().getRecords(HttpContext.Session.Id);
-            return View("create_masks", Manager.Instance().selections[HttpContext.Session.Id]);
+            try
+            {
+                //Manager.Instance().selections[HttpContext.Session.Id].records = Manager.Instance().getRecords(HttpContext.Session.Id);
+                Manager.Instance().selections[HttpContext.Session.Id].records = new Dictionary<string, string[]>();
+                return View("create_masks", Manager.Instance().selections[HttpContext.Session.Id]);
+            }
+            catch (KeyNotFoundException)
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
         }
         [HttpGet]
         public IActionResult create_constraints()
         {
-            return View("create_constraints", Manager.Instance().selections[HttpContext.Session.Id]);
+            try
+            {
+                return View("create_constraints", Manager.Instance().selections[HttpContext.Session.Id]);
+            }
+            catch (KeyNotFoundException)
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
         }
 
         [HttpGet]
         public IActionResult Performance()
         {
-            return View("Performance", Manager.Instance().selections[HttpContext.Session.Id]);
+            try
+            {
+                return View("Performance", Manager.Instance().selections[HttpContext.Session.Id]);
+            }
+            catch (KeyNotFoundException)
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
         }
 
         [HttpGet]
         public IActionResult Selection()
         {
-            return View("Selection", Manager.Instance().selections[HttpContext.Session.Id]);
+            try
+            {
+                return View("Selection", Manager.Instance().selections[HttpContext.Session.Id]);
+            }
+            catch (KeyNotFoundException)
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
         }
 
         [HttpGet]
@@ -189,48 +295,90 @@ namespace TFG.Controllers
         public IActionResult GoToSelection(string functionalitySelected)
         {
             // this method is used to go to the Selection page while saving the functionality selected and the table and column data
-            Manager.Instance().selections[HttpContext.Session.Id].functionality = functionalitySelected;
-            Manager.Instance().selections[HttpContext.Session.Id].ColumnsSelected = Manager.Instance().getTableAndColumnData(HttpContext.Session.Id);
-            return RedirectToAction("Selection");
+            try
+            {
+                Manager.Instance().selections[HttpContext.Session.Id].functionality = functionalitySelected;
+                Manager.Instance().selections[HttpContext.Session.Id].ColumnsSelected = Manager.Instance().getTableAndColumnData(HttpContext.Session.Id);
+                return RedirectToAction("Selection");
+            }
+            catch (KeyNotFoundException)
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
         }
         [HttpPost]
         public IActionResult GoToPage(string functionalitySelected, string selection)
         {
             // this method is used to go to the selected page while sending the corresponding functionality name and the selected columns and tables
-            Manager.Instance().saveSelections(selection, HttpContext.Session.Id);
-            return RedirectToAction(functionalitySelected, Manager.Instance().selections[HttpContext.Session.Id]);
+            try
+            {
+                Manager.Instance().saveSelections(selection, HttpContext.Session.Id);
+                return RedirectToAction(functionalitySelected, Manager.Instance().selections[HttpContext.Session.Id]);
+            }
+            catch (KeyNotFoundException)
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
         }
 
         [HttpPost]
         public IActionResult GoBackToPage(string functionalitySelected)
         {
             // this method is used to go to the selected page while sending the corresponding functionality name and the selected columns and tables
-            return RedirectToAction(functionalitySelected, Manager.Instance().selections[HttpContext.Session.Id]);
+            try
+            {
+                return RedirectToAction(functionalitySelected, Manager.Instance().selections[HttpContext.Session.Id]);
+            }
+            catch (KeyNotFoundException)
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
         }
 
         [HttpPost]
         public IActionResult GoToPageAll(string functionalitySelected)
         {
             // this method is like the one above but when every column and table is selected
-            Manager.Instance().selections[HttpContext.Session.Id].ColumnsSelected = Manager.Instance().getTableAndColumnData(HttpContext.Session.Id);
-            return RedirectToAction(functionalitySelected, Manager.Instance().selections[HttpContext.Session.Id]);
+            try
+            {
+                Manager.Instance().selections[HttpContext.Session.Id].ColumnsSelected = Manager.Instance().getTableAndColumnData(HttpContext.Session.Id);
+                return RedirectToAction(functionalitySelected, Manager.Instance().selections[HttpContext.Session.Id]);
+            }
+            catch (KeyNotFoundException)
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
         }
 
         [HttpPost]
         public IActionResult GoToPageAfterCreate(string functionalitySelected, string data)
         {
             // this method is only used for the 2 functionalities with extra steps to redirect after the create step
-            Manager.Instance().saveTypes(HttpContext.Session.Id, data);
-            return RedirectToAction(functionalitySelected, Manager.Instance().selections[HttpContext.Session.Id]);
+            try
+            {
+                Manager.Instance().saveTypes(HttpContext.Session.Id, data);
+                return RedirectToAction(functionalitySelected, Manager.Instance().selections[HttpContext.Session.Id]);
+            }
+            catch (KeyNotFoundException)
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
         }
 
         [HttpPost]
         public IActionResult Confirm(string functionalitySelected)
         {
             // this method is only used to confirm the changes to the database
-            Manager.Instance().update(HttpContext.Session.Id);
-            Manager.Instance().selections[HttpContext.Session.Id].log += functionalitySelected + "\t" + DateTime.Now.ToString();
-            return RedirectToAction("MainPage", Manager.Instance().selections[HttpContext.Session.Id]);
+            try
+            {
+                Manager.Instance().update(HttpContext.Session.Id);
+                Manager.Instance().selections[HttpContext.Session.Id].log += functionalitySelected + "\t" + DateTime.Now.ToString();
+                return RedirectToAction("MainPage", Manager.Instance().selections[HttpContext.Session.Id]);
+            }
+            catch (KeyNotFoundException)
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
         }
 
     }
