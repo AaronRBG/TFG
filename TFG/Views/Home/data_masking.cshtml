@@ -56,7 +56,8 @@
                         @for (int i = 0; i < ((string[])entry.Value).Length; i++)
                         {
                             string name = @entry.Key + '.' + @entry.Value[i];
-                            <input type="checkbox" id="@entry.Value[i]" onclick="checkParent('@CheckBox', '@entry.Value[i]')" data-parent="@CheckBox" /> <button class="btn btn-link" onclick="openTab(event, '@name')">@entry.Value[i]</button>
+                            string divName = name + "Div";
+                            <input type="checkbox" id="@name" onclick="checkBoth('@CheckBox', '@name')" data-parent="@CheckBox" /> <button class="btn btn-link" onclick="openTab(event, '@divName', false)">@entry.Value[i]</button>
                             <br />
                         }
                     </div>
@@ -82,6 +83,9 @@
         <input id="hidden-btn5" class="hidden-btn" type="submit" style="display: none;" />
     }
     <div id="Tab-contents" class="overflow-auto">
+        <div id="default" class="tabcontent">
+            <h2 style="padding-top:35vh;">No column selected, select one from the dropdown on the left</h2>
+        </div>
         @foreach (KeyValuePair<string, string[]> entry in Model.ColumnsSelected)
         {
             string[] pks = Manager.Instance().getPrimaryKey(Model.id, entry.Key);
@@ -95,36 +99,38 @@
             for (int i = 0; i < entry.Value.Length; i++)
             {
                 string name = @entry.Key + '.' + @entry.Value[i];
+                string divName = name + "Div";
                 string masked = name + "Masked";
                 string[] record = Model.records[name];
                 string[] recordMasked = Model.records[masked];
 
-                <div id="@name" class="tabcontent" style="display: none;">
+                <div id="@divName" class="tabcontent" style="display: none;">
                     <table class="table table-striped overflow-auto">
                         <thead class="thead-dark">
                             <tr>
-                                <th scope="col">@entry.Key Record Number</th>
+                                <th scope="col">Selections</th>
                                 <th scope="col">Original Column data (@entry.Value[i])</th>
                                 <th scope="col">Data after applying mask (@entry.Value[i])</th>
                                 @for (int k = 0; k < pks.Length; k++)
                                 {
                                     int l = k + 1;
-                                    <th scope="col">Pk column @l (@pks[k].Substring(pks[k].IndexOf('.')+1))</th>
+                                    <th scope="col">Pk column @l (@pks[k].Substring(pks[k].IndexOf('.') + 1))</th>
                                 }
                             </tr>
                         </thead>
                         <tbody>
-                            @for (int j = 1; j <= record.Length; j++)
+                            @for (int j = 0; j < record.Length; j++)
                             {
+                                string idname = @entry.Value[i] + @j + "Record";
                                 <tr>
-                                    <th scope="row">@j</th>
+                                    <th scope="row"><input type="checkbox" id="@idname" name="@idname" data-parent="@name" onclick="checkParent('@name', '@idname')" /></th>
 
-                                    <td>@record[j - 1]</td>
+                                    <td>@record[j]</td>
 
-                                    <td>@recordMasked[j - 1]</td>
+                                    <td>@recordMasked[j]</td>
                                     @for (int k = 0; k < pks.Length; k++)
                                     {
-                                        <td>@pk_data[k][j - 1]</td>
+                                        <td>@pk_data[k][j]</td>
                                     }
 
                                 </tr>

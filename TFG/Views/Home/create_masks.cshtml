@@ -13,6 +13,7 @@
 {
     <input type="text" id="record" class="functionalitySelected" name="record" />
     <input type="text" id="functionalitySelected6" class="functionalitySelected" name="functionalitySelected" />
+    <input type="text" id="data2" class="functionalitySelected" name="data2" />
     <input id="hidden-btn6" class="hidden-btn" type="submit" style="display: none;" />
 }
 <!-- A navegation bar which does not navigate, it only shows the chosen database name along with a button that
@@ -65,7 +66,7 @@
                             string name = @entry.Key + '.' + @entry.Value[i];
                             if (Model.records.ContainsKey(name))
                             {
-                                <button class="btn btn-link" onclick="openTab(event, '@name')">@entry.Value[i]</button>
+                                <button class="btn btn-link" onclick="openTab(event, '@name', true)">@entry.Value[i]</button>
                                 <br />
                             }
                             else
@@ -81,6 +82,9 @@
         }
     </div>
     <div id="Tab-contents" class="overflow-auto">
+        <div id="default" class="tabcontent">
+            <h2 style="padding-top:35vh;">No column selected, select one from the dropdown on the left</h2>
+        </div>
         @foreach (KeyValuePair<string, string[]> entry in Model.ColumnsSelected)
         {
             for (int i = 0; i < entry.Value.Length; i++)
@@ -125,12 +129,24 @@
             for (int i = 0; i < entry.Value.Length; i++)
             {
                 string dropdown = @entry.Key + '.' + @entry.Value[i] + "Dropdown";
+                string name = @entry.Key + '.' + @entry.Value[i];
                 string text = dropdown + "Text";
+                string stri;
+
+                if (Model.types!=null && Model.types.ContainsKey(name))
+                {
+                    stri = Model.types[name];
+                } else
+                {
+                    stri = "None";
+                }
 
                 <div class="dropdown">
                     <button class="btn btn-outline-dark dropdown-toggle tabcontent" type="button" id="@dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="display: none;">
-                        <span id="@text">None</span>
+                        <span id="@text">@stri</span>
                     </button>
+
+
                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                         <a class="dropdown-item" onclick="changeName('@text', 'DNI')">DNI</a>
                         <a class="dropdown-item" onclick="changeName('@text', 'Phone Number')">Phone Number</a>

@@ -5,6 +5,8 @@ namespace TFG.Models
 {
     public class ScriptsResults
     {
+        public ScriptsResults(){}
+
         public ScriptsResults(string database, string id)
         {
             this.database = database;

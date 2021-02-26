@@ -36,6 +36,11 @@ namespace TFG
 
         public void saveSelections(string selection, string id)
         {
+            selections[id].ColumnsSelected = parseSelection(selection);
+        }
+
+        public Dictionary<string, string[]> parseSelection(string selection)
+        {
             Dictionary<string, string[]> res = new Dictionary<string, string[]>();
 
             string[] tables = selection.Split('/');
@@ -44,10 +49,11 @@ namespace TFG
                 string[] columns = tables[i].Split(',');
                 res.Add(columns[0], columns.Skip(1).ToArray());
             }
-            selections[id].ColumnsSelected = res;
+
+            return res;
         }
 
-        public void saveTypes(string id, string data)
+        public void saveTypes(string id, string data, Boolean deleteSelection)
         {
             Dictionary<string, string> types = new Dictionary<string, string>();
             Dictionary<string, string[]> selection = new Dictionary<string, string[]>();
@@ -59,24 +65,30 @@ namespace TFG
                 types.Add(names[0], names[1]);
 
                 string[] pair = names[0].Split('.');
-                if (selection.ContainsKey(pair[0]))
+                if (deleteSelection)
                 {
-                    string[] aux = new string[selection[pair[0]].Length + 1];
-                    for (int j = 0; j < selection[pair[0]].Length; j++)
+                    if (selection.ContainsKey(pair[0]))
                     {
-                        aux[j] = selection[pair[0]][j];
+                        string[] aux = new string[selection[pair[0]].Length + 1];
+                        for (int j = 0; j < selection[pair[0]].Length; j++)
+                        {
+                            aux[j] = selection[pair[0]][j];
+                        }
+                        aux[aux.Length - 1] = pair[1];
+                        selection[pair[0]] = aux;
                     }
-                    aux[aux.Length - 1] = pair[1];
-                    selection[pair[0]] = aux;
-                }
-                else
-                {
-                    string[] aux = { pair[1] };
-                    selection.Add(pair[0], aux);
+                    else
+                    {
+                        string[] aux = { pair[1] };
+                        selection.Add(pair[0], aux);
+                    }
                 }
             }
             selections[id].types = types;
-            selections[id].ColumnsSelected = selection;
+            if (deleteSelection)
+            {
+                selections[id].ColumnsSelected = selection;
+            }
             getMaskedRecords(id);
         }
 
@@ -144,7 +156,11 @@ namespace TFG
                 {
                     container[x] = dt.Rows[x][0].ToString();
                 }
-                res.Add((entry.Key + "Masked"), container);
+                string name = entry.Key + "Masked";
+                if (!res.ContainsKey(name))
+                {
+                    res.Add((name), container);
+                }
             }
             selections[id].records = res;
         }
@@ -180,31 +196,35 @@ namespace TFG
 
         public Dictionary<string, string[]> getRecords(string id, string record)
         {
-            string path = Path.Combine(Directory.GetCurrentDirectory(), @"Scripts\createDNIMask.sql");
-            string sql = System.IO.File.ReadAllText(path);
-            Broker.Instance().Run(new SqlCommand(sql, connections[id]), "createFunctions");
-            path = Path.Combine(Directory.GetCurrentDirectory(), @"Scripts\createPhoneMask.sql");
-            sql = System.IO.File.ReadAllText(path);
-            Broker.Instance().Run(new SqlCommand(sql, connections[id]), "createFunctions");
-            path = Path.Combine(Directory.GetCurrentDirectory(), @"Scripts\createEmailMask.sql");
-            sql = System.IO.File.ReadAllText(path);
-            Broker.Instance().Run(new SqlCommand(sql, connections[id]), "createFunctions");
-            path = Path.Combine(Directory.GetCurrentDirectory(), @"Scripts\createCreditCardMask.sql");
-            sql = System.IO.File.ReadAllText(path);
-            Broker.Instance().Run(new SqlCommand(sql, connections[id]), "createFunctions");
-
             Dictionary<string, string[]> res = Manager.Instance().selections[id].records;
 
-            string[] column = record.Split('.');
-
-            DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT [" + column[1] + "] FROM " + getTableSchemaName(id, column[0]), connections[id]), "records");
-            DataTable dt = ds.Tables["records"];
-            String[] container = new string[dt.Rows.Count];
-            for (int x = 0; x < dt.Rows.Count; x++)
+            if (!res.ContainsKey(record))
             {
-                container[x] = dt.Rows[x][0].ToString();
+
+                string path = Path.Combine(Directory.GetCurrentDirectory(), @"Scripts\createDNIMask.sql");
+                string sql = System.IO.File.ReadAllText(path);
+                Broker.Instance().Run(new SqlCommand(sql, connections[id]), "createFunctions");
+                path = Path.Combine(Directory.GetCurrentDirectory(), @"Scripts\createPhoneMask.sql");
+                sql = System.IO.File.ReadAllText(path);
+                Broker.Instance().Run(new SqlCommand(sql, connections[id]), "createFunctions");
+                path = Path.Combine(Directory.GetCurrentDirectory(), @"Scripts\createEmailMask.sql");
+                sql = System.IO.File.ReadAllText(path);
+                Broker.Instance().Run(new SqlCommand(sql, connections[id]), "createFunctions");
+                path = Path.Combine(Directory.GetCurrentDirectory(), @"Scripts\createCreditCardMask.sql");
+                sql = System.IO.File.ReadAllText(path);
+                Broker.Instance().Run(new SqlCommand(sql, connections[id]), "createFunctions");
+
+                string[] column = record.Split('.');
+
+                DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT [" + column[1] + "] FROM " + getTableSchemaName(id, column[0]), connections[id]), "records");
+                DataTable dt = ds.Tables["records"];
+                String[] container = new string[dt.Rows.Count];
+                for (int x = 0; x < dt.Rows.Count; x++)
+                {
+                    container[x] = dt.Rows[x][0].ToString();
+                }
+                res.Add(record, container);
             }
-            res.Add(record, container);
             return res;
         }
 
@@ -326,6 +346,36 @@ namespace TFG
                         }
 
                         Broker.Instance().Run(new SqlCommand("UPDATE " + getTableSchemaName(id, entry.Key) + " SET " + column + " = " + data[i] + " WHERE" + str, connections[id]), "update");
+                    }
+                }
+            }
+        }
+
+        internal void selectRows(string data, string id)
+        {
+            Dictionary<string, string[]> res = parseSelection(data);
+
+            foreach (KeyValuePair<string, string[]> record in selections[id].records)
+            {
+                foreach (KeyValuePair<string, string[]> entry in res)
+                {
+                    if (record.Key == entry.Key)
+                    {
+                        string[] aux = new string[entry.Value.Length];
+                        string[] aux_masked = new string[entry.Value.Length];
+                        int counter = 0;
+                        for (int i = 0; i < record.Value.Length; i++)
+                        {
+                            if (entry.Value.Contains(i.ToString()))
+                            {
+                                aux[counter] = record.Value[i];
+                                aux_masked[counter] = selections[id].records[record.Key + "Masked"][i];
+                                counter++;
+                            }
+                        }
+
+                        selections[id].records[record.Key] = aux;
+                        selections[id].records[record.Key+"Masked"] = aux_masked;
                     }
                 }
             }

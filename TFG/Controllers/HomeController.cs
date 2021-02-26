@@ -356,7 +356,7 @@ namespace TFG.Controllers
             // this method is only used for the 2 functionalities with extra steps to redirect after the create step
             try
             {
-                Manager.Instance().saveTypes(HttpContext.Session.Id, data);
+                Manager.Instance().saveTypes(HttpContext.Session.Id, data, true);
                 return RedirectToAction(functionalitySelected, Manager.Instance().selections[HttpContext.Session.Id]);
             }
             catch (KeyNotFoundException)
@@ -366,11 +366,12 @@ namespace TFG.Controllers
         }
 
         [HttpPost]
-        public IActionResult Confirm(string functionalitySelected)
+        public IActionResult Confirm(string data, string functionalitySelected)
         {
             // this method is only used to confirm the changes to the database
             try
             {
+                Manager.Instance().selectRows(data, HttpContext.Session.Id);
                 Manager.Instance().update(HttpContext.Session.Id);
                 Manager.Instance().selections[HttpContext.Session.Id].log += functionalitySelected + "\t" + DateTime.Now.ToString();
                 return RedirectToAction("MainPage", Manager.Instance().selections[HttpContext.Session.Id]);
@@ -382,11 +383,15 @@ namespace TFG.Controllers
         }
 
         [HttpPost]
-        public IActionResult GetRecord(string record, string functionalitySelected)
+        public IActionResult GetRecord(string record, string functionalitySelected, string data2)
         {
             // this method is only used to confirm the changes to the database
             try
             {
+                if (data2 != "undefined")
+                {
+                    Manager.Instance().saveTypes(HttpContext.Session.Id, data2, false);
+                }
                 Manager.Instance().selections[HttpContext.Session.Id].records = Manager.Instance().getRecords(HttpContext.Session.Id, record);
                 return View(functionalitySelected, Manager.Instance().selections[HttpContext.Session.Id]);
             }

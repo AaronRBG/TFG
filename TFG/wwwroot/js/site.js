@@ -79,7 +79,7 @@ function goToPage(functionality, page) {
 function goToPageAfterCreate(functionality) {
 
     if (functionality == 'create_masks') {
-    functionality = 'data_masking';
+        functionality = 'data_masking';
     }
     if (functionality == 'create_constraints') {
         functionality = 'constraints';
@@ -98,15 +98,44 @@ function goToPageAfterCreate(functionality) {
         }
     }
 
-    document.getElementById("data").value = data;
+    if (data == undefined) {
+        alert('You have to select at least one mask or constraint');
+    } else {
 
-    $("#hidden-btn4").click();
+        document.getElementById("data").value = data;
+
+        $("#hidden-btn4").click();
+    }
 }
 
 // used as a middleware to activate a hidden button which is the one who connects to the controller and also inputs the functionality to a hidden input connected to the controller
 function confirm(functionality) {
-    document.getElementById("functionalitySelected5").value = functionality;
-    $("#hidden-btn5").click();
+    if (getColumns() == 0 && getTables() == 0) {
+        alert('You have to select at least one row');
+    } else {
+
+        var selected;
+        var aux;
+
+        document.querySelectorAll('input[type=checkbox][id$=Record]').forEach(
+            function (item) {
+                if (item.checked) {
+
+                    if (aux == undefined || item.attributes["data-parent"].value != aux) {
+                        selected += "/";
+                        aux = item.attributes["data-parent"].value;
+                        selected += aux;
+                    }
+                    selected += ',';
+                    var temp = aux.split('.')
+                    selected += (item.id.replace(temp[1], '').replace('Record', ''));;
+                }
+            });
+
+        document.getElementById("data").value = selected;
+        document.getElementById("functionalitySelected5").value = functionality;
+        $("#hidden-btn5").click();
+    }
 }
 
 // this method parameter is the id of the table checkbox
@@ -115,9 +144,10 @@ function confirm(functionality) {
 // then applies that value to all columns checkbox of that table and updates the output text
 function checkChilds(CheckBoxparent) {
     var boo = document.getElementById(CheckBoxparent).checked;
-    document.querySelectorAll('[ data-parent=' + CheckBoxparent + ']').forEach(
+    document.querySelectorAll('[ data-parent=' + '"' + CheckBoxparent + '"' + ']').forEach(
         function (item) {
             item.checked = boo;
+            checkChilds(item.id);
         });
     if (getColumns() == 0) {
         if (getTables() != 0) {
@@ -141,7 +171,7 @@ function checkParent(CheckBoxparent, child) {
         document.getElementById(CheckBoxparent).checked = boo;
     }
     boo = false;
-    document.querySelectorAll('[ data-parent=' + CheckBoxparent + ']').forEach(
+    document.querySelectorAll('[ data-parent=' + '"' + CheckBoxparent + '"' + ']').forEach(
         function (item) {
             if (item.checked) {
                 boo = true;
@@ -159,6 +189,13 @@ function checkParent(CheckBoxparent, child) {
     } else {
         document.getElementById('selection-text').innerHTML = getColumns() + ' columns selected from ' + getTables() + ' different tables.'
     }
+    checkParent(document.getElementById(CheckBoxparent).attributes["data-parent"].value, CheckBoxparent);
+}
+
+// this method is used for checkboxes who have both parent checkboxes and child checkboxes
+function checkBoth(CheckBoxparent, current) {
+    checkChilds(current);
+    checkParent(CheckBoxparent, current);
 }
 
 // this method parameter checks all the checkboxes and updates the output text
@@ -211,12 +248,26 @@ function checkRecord(event, name, functionality) {
 
     document.getElementById("record").value = name;
     document.getElementById("functionalitySelected6").value = functionality;
+
+    var data;
+    var array = a = document.querySelectorAll("[id$=DropdownText]");
+    for (i = 0; i < array.length; i++) {
+        if (array[i].innerHTML != 'None') {
+            data += '/';
+            data += array[i].id.replace("DropdownText", '');
+            data += ',';
+            data += array[i].innerHTML;
+        }
+    }
+
+    document.getElementById("data2").value = data;
+
     $("#hidden-btn6").click();
 
 }
 
 // This function controls the vertical tabs in some views like reports
-function openTab(event, name) {
+function openTab(event, name, create) {
     // Declare all variables
     var i, tabcontent, tablinks;
 
@@ -228,7 +279,9 @@ function openTab(event, name) {
 
     // Show the current tab, and add an "active" class to the link that opened the tab
     document.getElementById(name).style.display = "block";
-    document.getElementById(name + 'Dropdown').style.display = "inline";
+    if (create) {
+        document.getElementById(name + 'Dropdown').style.display = "inline";
+    }
     event.currentTarget.className += " active";
 }
 // This function more or less lets you download the page in pdf format
