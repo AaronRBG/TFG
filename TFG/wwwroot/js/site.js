@@ -262,6 +262,16 @@ function checkRecord(event, name, functionality) {
 
     document.getElementById("data2").value = data;
 
+    var aux;
+
+    document.querySelectorAll("[id^=collapse]").forEach(function (item) {
+        if (item.className.includes("show")) {
+            aux = item.id;
+        }
+    });
+
+    document.getElementById("accordionInfo").value = aux;
+
     $("#hidden-btn6").click();
 
 }

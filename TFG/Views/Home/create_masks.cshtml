@@ -13,6 +13,7 @@
 {
     <input type="text" id="record" class="functionalitySelected" name="record" />
     <input type="text" id="functionalitySelected6" class="functionalitySelected" name="functionalitySelected" />
+    <input type="text" id="accordionInfo" class="functionalitySelected" name="accordionInfo" />
     <input type="text" id="data2" class="functionalitySelected" name="data2" />
     <input id="hidden-btn6" class="hidden-btn" type="submit" style="display: none;" />
 }
@@ -47,6 +48,12 @@
         @foreach (KeyValuePair<string, string[]> entry in Model.ColumnsSelected)
         {
             string collapse = "#collapse" + entry.Key;
+            string collapseState = "collapse hide";
+
+            if(collapse.Substring(1) == Model.tableAccordion)
+            {
+                collapseState = "hide collapse show";
+            }
 
             <div class="card nav_color">
                 <div class="card-header" id="@entry.Key">
@@ -57,7 +64,7 @@
                     </h5>
                 </div>
 
-                <div id="@collapse.Substring(1)" class="collapse hide" aria-labelledby="@entry.Key" data-parent="#accordion">
+                <div id="@collapse.Substring(1)" class="@collapseState" aria-labelledby="@entry.Key" data-parent="#accordion">
                     <div class="card-body">
                         <span style="color: white;">@entry.Key columns: </span>
                         <br />
@@ -82,19 +89,32 @@
         }
     </div>
     <div id="Tab-contents" class="overflow-auto">
+        @{
+            string defaultDisplay = "none";
+            if(Model.columnAccordion==null)
+            {
+                defaultDisplay = "block";
+            }
+        }
         <div id="default" class="tabcontent">
-            <h2 style="padding-top:35vh;">No column selected, select one from the dropdown on the left</h2>
+            <h2 style="display: @defaultDisplay; padding-top:35vh;">No column selected, select one from the dropdown on the left</h2>
         </div>
         @foreach (KeyValuePair<string, string[]> entry in Model.ColumnsSelected)
         {
             for (int i = 0; i < entry.Value.Length; i++)
             {
                 string name = @entry.Key + '.' + @entry.Value[i];
+                string display = "none";
                 if (Model.records.ContainsKey(name))
                 {
+                    if(name == Model.columnAccordion)
+                    {
+                        display = "block";
+                    }
+
                     string[] record = Model.records[name];
 
-                    <div id="@name" class="tabcontent" style="display: none;">
+                    <div id="@name" class="tabcontent" style="display: @display;">
                         <table class="table table-striped overflow-auto">
                             <thead class="thead-dark">
                                 <tr>
@@ -133,10 +153,11 @@
                 string text = dropdown + "Text";
                 string stri;
 
-                if (Model.types!=null && Model.types.ContainsKey(name))
+                if (Model.types != null && Model.types.ContainsKey(name))
                 {
                     stri = Model.types[name];
-                } else
+                }
+                else
                 {
                     stri = "None";
                 }

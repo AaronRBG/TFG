@@ -17,6 +17,8 @@ namespace TFG.Models
         public string functionality { get; set; }
         public string log { get; set; }
         public string id { get; set; }
+        public string tableAccordion { get; set; }
+        public string columnAccordion { get; set; }
         public string[] tablesSelected { get; set; }
         public Dictionary<string, string[]> ColumnsSelected { get; set; }
         public Dictionary<string, string> types { get; set; }

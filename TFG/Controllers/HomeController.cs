@@ -383,11 +383,14 @@ namespace TFG.Controllers
         }
 
         [HttpPost]
-        public IActionResult GetRecord(string record, string functionalitySelected, string data2)
+        public IActionResult GetRecord(string record, string functionalitySelected, string accordionInfo, string data2)
         {
             // this method is only used to confirm the changes to the database
             try
             {
+                Manager.Instance().selections[HttpContext.Session.Id].tableAccordion = accordionInfo;
+                Manager.Instance().selections[HttpContext.Session.Id].columnAccordion = record;
+
                 if (data2 != "undefined")
                 {
                     Manager.Instance().saveTypes(HttpContext.Session.Id, data2, false);
@@ -401,5 +404,5 @@ namespace TFG.Controllers
             }
         }
 
-    }
+    }   
 }
