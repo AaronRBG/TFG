@@ -110,7 +110,7 @@ function goToPageAfterCreate(functionality) {
 
 // used as a middleware to activate a hidden button which is the one who connects to the controller and also inputs the functionality to a hidden input connected to the controller
 function confirm(functionality) {
-    if (getColumns() == 0 && getTables() == 0) {
+    if (getRecords() == 0 && getColumns() == 0 && getTables() == 0) {
         alert('You have to select at least one row');
     } else {
 
@@ -149,14 +149,18 @@ function checkChilds(CheckBoxparent) {
             item.checked = boo;
             checkChilds(item.id);
         });
-    if (getColumns() == 0) {
-        if (getTables() != 0) {
-            document.getElementById('selection-text').innerHTML = getTables() + ' tables selected'
+    if (getRecords() == 0) {
+        if (getColumns() == 0) {
+            if (getTables() != 0) {
+                document.getElementById('selection-text').innerHTML = getTables() + ' tables selected'
+            } else {
+                document.getElementById('selection-text').innerHTML = 'None selected'
+            }
         } else {
-            document.getElementById('selection-text').innerHTML = 'None selected'
+            document.getElementById('selection-text').innerHTML = getColumns() + ' columns selected from ' + getTables() + ' different tables.'
         }
     } else {
-        document.getElementById('selection-text').innerHTML = getColumns() + ' columns selected from ' + getTables() + ' different tables.'
+        document.getElementById('selection-text').innerHTML = getRecords() + ' records selected from ' + getColumns() + ' different columns and ' + getTables() + ' different tables.'
     }
 }
 
@@ -180,14 +184,18 @@ function checkParent(CheckBoxparent, child) {
     if (!boo) {
         document.getElementById(CheckBoxparent).checked = boo;
     }
-    if (getColumns() == 0) {
-        if (getTables() != 0) {
-            document.getElementById('selection-text').innerHTML = getTables() + ' tables selected'
+    if (getRecords() == 0) {
+        if (getColumns() == 0) {
+            if (getTables() != 0) {
+                document.getElementById('selection-text').innerHTML = getTables() + ' tables selected'
+            } else {
+                document.getElementById('selection-text').innerHTML = 'None selected'
+            }
         } else {
-            document.getElementById('selection-text').innerHTML = 'None selected'
+            document.getElementById('selection-text').innerHTML = getColumns() + ' columns selected from ' + getTables() + ' different tables.'
         }
     } else {
-        document.getElementById('selection-text').innerHTML = getColumns() + ' columns selected from ' + getTables() + ' different tables.'
+        document.getElementById('selection-text').innerHTML = getRecords() + ' records selected from ' + getColumns() + ' different columns and ' + getTables() + ' different tables.'
     }
     checkParent(document.getElementById(CheckBoxparent).attributes["data-parent"].value, CheckBoxparent);
 }
@@ -204,10 +212,14 @@ function selectAll() {
         function (item) {
             item.checked = true;
         });
-    if (getColumns() == 0) {
-        document.getElementById('selection-text').innerHTML = getTables() + ' tables selected'
+    if (getRecords() == 0) {
+        if (getColumns() == 0) {
+            document.getElementById('selection-text').innerHTML = getTables() + ' tables selected'
+        } else {
+            document.getElementById('selection-text').innerHTML = getColumns() + ' columns selected from ' + getTables() + ' different tables.'
+        }
     } else {
-        document.getElementById('selection-text').innerHTML = getColumns() + ' columns selected from ' + getTables() + ' different tables.'
+        document.getElementById('selection-text').innerHTML = getRecords() + ' records selected from ' + getColumns() + ' different columns and ' + getTables() + ' different tables.'
     }
 }
 
@@ -220,9 +232,9 @@ function selectNone() {
     document.getElementById('selection-text').innerHTML = 'None selected'
 }
 
-// this method parameter returns the number of table checkboxes that are clicked
+// this method parameter returns the number of table checkboxes that are checked
 function getTables() {
-    checked = 0.0;
+    checked = 0;
     document.querySelectorAll('input[type=checkbox][id$=CheckBox]').forEach(
         function (item) {
             if (item.checked) {
@@ -232,10 +244,22 @@ function getTables() {
     return checked;
 }
 
-// this method parameter returns the number of column checkboxes that are clicked
+// this method parameter returns the number of column checkboxes that are checked
 function getColumns() {
-    checked = 0.0;
-    document.querySelectorAll('input[type=checkbox]:not([id$=CheckBox])').forEach(
+    checked = 0;
+    document.querySelectorAll('input[type=checkbox]:not([id$=CheckBox]):not([id$=Record])').forEach(
+        function (item) {
+            if (item.checked) {
+                checked++;
+            }
+        });
+    return checked;
+}
+
+// this method parameter returns the number of record checkboxes that are checked
+function getRecords() {
+    checked = 0;
+    document.querySelectorAll('input[type=checkbox][id$=Record]').forEach(
         function (item) {
             if (item.checked) {
                 checked++;

@@ -34,7 +34,7 @@
 }
 <!-- A navegation bar which does not navigate, it only shows the chosen database name along with a button that
     allows the user to go to the corresponding page to change it, if needed and show the current page (receiving the functionality selected from the controller)-->
-<nav class="navbar nav_color">
+<nav class="navbar nav_color_1">
     <div id="Top-container">
         <div id="Top">
             <span class='database_icon'></span>
@@ -76,8 +76,8 @@
             string div = entry.Key + "Div";
             string CheckBox = entry.Key + "CheckBox";
 
-            <div class="card nav_color">
-                <div class="card-header" id="@div">
+            <div class="card">
+                <div class="card-header nav_color_1" id="@div">
                     <h5>
                         <input type="checkbox" id="@CheckBox" name="@entry.Key" onclick="checkChilds('@CheckBox')" />
                         <button class="btn btn-link" data-toggle="collapse" data-target="@collapse" aria-expanded="true" aria-controls="collapseOne">
@@ -88,7 +88,7 @@
                 @if (@functionalities_need_columns[Model.functionality])
                 {
                     <div id="@collapse.Substring(1)" class="collapse hide" aria-labelledby="@entry.Key" data-parent="#accordion">
-                        <div class="card-body">
+                        <div class="card-body nav_color_2">
                             @for (int i = 0; i < ((string[])entry.Value).Length; i++)
                             {
                                 <input type="checkbox" id="@entry.Value[i]" onclick="checkParent('@CheckBox', '@entry.Value[i]')" data-parent="@CheckBox" /> <span style="color: white;">@entry.Value[i]</span>

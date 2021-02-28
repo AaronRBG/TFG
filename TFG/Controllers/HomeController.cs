@@ -255,11 +255,11 @@ namespace TFG.Controllers
             }
 
             // then tries to open it to see if it is valid
-            SqlConnection con = new SqlConnection(connectionString);
-            con.Open();
-
-            if (con.State == System.Data.ConnectionState.Open)
+            try
             {
+                SqlConnection con = new SqlConnection(connectionString);
+                con.Open();
+
                 // if it is valid it gets the database name
                 string[] splits = connectionString.Split(';');
                 foreach (string splitted in splits)
@@ -284,7 +284,7 @@ namespace TFG.Controllers
 
                 return RedirectToAction("MainPage");
             }
-            else
+            catch (Exception)
             {
                 // if it is not valid it return the Help View
                 return RedirectToAction("Help");
@@ -404,5 +404,5 @@ namespace TFG.Controllers
             }
         }
 
-    }   
+    }
 }

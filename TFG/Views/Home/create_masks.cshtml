@@ -19,7 +19,7 @@
 }
 <!-- A navegation bar which does not navigate, it only shows the chosen database name along with a button that
     allows the user to go to the corresponding page to change it, if needed and show the current page (receiving the functionality selected from the controller)-->
-<nav class="navbar nav_color">
+<nav class="navbar nav_color_1">
     <div id="Top-container">
         <div id="Top">
             <span class='database_icon'></span>
@@ -50,13 +50,13 @@
             string collapse = "#collapse" + entry.Key;
             string collapseState = "collapse hide";
 
-            if(collapse.Substring(1) == Model.tableAccordion)
+            if (collapse.Substring(1) == Model.tableAccordion)
             {
                 collapseState = "hide collapse show";
             }
 
-            <div class="card nav_color">
-                <div class="card-header" id="@entry.Key">
+            <div class="card">
+                <div class="card-header nav_color_1" id="@entry.Key">
                     <h5>
                         <button class="btn btn-link" data-toggle="collapse" data-target="@collapse" aria-expanded="true" aria-controls="collapseOne">
                             @entry.Key
@@ -65,7 +65,7 @@
                 </div>
 
                 <div id="@collapse.Substring(1)" class="@collapseState" aria-labelledby="@entry.Key" data-parent="#accordion">
-                    <div class="card-body">
+                    <div class="card-body nav_color_2">
                         <span style="color: white;">@entry.Key columns: </span>
                         <br />
                         @for (int i = 0; i < ((string[])entry.Value).Length; i++)
@@ -91,7 +91,7 @@
     <div id="Tab-contents" class="overflow-auto">
         @{
             string defaultDisplay = "none";
-            if(Model.columnAccordion==null)
+            if (Model.columnAccordion == null)
             {
                 defaultDisplay = "block";
             }
@@ -107,7 +107,7 @@
                 string display = "none";
                 if (Model.records.ContainsKey(name))
                 {
-                    if(name == Model.columnAccordion)
+                    if (name == Model.columnAccordion)
                     {
                         display = "block";
                     }
@@ -152,6 +152,12 @@
                 string name = @entry.Key + '.' + @entry.Value[i];
                 string text = dropdown + "Text";
                 string stri;
+                string display = "none";
+
+                if (name == Model.columnAccordion)
+                {
+                    display = "inline";
+                }
 
                 if (Model.types != null && Model.types.ContainsKey(name))
                 {
@@ -163,7 +169,7 @@
                 }
 
                 <div class="dropdown">
-                    <button class="btn btn-outline-dark dropdown-toggle tabcontent" type="button" id="@dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="display: none;">
+                    <button class="btn btn-outline-dark dropdown-toggle tabcontent" type="button" id="@dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="display: @display;">
                         <span id="@text">@stri</span>
                     </button>
 

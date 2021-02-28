@@ -203,7 +203,11 @@ div#bottom-buttons {
     padding-right: 20vw;
 }
 
-.nav_color {
+.nav_color_1 {
+    background: rgba(25,50,75,0.9);
+}
+
+.nav_color_2 {
     background: rgba(25,50,75,0.8);
 }
 
