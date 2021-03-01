@@ -148,11 +148,12 @@
         {
             for (int i = 0; i < entry.Value.Length; i++)
             {
-                string dropdown = @entry.Key + '.' + @entry.Value[i] + "Dropdown";
-                string name = @entry.Key + '.' + @entry.Value[i];
+                string dropdown = entry.Key + '.' + entry.Value[i] + "Dropdown";
+                string name = entry.Key + '.' + entry.Value[i];
                 string text = dropdown + "Text";
                 string stri;
                 string display = "none";
+                string datatype = Manager.Instance().getDataType(Model.id, entry.Value[i]);
 
                 if (name == Model.columnAccordion)
                 {
@@ -175,10 +176,16 @@
 
 
                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                        <a class="dropdown-item" onclick="changeName('@text', 'DNI')">DNI</a>
-                        <a class="dropdown-item" onclick="changeName('@text', 'Phone Number')">Phone Number</a>
-                        <a class="dropdown-item" onclick="changeName('@text', 'Credit card')">Credit card</a>
-                        <a class="dropdown-item" onclick="changeName('@text', 'Email')">Email</a>
+                        @if (@datatype == "nvarchar")
+                        {
+                            <a class="dropdown-item" onclick="changeName('@text', 'DNI')">DNI</a>
+                            <a class="dropdown-item" onclick="changeName('@text', 'Email')">Email</a>
+                        }
+                        @if (@datatype.Contains("decimal") || @datatype.Contains("int"))
+                        {
+                            <a class="dropdown-item" onclick="changeName('@text', 'Phone Number')">Phone Number</a>
+                            <a class="dropdown-item" onclick="changeName('@text', 'Credit card')">Credit card</a>
+                        }
                         <a class="dropdown-item" onclick="changeName('@text', 'None')">None</a>
                     </div>
                 </div>
