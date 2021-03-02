@@ -311,7 +311,10 @@ namespace TFG.Controllers
             // this method is used to go to the selected page while sending the corresponding functionality name and the selected columns and tables
             try
             {
-                Manager.Instance().saveSelections(selection, HttpContext.Session.Id);
+                if (functionalitySelected != "MainPage")
+                {
+                    Manager.Instance().saveSelections(selection, HttpContext.Session.Id);
+                }
                 return RedirectToAction(functionalitySelected, Manager.Instance().selections[HttpContext.Session.Id]);
             }
             catch (KeyNotFoundException)

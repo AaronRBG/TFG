@@ -32,6 +32,12 @@
     functionalities_text.Add("improve_indexes", "Index Cleaning & Generation");
     functionalities_need_columns.Add("improve_indexes", false);
 }
+@using (Html.BeginForm("GoToPage", "Home"))
+{
+    <input type="text" id="functionalitySelected3" class="functionalitySelected" name="functionalitySelected" />
+    <input type="text" id="selection" class="functionalitySelected" name="selection" />
+    <input id="hidden-btn3" class="hidden-btn" type="submit" style="display: none;" />
+}
 <!-- A navegation bar which does not navigate, it only shows the chosen database name along with a button that
     allows the user to go to the corresponding page to change it, if needed and show the current page (receiving the functionality selected from the controller)-->
 <nav class="navbar nav_color_1">
@@ -41,18 +47,12 @@
             <span class="top-text">@Model.database</span>
             <button type="button" onclick='window.location.href="DatabaseConnection"' class="btn btn-default" data-toggle="tooltip" data-placement="auto" title="Change database"><span class='folder_icon'></span></button>
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="MainPage" MainPage">Home</a></li>
+                <li class="breadcrumb-item"><a id="selection-a" onclick="goToPage('MainPage', false)" style="color: orange;" MainPage">Home</a></li>
                 <li class="breadcrumb-item active" aria-current="page"><text>@functionalities_text[Model.functionality]</text> Selection</li>
             </ol>
         </div>
     </div>
 </nav>
-@using (Html.BeginForm("GoToPage", "Home"))
-{
-    <input type="text" id="functionalitySelected3" class="functionalitySelected" name="functionalitySelected" />
-    <input type="text" id="selection" class="functionalitySelected" name="selection" />
-    <input id="hidden-btn3" class="hidden-btn" type="submit" style="display: none;" />
-}
 <!-- This part is the most complicated of this view
     It gets the data sent from the controller (double array with the database entry.Value names and column names of each entry.Value)
     Then it creates for each entry.Value an item of an accordion which when expanded shows its columns with checkboxes for all of those items-->

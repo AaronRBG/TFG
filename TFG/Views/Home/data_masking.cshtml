@@ -4,7 +4,22 @@
 
     ViewData["Title"] = "Data Masking Report";
 }
-
+@using (Html.BeginForm("GoToSelection", "Home"))
+{
+    <input type="text" id="functionalitySelected1" class="functionalitySelected" name="functionalitySelected" />
+    <input id="hidden-btn1" class="hidden-btn" type="submit" style="display: none;" />
+}
+@using (Html.BeginForm("GoBackToPage", "Home"))
+{
+    <input type="text" id="functionalitySelected3" class="functionalitySelected" name="functionalitySelected" />
+    <input id="hidden-btn3" class="hidden-btn" type="submit" style="display: none;" />
+}
+@using (Html.BeginForm("Confirm", "Home"))
+{
+    <input type="text" id="functionalitySelected5" class="functionalitySelected" name="functionalitySelected" />
+    <input type="text" id="data" class="functionalitySelected" name="data" />
+    <input id="hidden-btn5" class="hidden-btn" type="submit" style="display: none;" />
+}
 <!-- A navegation bar which does not navigate, it only shows the chosen database name along with a button that
     allows the user to go to the corresponding page to change it, if needed and show the current page (receiving the functionality selected from the controller)-->
 <nav class="navbar nav_color_1">
@@ -14,7 +29,7 @@
             <span class="top-text">@Model.database</span>
             <button type="button" onclick='window.location.href="DatabaseConnection"' class="btn btn-default" data-toggle="tooltip" data-placement="auto" title="Change database"><span class='folder_icon'></span></button>
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="MainPage" MainPage">Home</a></li>
+                <li class="breadcrumb-item"><a id="selection-a" onclick="goToPage('MainPage', false)" style="color: orange;" MainPage">Home</a></li>
                 <li class="breadcrumb-item"><a id="selection-a" onclick="goToSelection('@Model.functionality')" style="color: orange;" Selection">Selection</a></li>
                 <li class="breadcrumb-item"><a id="selection-a" onclick="goToPage('@Model.functionality', false)" style="color: orange;" Create_Masks">Create Masks</a></li>
                 <li class="breadcrumb-item active" aria-current="page">Data Masking Report</li>
@@ -66,22 +81,6 @@
             </div>
         }
     </div>
-    @using (Html.BeginForm("GoToSelection", "Home"))
-    {
-        <input type="text" id="functionalitySelected1" class="functionalitySelected" name="functionalitySelected" />
-        <input id="hidden-btn1" class="hidden-btn" type="submit" style="display: none;" />
-    }
-    @using (Html.BeginForm("GoBackToPage", "Home"))
-    {
-        <input type="text" id="functionalitySelected3" class="functionalitySelected" name="functionalitySelected" />
-        <input id="hidden-btn3" class="hidden-btn" type="submit" style="display: none;" />
-    }
-    @using (Html.BeginForm("Confirm", "Home"))
-    {
-        <input type="text" id="functionalitySelected5" class="functionalitySelected" name="functionalitySelected" />
-        <input type="text" id="data" class="functionalitySelected" name="data" />
-        <input id="hidden-btn5" class="hidden-btn" type="submit" style="display: none;" />
-    }
     <div id="Tab-contents" class="overflow-auto">
         <div id="default" class="tabcontent">
             <h2 style="padding-top:35vh;">No column selected, select one from the dropdown on the left</h2>
@@ -109,13 +108,13 @@
                         <thead class="thead-dark">
                             <tr>
                                 <th scope="col">Selections</th>
-                                <th scope="col">Original Column data (@entry.Value[i])</th>
-                                <th scope="col">Data after applying mask (@entry.Value[i])</th>
                                 @for (int k = 0; k < pks.Length; k++)
                                 {
                                     int l = k + 1;
                                     <th scope="col">Pk column @l (@pks[k].Substring(pks[k].IndexOf('.') + 1))</th>
                                 }
+                                <th scope="col">Original Column data (@entry.Value[i])</th>
+                                <th scope="col">Data after applying mask (@entry.Value[i])</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -124,14 +123,14 @@
                                 string idname = @entry.Value[i] + @j + "Record";
                                 <tr>
                                     <th scope="row"><input type="checkbox" id="@idname" name="@idname" data-parent="@name" onclick="checkParent('@name', '@idname')" /></th>
-
-                                    <td>@record[j]</td>
-
-                                    <td>@recordMasked[j]</td>
                                     @for (int k = 0; k < pks.Length; k++)
                                     {
                                         <td>@pk_data[k][j]</td>
                                     }
+                                    <td style="border-left: 1px solid;">@record[j]</td>
+
+                                    <td>@recordMasked[j]</td>
+
 
                                 </tr>
                             }
