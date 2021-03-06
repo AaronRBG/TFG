@@ -164,7 +164,6 @@
                 string text = dropdown + "Text";
                 string stri;
                 string display = "none";
-                string datatype = Manager.Instance().getDataType(Model.id, entry.Value[i]);
 
                 if (name == Model.columnAccordion)
                 {
@@ -185,20 +184,28 @@
                         <span id="@text">@stri</span>
                     </button>
 
-
-                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                        @if (@datatype == "nvarchar")
-                        {
-                            <a class="dropdown-item" onclick="changeName('@text', 'DNI')">DNI</a>
-                            <a class="dropdown-item" onclick="changeName('@text', 'Email')">Email</a>
-                        }
-                        @if (@datatype.Contains("decimal") || @datatype.Contains("int"))
-                        {
-                            <a class="dropdown-item" onclick="changeName('@text', 'Phone Number')">Phone Number</a>
-                            <a class="dropdown-item" onclick="changeName('@text', 'Credit card')">Credit card</a>
-                        }
-                        <a class="dropdown-item" onclick="changeName('@text', 'None')">None</a>
-                    </div>
+                    @if (Model.records.ContainsKey(name))
+                    {
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            @if (Manager.Instance().isType(Model.id, name, "DNI"))
+                            {
+                                <a class="dropdown-item" onclick="changeName('@text', 'DNI')">DNI</a>
+                            }
+                            @if (Manager.Instance().isType(Model.id, name, "Email"))
+                            {
+                                <a class="dropdown-item" onclick="changeName('@text', 'Email')">Email</a>
+                            }
+                            @if (Manager.Instance().isType(Model.id, name, "Phone"))
+                            {
+                                <a class="dropdown-item" onclick="changeName('@text', 'Phone Number')">Phone Number</a>
+                            }
+                            @if (Manager.Instance().isType(Model.id, name, "CCN"))
+                            {
+                                <a class="dropdown-item" onclick="changeName('@text', 'Credit card')">Credit card</a>
+                            }
+                            <a class="dropdown-item" onclick="changeName('@text', 'None')">None</a>
+                        </div>
+                    }
                 </div>
             }
         }

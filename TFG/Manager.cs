@@ -305,6 +305,116 @@ namespace TFG
             return false;
         }
 
+        public bool isType(string id, string column, string type)
+        {
+            float comply = 0;
+
+            string[] data = Manager.Instance().selections[id].records[column];
+
+            foreach (string value in data)
+            {
+                switch (type)
+                {
+                    case "DNI":
+                        if (isDNI(value))
+                        {
+                            comply++;
+                        }
+                        break;
+                    case "Email":
+                        if (isEmail(value))
+                        {
+                            comply++;
+                        }
+                        break;
+                    case "Phone":
+                        if (isPhone(value))
+                        {
+                            comply++;
+                        }
+                        break;
+                    default:
+                        if (isCCN(value))
+                        {
+                            comply++;
+                        }
+                        break;
+                }
+            }
+
+            float res = (comply * 100) / data.Length;
+            if (res >= 50)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        private bool isDNI(string value)
+        {
+            char[] aux = value.ToCharArray();
+            int INTcount = 0;
+            int LETTERcount = 0;
+            foreach (char i in aux)
+            {
+                if (Char.IsDigit(i))
+                {
+                    INTcount++;
+                }
+                if (Char.IsLetter(i))
+                {
+                    INTcount++;
+                }
+            }
+            if ((INTcount == 8 || INTcount == 9) && LETTERcount == 1)
+            {
+                return true;
+            }
+            return false;
+        }
+        private bool isEmail(string value)
+        {
+            if(value.Contains('@') && value.Contains('.') && value.IndexOf('@')<value.IndexOf('.'))
+            {
+                return true;
+            }
+            return false;
+        }
+        private bool isPhone(string value)
+        {
+            char[] aux = value.ToCharArray();
+            int count = 0;
+            foreach(char i in aux)
+            {
+                if (Char.IsDigit(i))
+                {
+                    count++;
+                }
+            }
+            if(count >= 7 && count <= 15)
+            {
+                return true;
+            }
+            return false;
+        }
+        private bool isCCN(string value)
+        {
+            char[] aux = value.ToCharArray();
+            int count = 0;
+            foreach (char i in aux)
+            {
+                if (Char.IsDigit(i))
+                {
+                    count++;
+                }
+            }
+            if (count >= 13 && count <= 19)
+            {
+                return true;
+            }
+            return false;
+        }
+
         public void update(string id)
         {
             foreach (KeyValuePair<string, string[]> entry in Manager.Instance().selections[id].ColumnsSelected)
@@ -375,7 +485,7 @@ namespace TFG
                         }
 
                         selections[id].records[record.Key] = aux;
-                        selections[id].records[record.Key+"Masked"] = aux_masked;
+                        selections[id].records[record.Key + "Masked"] = aux_masked;
                     }
                 }
             }
