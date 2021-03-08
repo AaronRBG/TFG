@@ -281,11 +281,20 @@ namespace TFG
                 }
                 aux = other;
 
+                Array.Sort<string>(aux);
+
                 dsC.Reset();
                 res.Add(tablename, aux);
             }
 
-            return res;
+            Dictionary<string, string[]> result = new Dictionary<string, string[]>();
+
+            foreach (KeyValuePair<string, string[]> entry in res.OrderBy(key => key.Key))
+            {
+                result.Add(entry.Key, entry.Value);
+            }
+
+            return result;
         }
 
         private bool isSpacial(string type)
@@ -363,7 +372,7 @@ namespace TFG
                 }
                 if (Char.IsLetter(i))
                 {
-                    INTcount++;
+                    LETTERcount++;
                 }
             }
             if ((INTcount == 8 || INTcount == 9) && LETTERcount == 1)
@@ -430,12 +439,14 @@ namespace TFG
 
                 foreach (string column in entry.Value)
                 {
-                    string aux = entry.Key + '.' + column + "Masked";
+                    string name = entry.Key + '.' + column;
+                    string aux = name + "Masked";
                     string[] data = selections[id].records[(aux)];
+                    string[] data_aux = selections[id].records[(name)];
 
                     for (int i = 0; i < data.Length; i++)
                     {
-                        string str = "";
+                        string str = " WHERE";
 
                         for (int j = 0; j < pks.Length; j++)
                         {
@@ -454,8 +465,21 @@ namespace TFG
                                 str += " and";
                             }
                         }
+                        if(pks.Length == 0)
+                        {
+                            string type = getDataType(id, column);
+                            str += " " + column + " = convert(" + type + ", '" + data_aux[i];
+                            if (type == "datetime")
+                            {
+                                str += "', 103)";
+                            }
+                            else
+                            {
+                                str += "')";
+                            }
+                        }
 
-                        Broker.Instance().Run(new SqlCommand("UPDATE " + getTableSchemaName(id, entry.Key) + " SET " + column + " = " + data[i] + " WHERE" + str, connections[id]), "update");
+                        Broker.Instance().Run(new SqlCommand("UPDATE " + getTableSchemaName(id, entry.Key) + " SET " + column + " = '" + data[i] + "'" + str, connections[id]), "update");
                     }
                 }
             }

@@ -28,9 +28,14 @@ namespace TFG
         public DataSet Run(SqlCommand comm, string reff) {
             
             DataSet ds = new DataSet();
-
-            adp.SelectCommand = comm;
-            adp.Fill(ds, reff);
+            try
+            {
+                adp.SelectCommand = comm;
+                adp.Fill(ds, reff);
+            } catch (Exception)
+            {
+                Console.WriteLine();
+            }
 
             return ds;
         }
