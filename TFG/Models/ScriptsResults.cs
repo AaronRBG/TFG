@@ -13,10 +13,10 @@ namespace TFG.Models
             this.id = id;
         }
 
-        public string database { get; set; }
+        public string database { get; set; } // sesion controller 
         public string functionality { get; set; }
         public string log { get; set; }
-        public string id { get; set; }
+        public string id { get; set; } // remove 
         public string tableAccordion { get; set; }
         public string columnAccordion { get; set; }
         public string[] tablesSelected { get; set; }
