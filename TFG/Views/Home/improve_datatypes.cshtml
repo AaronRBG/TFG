@@ -1,13 +1,16 @@
 ﻿@{
+    @using TFG.Models
+    @model TFG.Models.ScriptsResults
+
     ViewData["Title"] = "Improve Datatypes Report";
 }
 <!-- A navegation bar which does not navigate, it only shows the chosen database name along with a button that
     allows the user to go to the corresponding page to change it, if needed and show the current page (receiving the functionality selected from the controller)-->
-<nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+<nav class="navbar nav_color">
     <div id="Top-container">
         <div id="Top">
             <span class='database_icon'></span>
-            <span class="top-text">@ViewData["database"]</span>
+            <span class="top-text">@Model.database</span>
             <button type="button" onclick='window.location.href="DatabaseConnection"' class="btn btn-default" data-toggle="tooltip" data-placement="auto" title="Change database"><span class='folder_icon'></span></button>
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="MainPage" MainPage">Home</a></li>
@@ -26,7 +29,7 @@
         </h3>
     </div>
     <div id="accordion" class="overflow-auto left-half" style="width:15vw;">
-        <div class="card">
+        <div class="card nav_color">
             <div class="card-header">
                 <h5>
                     <button class="btn btn-link" onclick="openTab(event, 'Tokyo')">Tokyo</button>

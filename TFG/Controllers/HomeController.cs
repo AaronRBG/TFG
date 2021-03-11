@@ -6,6 +6,7 @@ using Microsoft.Data.SqlClient;
 using System.Data;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
+using System;
 
 namespace TFG.Controllers
 {
@@ -23,8 +24,14 @@ namespace TFG.Controllers
         [HttpGet]
         public IActionResult MainPage()
         {
-            ViewData["database"] = HttpContext.Session.GetString("database");
-            return View("MainPage", "Home");
+            try
+            {
+                return View("MainPage", Manager.Instance().selections[HttpContext.Session.Id]);
+            }
+            catch (KeyNotFoundException)
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
         }
 
         // loads the DatabaseConnection View
@@ -37,160 +44,198 @@ namespace TFG.Controllers
         [HttpGet]
         public IActionResult data_masking()
         {
-            ViewData["database"] = HttpContext.Session.GetString("database");
-            return View("data_masking", "Home");
+            try
+            {
+                return View("data_masking", Manager.Instance().selections[HttpContext.Session.Id]);
+            }
+            catch (KeyNotFoundException)
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
         }
 
         // loads the data_unification View
         [HttpGet]
         public IActionResult data_unification()
         {
-            ViewData["database"] = HttpContext.Session.GetString("database");
-            return View("data_unification", "Home");
+            try
+            {
+                return View("data_unification", Manager.Instance().selections[HttpContext.Session.Id]);
+            }
+            catch (KeyNotFoundException)
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
         }
 
         // loads the remove_duplicates View
         [HttpGet]
         public IActionResult remove_duplicates()
         {
-            ViewData["database"] = HttpContext.Session.GetString("database");
-            return View("remove_duplicates", "Home");
+            try
+            {
+                return View("remove_duplicates", Manager.Instance().selections[HttpContext.Session.Id]);
+            }
+            catch (KeyNotFoundException)
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
         }
 
         // loads the constraints View
         [HttpGet]
         public IActionResult constraints()
         {
-            ViewData["database"] = HttpContext.Session.GetString("database");
-            return View("constraints", "Home");
+            try
+            {
+                return View("constraints", Manager.Instance().selections[HttpContext.Session.Id]);
+            }
+            catch (KeyNotFoundException)
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
         }
 
         // loads the missing_values View
         [HttpGet]
         public IActionResult missing_values()
         {
-            ViewData["database"] = HttpContext.Session.GetString("database");
-            return View("missing_values", "Home");
+            try
+            {
+                return View("missing_values", Manager.Instance().selections[HttpContext.Session.Id]);
+            }
+            catch (KeyNotFoundException)
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
         }
 
         // loads the improve_datatypes View
         [HttpGet]
         public IActionResult improve_datatypes()
         {
-            ViewData["database"] = HttpContext.Session.GetString("database");
-            return View("improve_datatypes", "Home");
+            try
+            {
+                return View("improve_datatypes", Manager.Instance().selections[HttpContext.Session.Id]);
+            }
+            catch (KeyNotFoundException)
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
         }
 
         // loads the primary_keys View
         [HttpGet]
         public IActionResult primary_keys()
         {
-            ViewData["database"] = HttpContext.Session.GetString("database");
-            return View("primary_keys", "Home");
+            try
+            {
+                return View("primary_keys", Manager.Instance().selections[HttpContext.Session.Id]);
+            }
+            catch (KeyNotFoundException)
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
         }
 
         // loads the foreign_keys View
         [HttpGet]
         public IActionResult foreign_keys()
         {
-            ViewData["database"] = HttpContext.Session.GetString("database");
-            return View("foreign_keys", "Home");
+            try
+            {
+                return View("foreign_keys", Manager.Instance().selections[HttpContext.Session.Id]);
+            }
+            catch (KeyNotFoundException)
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
         }
 
         // loads the table_defragmentation View
         [HttpGet]
         public IActionResult table_defragmentation()
         {
-            ViewData["database"] = HttpContext.Session.GetString("database");
-            return View("table_defragmentation", "Home");
+            try
+            {
+                return View("table_defragmentation", Manager.Instance().selections[HttpContext.Session.Id]);
+            }
+            catch (KeyNotFoundException)
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
         }
 
         // loads the improve_indexes View
         [HttpGet]
         public IActionResult improve_indexes()
         {
-            ViewData["database"] = HttpContext.Session.GetString("database");
-            return View("improve_indexes", "Home");
+            try
+            {
+                return View("improve_indexes", Manager.Instance().selections[HttpContext.Session.Id]);
+            }
+            catch (KeyNotFoundException)
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
         }
 
         [HttpGet]
         public IActionResult create_masks()
         {
-            ViewData["database"] = HttpContext.Session.GetString("database");
-            return View("create_masks", "Home");
+            try
+            {
+                Manager.Instance().selections[HttpContext.Session.Id].records = new Dictionary<string, string[]>();
+                return View("create_masks", Manager.Instance().selections[HttpContext.Session.Id]);
+            }
+            catch (KeyNotFoundException)
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
         }
         [HttpGet]
         public IActionResult create_constraints()
         {
-            ViewData["database"] = HttpContext.Session.GetString("database");
-            return View("create_constraints", "Home");
+            try
+            {
+                return View("create_constraints", Manager.Instance().selections[HttpContext.Session.Id]);
+            }
+            catch (KeyNotFoundException)
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
         }
 
         [HttpGet]
         public IActionResult Performance()
         {
-            ViewData["database"] = HttpContext.Session.GetString("database");
-            return View("Performance", "Home");
-        }
-
-        public string[][] getTableAndColumnData() {
-
-            SqlDataAdapter adp = new SqlDataAdapter();
-            DataSet dsTables = new DataSet();
-            DataSet dsColumns = new DataSet();
-
-            // gets the connection String stored in the session and opens it
-            SqlConnection con = new SqlConnection(HttpContext.Session.GetString("connectionString"));
-            con.Open();
-
-            // then it runs a query that returns all the tables names from that database
-            // then processes the result to run a nested for loop which itself runs another query that returns all the column names of that table
-            // when the for loop is finished we have a double string array which stores for each table its name and the names of all its columns, then saves this in the viewbag
-
-            adp.SelectCommand = new SqlCommand("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'", con);
-            adp.Fill(dsTables, "tables");
-            DataTable dtTables = dsTables.Tables["tables"];
-            DataTable dtColumns;
-            DataRow rows;
-            string[][] res = new string[dtTables.Rows.Count][];
-            for (int i = 0; i < dtTables.Rows.Count; i++)
+            try
             {
-                rows = dtTables.Rows[i];
-                string com = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '" + rows[0] + "'";
-
-                adp.SelectCommand = new SqlCommand(com, con);
-                adp.Fill(dsColumns, "columns");
-                dtColumns = dsColumns.Tables["columns"];
-
-                res[i] = new string[dtColumns.Rows.Count + 1];
-                res[i][0] = (string)rows[0];
-
-                for (int j = 1; j < dtColumns.Rows.Count + 1; j++)
-                {
-                    rows = dtColumns.Rows[j - 1];
-                    res[i][j] = (string)rows[0];
-                }
-                dsColumns.Reset();
+                return View("Performance", Manager.Instance().selections[HttpContext.Session.Id]);
             }
-
-            return res;
+            catch (KeyNotFoundException)
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
         }
 
-        // loads the Selection View saving the database name in the viewdata to be accesed later
         [HttpGet]
         public IActionResult Selection()
         {
-            ViewData["database"] = HttpContext.Session.GetString("database"); 
-            ViewBag.tableData = getTableAndColumnData();
-            return View("Selection", "Home");
+            try
+            {
+                return View("Selection", Manager.Instance().selections[HttpContext.Session.Id]);
+            }
+            catch (KeyNotFoundException)
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
         }
 
-        // loads the Help View saving the database name in the viewdata to be accesed later
         [HttpGet]
         public IActionResult Help()
         {
-            ViewData["database"] = HttpContext.Session.GetString("database");
-            return View("Help", "Home");
+            return View("Help");
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
@@ -210,12 +255,11 @@ namespace TFG.Controllers
             }
 
             // then tries to open it to see if it is valid
-            SqlConnection con = new SqlConnection(connectionString);
-            con.Open();
-
-            bool boo = (con.State == System.Data.ConnectionState.Open);
-            if (boo)
+            try
             {
+                SqlConnection con = new SqlConnection(connectionString);
+                con.Open();
+
                 // if it is valid it gets the database name
                 string[] splits = connectionString.Split(';');
                 foreach (string splitted in splits)
@@ -227,13 +271,20 @@ namespace TFG.Controllers
                     }
                 }
 
-                // and saves both the database name and the connection String in the session for later access and changes the view
-                HttpContext.Session.SetString("database", splits[1]);
-                HttpContext.Session.SetString("connectionString", connectionString);
-                con.Close();
+                // Save a init variable in the session to stop it for resetting, then save the connection and the database name
+                HttpContext.Session.SetInt32("init", 0);
+                if (Manager.Instance().connections.ContainsKey(HttpContext.Session.Id))
+                {
+                    Manager.Instance().connections.Remove(HttpContext.Session.Id);
+                    Manager.Instance().selections.Remove(HttpContext.Session.Id);
+                }
+
+                Manager.Instance().connections.Add(HttpContext.Session.Id, con);
+                Manager.Instance().selections.Add(HttpContext.Session.Id, new ScriptsResults(splits[1], HttpContext.Session.Id));
+
                 return RedirectToAction("MainPage");
             }
-            else
+            catch (Exception)
             {
                 // if it is not valid it return the Help View
                 return RedirectToAction("Help");
@@ -242,33 +293,118 @@ namespace TFG.Controllers
         [HttpPost]
         public IActionResult GoToSelection(string functionalitySelected)
         {
-            // this method is used to go to the Selection page while sending the corresponding functionality
-            TempData["functionalitySelected"] = functionalitySelected;
-            return RedirectToAction("Selection");
+            // this method is used to go to the Selection page while saving the functionality selected and the table and column data
+            try
+            {
+                Manager.Instance().selections[HttpContext.Session.Id].functionality = functionalitySelected;
+                Manager.Instance().selections[HttpContext.Session.Id].ColumnsSelected = Manager.Instance().getTableAndColumnData(HttpContext.Session.Id);
+                return RedirectToAction("Selection");
+            }
+            catch (KeyNotFoundException)
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
         }
         [HttpPost]
         public IActionResult GoToPage(string functionalitySelected, string selection)
         {
-            // this method is used to go to the Selection page while sending the corresponding functionality
-            TempData["functionalitySelected"] = functionalitySelected;
-            string[] tables = selection.Split('/');
-            string[][] selected = new string[tables.Length-1][];
-            for (int i = 1; i<tables.Length; i++) {
-                string[] columns = tables[i].Split(',');
-                selected[i-1] = columns;
+            // this method is used to go to the selected page while sending the corresponding functionality name and the selected columns and tables
+            try
+            {
+                if (functionalitySelected != "MainPage")
+                {
+                    Manager.Instance().saveSelections(selection, HttpContext.Session.Id);
+                }
+                return RedirectToAction(functionalitySelected, Manager.Instance().selections[HttpContext.Session.Id]);
             }
+            catch (KeyNotFoundException)
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
+        }
 
-            ViewBag.selected = selected;
-            return View(functionalitySelected, "Home");
+        [HttpPost]
+        public IActionResult GoBackToPage(string functionalitySelected)
+        {
+            // this method is used to go to the selected page while sending the corresponding functionality name and the selected columns and tables
+            try
+            {
+                return RedirectToAction(functionalitySelected, Manager.Instance().selections[HttpContext.Session.Id]);
+            }
+            catch (KeyNotFoundException)
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
         }
 
         [HttpPost]
         public IActionResult GoToPageAll(string functionalitySelected)
         {
-            TempData["functionalitySelected"] = functionalitySelected;
-            string[][] selected = getTableAndColumnData();
-            ViewBag.selected = selected;
-            return View(functionalitySelected, "Home");
+            // this method is like the one above but when every column and table is selected
+            try
+            {
+                Manager.Instance().selections[HttpContext.Session.Id].functionality = functionalitySelected;
+                Manager.Instance().selections[HttpContext.Session.Id].ColumnsSelected = Manager.Instance().getTableAndColumnData(HttpContext.Session.Id);
+                return RedirectToAction(functionalitySelected, Manager.Instance().selections[HttpContext.Session.Id]);
+            }
+            catch (KeyNotFoundException)
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
+        }
+
+        [HttpPost]
+        public IActionResult GoToPageAfterCreate(string functionalitySelected, string data)
+        {
+            // this method is only used for the 2 functionalities with extra steps to redirect after the create step
+            try
+            {
+                Manager.Instance().saveTypes(HttpContext.Session.Id, data, true);
+                return RedirectToAction(functionalitySelected, Manager.Instance().selections[HttpContext.Session.Id]);
+            }
+            catch (KeyNotFoundException)
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
+        }
+
+        [HttpPost]
+        public IActionResult Confirm(string data, string functionalitySelected)
+        {
+            // this method is only used to confirm the changes to the database
+            try
+            {
+                Manager.Instance().selectRows(data, HttpContext.Session.Id);
+                Manager.Instance().update(HttpContext.Session.Id);
+                Manager.Instance().selections[HttpContext.Session.Id].log += functionalitySelected + "\t" + DateTime.Now.ToString();
+                return RedirectToAction("MainPage", Manager.Instance().selections[HttpContext.Session.Id]);
+            }
+            catch (KeyNotFoundException)
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
+        }
+
+        [HttpPost]
+        public IActionResult GetRecord(string record, string functionalitySelected, string accordionInfo, string data2)
+        {
+            // this method is only used to confirm the changes to the database
+            try
+            {
+                Manager.Instance().selections[HttpContext.Session.Id].tableAccordion = accordionInfo;
+                Manager.Instance().selections[HttpContext.Session.Id].columnAccordion = record;
+
+                if (data2 != "undefined")
+                {
+                    Manager.Instance().saveTypes(HttpContext.Session.Id, data2, false);
+                }
+                Manager.Instance().selections[HttpContext.Session.Id].records = Manager.Instance().getRecords(HttpContext.Session.Id, record);
+                return View(functionalitySelected, Manager.Instance().selections[HttpContext.Session.Id]);
+            }
+            catch (KeyNotFoundException)
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
         }
 
     }

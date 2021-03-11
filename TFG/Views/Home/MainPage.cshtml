@@ -1,4 +1,7 @@
 ﻿@{
+    @using TFG.Models
+    @model TFG.Models.ScriptsResults
+
     ViewData["Title"] = "Home Page";
 
     // Creating some structures to ensure code reusability and prevent code duplication
@@ -32,16 +35,16 @@
 }
 <!-- A navegation bar which does not navigate, it only shows the chosen database name along with a button that
     allows the user to go to the corresponding page to change it, if needed and show the current page -->
-<nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+<nav class="navbar nav_color_1">
     <div id="Top-container">
         <div id="Top">
             <span class='database_icon'></span>
-            <span class="top-text">@ViewData["database"]</span>
+            <span class="top-text">@Model.database</span>
             <button type="button" onclick='window.location.href="DatabaseConnection"' class="btn btn-default" data-toggle="tooltip" data-placement="auto" title="Change database"><span class='folder_icon'></span></button>
             <ol class="breadcrumb">
                 <li class="breadcrumb-item active" aria-current="page">Home</li>
             </ol>
-            <button id="performance-button" onclick='window.location.href="Performance"' type="button" class="btn btn-outline-success">Performance</button>
+            <button id="performance-button" onclick="goToPage('Performance', false)" type="button" class="btn btn-outline-success">Performance</button>
         </div>
     </div>
 </nav>
@@ -50,14 +53,18 @@
     The Html.BeginForm part is used to send information to a controller method-->
 @using (Html.BeginForm("GoToSelection", "Home"))
 {
-    <input type="text" id="functionalitySelected" name="functionalitySelected" />
-    <input id="hidden-btn2" class="hidden-btn" type="submit" style="display: none;" />
+    <input type="text" id="functionalitySelected1" class="functionalitySelected" name="functionalitySelected" />
+    <input id="hidden-btn1" class="hidden-btn" type="submit" style="display: none;" />
 }
-
+@using (Html.BeginForm("GoBackToPage", "Home"))
+{
+    <input type="text" id="functionalitySelected3" class="functionalitySelected" name="functionalitySelected" />
+    <input id="hidden-btn3" class="hidden-btn" type="submit" style="display: none;" />
+}
 @using (Html.BeginForm("GoToPageAll", "Home"))
 {
-    <input type="text" id="functionalitySelected2" name="functionalitySelected" />
-    <input id="hidden-btn3" class="hidden-btn" type="submit" style="display: none;" />
+    <input type="text" id="functionalitySelected2" class="functionalitySelected" name="functionalitySelected" />
+    <input id="hidden-btn2" class="hidden-btn" type="submit" style="display: none;" />
 }
 
 <!-- Everything on here is just visual, 2 divs one to the left and one to the right with 5 divs of functionality each which in turn have a help button, their name and their option buttons -->
@@ -76,6 +83,9 @@
             </div>
 
         }
+        <div class="alert alert-warning" role="alert">
+            Disclaimer: Some Datacleaning functionalities may malfunction on tables with missing Primary Keys. Tuning functionalities should be prioritized!
+        </div>
     </div>
 </div>
 <div id="Tuning" class="right-half">

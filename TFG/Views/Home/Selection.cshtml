@@ -1,19 +1,22 @@
 ﻿@{
+    @using TFG.Models
+    @model TFG.Models.ScriptsResults
+
     ViewData["Title"] = "Database Connection";
 
-    // Creating some structures to ensure code reusability and prevent code duplication and if it's run on columns (true) or tables (false)
+    // Creating some structures to ensure code reusability and prevent code duplication and if it's run on columns (true) or entry.Values (false)
     Dictionary<string, string> functionalities_text = new Dictionary<string, string>();
     Dictionary<string, bool> functionalities_need_columns = new Dictionary<string, bool>();
 
     // Datacleaning functionalities
-    functionalities_text.Add("data_masking", "Data Masking");
-    functionalities_need_columns.Add("data_masking", true);
+    functionalities_text.Add("create_masks", "Data Masking");
+    functionalities_need_columns.Add("create_masks", true);
     functionalities_text.Add("data_unification", "Data Unification");
     functionalities_need_columns.Add("data_unification", true);
     functionalities_text.Add("remove_duplicates", "Remove Duplicates");
     functionalities_need_columns.Add("remove_duplicates", true);
-    functionalities_text.Add("constraints", "Constraints");
-    functionalities_need_columns.Add("constraints", false);
+    functionalities_text.Add("create_constraints", "Constraints");
+    functionalities_need_columns.Add("create_constraints", false);
     functionalities_text.Add("missing_values", "Treating Missing Values");
     functionalities_need_columns.Add("missing_values", true);
 
@@ -24,39 +27,39 @@
     functionalities_need_columns.Add("primary_keys", false);
     functionalities_text.Add("foreign_keys", "Add/Improve Foreign Keys");
     functionalities_need_columns.Add("foreign_keys", false);
-    functionalities_text.Add("table_defragmentation", "Table Defragmentation");
-    functionalities_need_columns.Add("table_defragmentation", false);
+    functionalities_text.Add("entry.Value_defragmentation", "Table Defragmentation");
+    functionalities_need_columns.Add("entry.Value_defragmentation", false);
     functionalities_text.Add("improve_indexes", "Index Cleaning & Generation");
     functionalities_need_columns.Add("improve_indexes", false);
 }
+@using (Html.BeginForm("GoToPage", "Home"))
+{
+    <input type="text" id="functionalitySelected3" class="functionalitySelected" name="functionalitySelected" />
+    <input type="text" id="selection" class="functionalitySelected" name="selection" />
+    <input id="hidden-btn3" class="hidden-btn" type="submit" style="display: none;" />
+}
 <!-- A navegation bar which does not navigate, it only shows the chosen database name along with a button that
     allows the user to go to the corresponding page to change it, if needed and show the current page (receiving the functionality selected from the controller)-->
-<nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+<nav class="navbar nav_color_1">
     <div id="Top-container">
         <div id="Top">
             <span class='database_icon'></span>
-            <span class="top-text">@ViewData["database"]</span>
+            <span class="top-text">@Model.database</span>
             <button type="button" onclick='window.location.href="DatabaseConnection"' class="btn btn-default" data-toggle="tooltip" data-placement="auto" title="Change database"><span class='folder_icon'></span></button>
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="MainPage" MainPage">Home</a></li>
-                <li class="breadcrumb-item active" aria-current="page"><text>@functionalities_text[(string)TempData["functionalitySelected"]]</text> Selection</li>
+                <li class="breadcrumb-item"><a id="selection-a" onclick="goToPage('MainPage', false)" style="color: orange;" MainPage">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page"><text>@functionalities_text[Model.functionality]</text> Selection</li>
             </ol>
         </div>
     </div>
 </nav>
-@using (Html.BeginForm("GoToPage", "Home"))
-{
-    <input type="text" id="functionalitySelected3" name="functionalitySelected" />
-    <input type="text" id="selection" name="selection" />
-    <input id="hidden-btn4" class="hidden-btn" type="submit" style="display: none;" />
-}
 <!-- This part is the most complicated of this view
-    It gets the data sent from the controller (double array with the database table names and column names of each table)
-    Then it creates for each table an item of an accordion which when expanded shows its columns with checkboxes for all of those items-->
+    It gets the data sent from the controller (double array with the database entry.Value names and column names of each entry.Value)
+    Then it creates for each entry.Value an item of an accordion which when expanded shows its columns with checkboxes for all of those items-->
 <div id="middle_container" class="left-half">
     <div id="selection-top" class="centeredBig">
         <h3>
-            @if (@functionalities_need_columns[(string)TempData["functionalitySelected"]])
+            @if (@functionalities_need_columns[Model.functionality])
             {
                 <span>Tables and columns selection</span>
             }
@@ -67,25 +70,28 @@
         </h3>
     </div>
     <div id="accordion" class="overflow-auto centeredBig">
-        @foreach (var table in ViewBag.tableData)
+        @foreach (KeyValuePair<string, string[]> entry in Model.ColumnsSelected)
         {
-            string collapse = "#collapse" + table[0];
+            string collapse = "#collapse" + entry.Key;
+            string div = entry.Key + "Div";
+            string CheckBox = entry.Key + "CheckBox";
+
             <div class="card">
-                <div class="card-header" id="@table[0]Div">
+                <div class="card-header nav_color_1" id="@div">
                     <h5>
-                        <input type="checkbox" id="@table[0]CheckBox" name="@table[0]" onclick="checkChilds('@table[0]CheckBox')" />
+                        <input type="checkbox" id="@CheckBox" name="@entry.Key" onclick="checkChilds('@CheckBox')" />
                         <button class="btn btn-link" data-toggle="collapse" data-target="@collapse" aria-expanded="true" aria-controls="collapseOne">
-                            @table[0]
+                            @entry.Key
                         </button>
                     </h5>
                 </div>
-                @if (@functionalities_need_columns[(string)TempData["functionalitySelected"]])
+                @if (@functionalities_need_columns[Model.functionality])
                 {
-                    <div id="@collapse.Substring(1)" class="collapse hide" aria-labelledby="@table[0]" data-parent="#accordion">
-                        <div class="card-body">
-                            @for (int i = 1; i < ((string[])table).Length; i++)
+                    <div id="@collapse.Substring(1)" class="collapse hide" aria-labelledby="@entry.Key" data-parent="#accordion">
+                        <div class="card-body nav_color_2">
+                            @for (int i = 0; i < ((string[])entry.Value).Length; i++)
                             {
-                                <input type="checkbox" id="@table[i]" onclick="checkParent('@table[0]CheckBox', '@table[i]')" data-parent="@table[0]CheckBox" /> <span>@table[i]</span>
+                                <input type="checkbox" id="@entry.Value[i]" onclick="checkParent('@CheckBox', '@entry.Value[i]')" data-parent="@CheckBox" /> <span style="color: white;">@entry.Value[i]</span>
                                 <br />
                             }
                         </div>
@@ -104,6 +110,6 @@
     <br />
     <span id="selection-text">None selected</span>
     <div id="controls-inside">
-        <button type="button" onclick='goToPage("@TempData["functionalitySelected"]")' class="btn btn-outline-primary">Confirm and run</button>
+        <button type="button" onclick='goToPage("@Model.functionality", true)' class="btn btn-outline-primary">Confirm and run</button>
     </div>
 </div>
