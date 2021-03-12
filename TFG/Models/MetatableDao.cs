@@ -10,36 +10,24 @@ using TFG.Models;
 
 namespace TFG
 {
-    public sealed class Manager
+    public class MetatableDao
     {
-        public Dictionary<string, SqlConnection> connections { get; }
-        public Dictionary<string, ScriptsResults> selections { get; }
 
-        private static Manager instance;
+        public Metatable tabledata { get; set; }
+        public SqlConnection con { get; set; }
 
-        public Manager()
+        public MetatableDao(Metatable tabledata, SqlConnection con)
         {
-            connections = new Dictionary<string, SqlConnection>();
-            selections = new Dictionary<string, ScriptsResults>();
-
+            this.tabledata = tabledata;
+            this.con = con;
         }
 
-        public static Manager Instance()
-
+        public void saveSelections(string selection)
         {
-            if (instance == null)
-            {
-                instance = new Manager();
-            }
-            return instance;
+            tabledata.ColumnsSelected = parseSelection(selection);
         }
 
-        public void saveSelections(string selection, string id)
-        {
-            selections[id].ColumnsSelected = parseSelection(selection);
-        }
-
-        public Dictionary<string, string[]> parseSelection(string selection)
+        private Dictionary<string, string[]> parseSelection(string selection)
         {
             Dictionary<string, string[]> res = new Dictionary<string, string[]>();
 
@@ -53,7 +41,7 @@ namespace TFG
             return res;
         }
 
-        public void saveTypes(string id, string data, Boolean deleteSelection)
+        public void saveTypes(string data, Boolean deleteSelection)
         {
             Dictionary<string, string> types = new Dictionary<string, string>();
             Dictionary<string, string[]> selection = new Dictionary<string, string[]>();
@@ -84,35 +72,35 @@ namespace TFG
                     }
                 }
             }
-            selections[id].types = types;
+            tabledata.types = types;
             if (deleteSelection)
             {
-                selections[id].ColumnsSelected = selection;
+                tabledata.ColumnsSelected = selection;
             }
-            getMaskedRecords(id);
+            getMaskedRecords();
         }
 
-        public string getTableSchemaName(string id, string table)
+        public string getTableSchemaName(string table)
         {
-            DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT '[' + TABLE_SCHEMA + '].[' + TABLE_NAME + ']' FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = '" + table + "'", connections[id]), "schema");
+            DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT '[' + TABLE_SCHEMA + '].[' + TABLE_NAME + ']' FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = '" + table + "'", con), "schema");
             DataTable dt = ds.Tables["schema"];
             DataRow row = dt.Rows[0];
             return (string)row[0];
         }
 
-        public string getDataType(string id, string column)
+        public string getDataType(string column)
         {
-            DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE COLUMN_NAME = '" + column + "'", connections[id]), "type");
+            DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE COLUMN_NAME = '" + column + "'", con), "type");
             DataTable dt = ds.Tables["type"];
             DataRow row = dt.Rows[0];
             return (string)row[0];
         }
 
-        public string[] getPrimaryKey(string id, string table)
+        public string[] getPrimaryKey(string table)
         {
             string path = Path.Combine(Directory.GetCurrentDirectory(), @"Scripts\getPrimaryKey.sql");
             string sql = System.IO.File.ReadAllText(path);
-            DataSet ds = Broker.Instance().Run(new SqlCommand(sql + table + "'", connections[id]), "schema");
+            DataSet ds = Broker.Instance().Run(new SqlCommand(sql + table + "'", con), "schema");
             DataTable dt = ds.Tables["schema"];
             string[] res = new string[dt.Rows.Count];
 
@@ -124,12 +112,12 @@ namespace TFG
             return res;
         }
 
-        public void getMaskedRecords(string id)
+        public void getMaskedRecords()
         {
-            getPrimaryKeysRecords(id);
-            Dictionary<string, string[]> res = selections[id].records;
+            getPrimaryKeysRecords();
+            Dictionary<string, string[]> res = tabledata.records;
 
-            foreach (KeyValuePair<string, string> entry in Manager.Instance().selections[id].types)
+            foreach (KeyValuePair<string, string> entry in tabledata.types)
             {
                 string[] pair = entry.Key.Split('.');
                 string mask;
@@ -149,7 +137,7 @@ namespace TFG
                         break;
                 }
 
-                DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT [" + mask + pair[1] + "]) FROM " + getTableSchemaName(id, pair[0]), connections[id]), "records");
+                DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT [" + mask + pair[1] + "]) FROM " + getTableSchemaName(pair[0]), con), "records");
                 DataTable dt = ds.Tables["records"];
                 String[] container = new string[dt.Rows.Count];
                 for (int x = 0; x < dt.Rows.Count; x++)
@@ -162,22 +150,24 @@ namespace TFG
                     res.Add((name), container);
                 }
             }
-            selections[id].records = res;
+            tabledata.records = res;
         }
 
-        public void getPrimaryKeysRecords(string id)
+        public void getPrimaryKeysRecords()
         {
-            Dictionary<string, string[]> res = selections[id].records;
+            Dictionary<string, string[]> res = tabledata.records;
+            Dictionary<string, string[]> tablePks = new Dictionary<string, string[]>();
 
-            foreach (KeyValuePair<string, string> entry in selections[id].types)
+            foreach (KeyValuePair<string, string> entry in tabledata.types)
             {
                 string[] table = entry.Key.Split('.');
 
-                string[] pks = getPrimaryKey(id, table[0]);
+                string[] pks = getPrimaryKey(table[0]);
+                tablePks.Add(table[0], pks);
 
                 for (int j = 0; j < pks.Length; j++)
                 {
-                    DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT [" + pks[j] + "] FROM " + getTableSchemaName(id, table[0]), connections[id]), "records");
+                    DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT [" + pks[j] + "] FROM " + getTableSchemaName(table[0]), con), "records");
                     DataTable dt = ds.Tables["records"];
                     String[] container = new string[dt.Rows.Count];
                     for (int x = 0; x < dt.Rows.Count; x++)
@@ -191,32 +181,33 @@ namespace TFG
                     }
                 }
             }
-            selections[id].records = res;
+            tabledata.records = res;
+            tabledata.tablePks = tablePks;
         }
 
-        public Dictionary<string, string[]> getRecords(string id, string record)
+        public Dictionary<string, string[]> getRecords(string record)
         {
-            Dictionary<string, string[]> res = Manager.Instance().selections[id].records;
+            Dictionary<string, string[]> res = tabledata.records;
 
             if (!res.ContainsKey(record))
             {
 
                 string path = Path.Combine(Directory.GetCurrentDirectory(), @"Scripts\createDNIMask.sql");
                 string sql = System.IO.File.ReadAllText(path);
-                Broker.Instance().Run(new SqlCommand(sql, connections[id]), "createFunctions");
+                Broker.Instance().Run(new SqlCommand(sql, con), "createFunctions");
                 path = Path.Combine(Directory.GetCurrentDirectory(), @"Scripts\createPhoneMask.sql");
                 sql = System.IO.File.ReadAllText(path);
-                Broker.Instance().Run(new SqlCommand(sql, connections[id]), "createFunctions");
+                Broker.Instance().Run(new SqlCommand(sql, con), "createFunctions");
                 path = Path.Combine(Directory.GetCurrentDirectory(), @"Scripts\createEmailMask.sql");
                 sql = System.IO.File.ReadAllText(path);
-                Broker.Instance().Run(new SqlCommand(sql, connections[id]), "createFunctions");
+                Broker.Instance().Run(new SqlCommand(sql, con), "createFunctions");
                 path = Path.Combine(Directory.GetCurrentDirectory(), @"Scripts\createCreditCardMask.sql");
                 sql = System.IO.File.ReadAllText(path);
-                Broker.Instance().Run(new SqlCommand(sql, connections[id]), "createFunctions");
+                Broker.Instance().Run(new SqlCommand(sql, con), "createFunctions");
 
                 string[] column = record.Split('.');
 
-                DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT [" + column[1] + "] FROM " + getTableSchemaName(id, column[0]), connections[id]), "records");
+                DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT [" + column[1] + "] FROM " + getTableSchemaName(column[0]), con), "records");
                 DataTable dt = ds.Tables["records"];
                 String[] container = new string[dt.Rows.Count];
                 for (int x = 0; x < dt.Rows.Count; x++)
@@ -228,13 +219,13 @@ namespace TFG
             return res;
         }
 
-        public Dictionary<string, string[]> getTableAndColumnData(string id)
+        public Dictionary<string, string[]> getTableAndColumnData()
         {
             // then it runs a query that returns all the tables names from that database
             // then processes the result to run a nested for loop which itself runs another query that returns all the column names of that table
             // when the for loop is finished we have a double string array which stores for each table its name and the names of all its columns, then saves this in the viewbag
 
-            DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'", connections[id]), "tables");
+            DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'", con), "tables");
             DataSet dsC;
             DataTable dt = ds.Tables["tables"];
             DataTable dtC;
@@ -246,7 +237,7 @@ namespace TFG
             for (int i = 0; i < dt.Rows.Count; i++)
             {
                 rows = dt.Rows[i];
-                dsC = Broker.Instance().Run(new SqlCommand("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '" + rows[0] + "'", connections[id]), "columns");
+                dsC = Broker.Instance().Run(new SqlCommand("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '" + rows[0] + "'", con), "columns");
                 dtC = dsC.Tables["columns"];
 
                 aux = new string[dtC.Rows.Count];
@@ -257,7 +248,7 @@ namespace TFG
                 for (int j = 0; j < dtC.Rows.Count; j++)
                 {
                     rows = dtC.Rows[j];
-                    string type = getDataType(id, (string)rows[0]);
+                    string type = getDataType((string)rows[0]);
                     if (!isSpacial(type))
                     {
                         aux[j] = (string)rows[0];
@@ -314,52 +305,54 @@ namespace TFG
             return false;
         }
 
-        public bool isType(string id, string column, string type)
+        public void getAvailableMasks(string column)
         {
-            float comply = 0;
-
-            string[] data = Manager.Instance().selections[id].records[column];
+            bool[] res = new bool[4];
+            float[] comply = new float[4];
+            string[] data = tabledata.records[column];
 
             foreach (string value in data)
             {
-                switch (type)
+
+                if (isDNI(value))
                 {
-                    case "DNI":
-                        if (isDNI(value))
-                        {
-                            comply++;
-                        }
-                        break;
-                    case "Email":
-                        if (isEmail(value))
-                        {
-                            comply++;
-                        }
-                        break;
-                    case "Phone":
-                        if (isPhone(value))
-                        {
-                            comply++;
-                        }
-                        break;
-                    default:
-                        if (isCCN(value))
-                        {
-                            comply++;
-                        }
-                        break;
+                    comply[0]++;
+                }
+
+                if (isEmail(value))
+                {
+                    comply[1]++;
+                }
+
+                if (isPhone(value))
+                {
+                    comply[2]++;
+                }
+
+                if (isCCN(value))
+                {
+                    comply[3]++;
+                }
+
+            }
+
+            for (int i = 0; i < 4; i++)
+            {
+                float aux = (comply[i] * 100) / data.Length;
+                if (aux >= 50)
+                {
+                    res[i] = true;
+                }
+                else
+                {
+                    res[i] = false;
                 }
             }
 
-            float res = (comply * 100) / data.Length;
-            if (res >= 50)
-            {
-                return true;
-            }
-            return false;
+            tabledata.masksAvailable.Add(column, res);
         }
 
-        private bool isDNI(string value)
+        private static bool isDNI(string value)
         {
             char[] aux = value.ToCharArray();
             int INTcount = 0;
@@ -383,7 +376,7 @@ namespace TFG
         }
         private bool isEmail(string value)
         {
-            if(value.Contains('@') && value.Contains('.') && value.IndexOf('@')<value.IndexOf('.'))
+            if (value.Contains('@') && value.Contains('.') && value.IndexOf('@') < value.IndexOf('.'))
             {
                 return true;
             }
@@ -393,19 +386,20 @@ namespace TFG
         {
             char[] aux = value.ToCharArray();
             int count = 0;
-            foreach(char i in aux)
+            foreach (char i in aux)
             {
                 if (Char.IsDigit(i))
                 {
                     count++;
                 }
             }
-            if(count >= 7 && count <= 15)
+            if (count >= 7 && count <= 15)
             {
                 return true;
             }
             return false;
         }
+
         private bool isCCN(string value)
         {
             char[] aux = value.ToCharArray();
@@ -424,25 +418,25 @@ namespace TFG
             return false;
         }
 
-        public void update(string id)
+        public void update()
         {
-            foreach (KeyValuePair<string, string[]> entry in Manager.Instance().selections[id].ColumnsSelected)
+            foreach (KeyValuePair<string, string[]> entry in tabledata.ColumnsSelected)
             {
-                string[] pks = getPrimaryKey(id, entry.Key);
+                string[] pks = getPrimaryKey(entry.Key);
                 string[][] pk_data = new string[pks.Length][];
 
                 for (int i = 0; i < pks.Length; i++)
                 {
                     string aux = entry.Key + '.' + pks[i];
-                    pk_data[i] = selections[id].records[aux];
+                    pk_data[i] = tabledata.records[aux];
                 }
 
                 foreach (string column in entry.Value)
                 {
                     string name = entry.Key + '.' + column;
                     string aux = name + "Masked";
-                    string[] data = selections[id].records[(aux)];
-                    string[] data_aux = selections[id].records[(name)];
+                    string[] data = tabledata.records[(aux)];
+                    string[] data_aux = tabledata.records[(name)];
 
                     for (int i = 0; i < data.Length; i++)
                     {
@@ -450,7 +444,7 @@ namespace TFG
 
                         for (int j = 0; j < pks.Length; j++)
                         {
-                            string type = getDataType(id, pks[j]);
+                            string type = getDataType(pks[j]);
                             str += " " + pks[j] + " = convert(" + type + ", '" + pk_data[j][i];
                             if (type == "datetime")
                             {
@@ -465,9 +459,9 @@ namespace TFG
                                 str += " and";
                             }
                         }
-                        if(pks.Length == 0)
+                        if (pks.Length == 0)
                         {
-                            string type = getDataType(id, column);
+                            string type = getDataType(column);
                             str += " " + column + " = convert(" + type + ", '" + data_aux[i];
                             if (type == "datetime")
                             {
@@ -479,17 +473,17 @@ namespace TFG
                             }
                         }
 
-                        Broker.Instance().Run(new SqlCommand("UPDATE " + getTableSchemaName(id, entry.Key) + " SET " + column + " = '" + data[i] + "'" + str, connections[id]), "update");
+                        Broker.Instance().Run(new SqlCommand("UPDATE " + getTableSchemaName(entry.Key) + " SET " + column + " = '" + data[i] + "'" + str, con), "update");
                     }
                 }
             }
         }
 
-        internal void selectRows(string data, string id)
+        public void selectRows(string data)
         {
             Dictionary<string, string[]> res = parseSelection(data);
 
-            foreach (KeyValuePair<string, string[]> record in selections[id].records)
+            foreach (KeyValuePair<string, string[]> record in tabledata.records)
             {
                 foreach (KeyValuePair<string, string[]> entry in res)
                 {
@@ -503,13 +497,13 @@ namespace TFG
                             if (entry.Value.Contains(i.ToString()))
                             {
                                 aux[counter] = record.Value[i];
-                                aux_masked[counter] = selections[id].records[record.Key + "Masked"][i];
+                                aux_masked[counter] = tabledata.records[record.Key + "Masked"][i];
                                 counter++;
                             }
                         }
 
-                        selections[id].records[record.Key] = aux;
-                        selections[id].records[record.Key + "Masked"] = aux_masked;
+                        tabledata.records[record.Key] = aux;
+                        tabledata.records[record.Key + "Masked"] = aux_masked;
                     }
                 }
             }

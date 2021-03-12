@@ -1,6 +1,6 @@
 ﻿@{
     @using TFG.Models
-    @model TFG.Models.ScriptsResults
+    @model TFG.Models.Metatable
 
     ViewData["Title"] = "Data Masking Report";
 }
@@ -87,7 +87,7 @@
         </div>
         @foreach (KeyValuePair<string, string[]> entry in Model.ColumnsSelected)
         {
-            string[] pks = Manager.Instance().getPrimaryKey(Model.id, entry.Key);
+            string[] pks =  Model.tablePks[entry.Key];
             string[][] pk_data = new string[pks.Length][];
             for (int i = 0; i < pks.Length; i++)
             {

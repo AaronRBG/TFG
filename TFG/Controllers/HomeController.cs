@@ -7,12 +7,16 @@ using System.Data;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 using System;
+using System.Web;
+using Microsoft.AspNetCore.Session;
 
 namespace TFG.Controllers
 {
     public class HomeController : Controller
     {
+
         private readonly ILogger<HomeController> _logger;
+        private static Dictionary<string, MetatableDao> daos { get; set; }
 
         public HomeController(ILogger<HomeController> logger)
         {
@@ -24,11 +28,12 @@ namespace TFG.Controllers
         [HttpGet]
         public IActionResult MainPage()
         {
-            try
+            string id = HttpContext.Session.GetString("id");
+            if (HttpContext.Session.Id == id)
             {
-                return View("MainPage", Manager.Instance().selections[HttpContext.Session.Id]);
+                return View("MainPage", daos[id].tabledata);
             }
-            catch (KeyNotFoundException)
+            else
             {
                 return RedirectToAction("DatabaseConnection");
             }
@@ -44,11 +49,12 @@ namespace TFG.Controllers
         [HttpGet]
         public IActionResult data_masking()
         {
-            try
+            string id = HttpContext.Session.GetString("id");
+            if (HttpContext.Session.Id == id)
             {
-                return View("data_masking", Manager.Instance().selections[HttpContext.Session.Id]);
+                return View("data_masking", daos[id].tabledata);
             }
-            catch (KeyNotFoundException)
+            else
             {
                 return RedirectToAction("DatabaseConnection");
             }
@@ -58,11 +64,12 @@ namespace TFG.Controllers
         [HttpGet]
         public IActionResult data_unification()
         {
-            try
+            string id = HttpContext.Session.GetString("id");
+            if (HttpContext.Session.Id == id)
             {
-                return View("data_unification", Manager.Instance().selections[HttpContext.Session.Id]);
+                return View("data_unification", daos[id].tabledata);
             }
-            catch (KeyNotFoundException)
+            else
             {
                 return RedirectToAction("DatabaseConnection");
             }
@@ -72,11 +79,12 @@ namespace TFG.Controllers
         [HttpGet]
         public IActionResult remove_duplicates()
         {
-            try
+            string id = HttpContext.Session.GetString("id");
+            if (HttpContext.Session.Id == id)
             {
-                return View("remove_duplicates", Manager.Instance().selections[HttpContext.Session.Id]);
+                return View("remove_duplicates", daos[id].tabledata);
             }
-            catch (KeyNotFoundException)
+            else
             {
                 return RedirectToAction("DatabaseConnection");
             }
@@ -86,11 +94,12 @@ namespace TFG.Controllers
         [HttpGet]
         public IActionResult constraints()
         {
-            try
+            string id = HttpContext.Session.GetString("id");
+            if (HttpContext.Session.Id == id)
             {
-                return View("constraints", Manager.Instance().selections[HttpContext.Session.Id]);
+                return View("constraints", daos[id].tabledata);
             }
-            catch (KeyNotFoundException)
+            else
             {
                 return RedirectToAction("DatabaseConnection");
             }
@@ -100,25 +109,27 @@ namespace TFG.Controllers
         [HttpGet]
         public IActionResult missing_values()
         {
-            try
+            string id = HttpContext.Session.GetString("id");
+            if (HttpContext.Session.Id == id)
             {
-                return View("missing_values", Manager.Instance().selections[HttpContext.Session.Id]);
+                return View("missing_values", daos[id].tabledata);
             }
-            catch (KeyNotFoundException)
+            else
             {
                 return RedirectToAction("DatabaseConnection");
             }
         }
 
-        // loads the improve_datatypes View
+        // loads the improve_Metatable daos[id].tabledatatypes View
         [HttpGet]
         public IActionResult improve_datatypes()
         {
-            try
+            string id = HttpContext.Session.GetString("id");
+            if (HttpContext.Session.Id == id)
             {
-                return View("improve_datatypes", Manager.Instance().selections[HttpContext.Session.Id]);
+                return View("improve_datatypes", daos[id].tabledata);
             }
-            catch (KeyNotFoundException)
+            else
             {
                 return RedirectToAction("DatabaseConnection");
             }
@@ -128,11 +139,12 @@ namespace TFG.Controllers
         [HttpGet]
         public IActionResult primary_keys()
         {
-            try
+            string id = HttpContext.Session.GetString("id");
+            if (HttpContext.Session.Id == id)
             {
-                return View("primary_keys", Manager.Instance().selections[HttpContext.Session.Id]);
+                return View("primary_keys", daos[id].tabledata);
             }
-            catch (KeyNotFoundException)
+            else
             {
                 return RedirectToAction("DatabaseConnection");
             }
@@ -142,11 +154,12 @@ namespace TFG.Controllers
         [HttpGet]
         public IActionResult foreign_keys()
         {
-            try
+            string id = HttpContext.Session.GetString("id");
+            if (HttpContext.Session.Id == id)
             {
-                return View("foreign_keys", Manager.Instance().selections[HttpContext.Session.Id]);
+                return View("foreign_keys", daos[id].tabledata);
             }
-            catch (KeyNotFoundException)
+            else
             {
                 return RedirectToAction("DatabaseConnection");
             }
@@ -156,11 +169,12 @@ namespace TFG.Controllers
         [HttpGet]
         public IActionResult table_defragmentation()
         {
-            try
+            string id = HttpContext.Session.GetString("id");
+            if (HttpContext.Session.Id == id)
             {
-                return View("table_defragmentation", Manager.Instance().selections[HttpContext.Session.Id]);
+                return View("table_defragmentation", daos[id].tabledata);
             }
-            catch (KeyNotFoundException)
+            else
             {
                 return RedirectToAction("DatabaseConnection");
             }
@@ -170,11 +184,12 @@ namespace TFG.Controllers
         [HttpGet]
         public IActionResult improve_indexes()
         {
-            try
+            string id = HttpContext.Session.GetString("id");
+            if (HttpContext.Session.Id == id)
             {
-                return View("improve_indexes", Manager.Instance().selections[HttpContext.Session.Id]);
+                return View("improve_indexes", daos[id].tabledata);
             }
-            catch (KeyNotFoundException)
+            else
             {
                 return RedirectToAction("DatabaseConnection");
             }
@@ -183,12 +198,13 @@ namespace TFG.Controllers
         [HttpGet]
         public IActionResult create_masks()
         {
-            try
+            string id = HttpContext.Session.GetString("id");
+            if (HttpContext.Session.Id == id)
             {
-                Manager.Instance().selections[HttpContext.Session.Id].records = new Dictionary<string, string[]>();
-                return View("create_masks", Manager.Instance().selections[HttpContext.Session.Id]);
+                daos[id].tabledata.records = new Dictionary<string, string[]>();
+                return View("create_masks", daos[id].tabledata);
             }
-            catch (KeyNotFoundException)
+            else
             {
                 return RedirectToAction("DatabaseConnection");
             }
@@ -196,11 +212,12 @@ namespace TFG.Controllers
         [HttpGet]
         public IActionResult create_constraints()
         {
-            try
+            string id = HttpContext.Session.GetString("id");
+            if (HttpContext.Session.Id == id)
             {
-                return View("create_constraints", Manager.Instance().selections[HttpContext.Session.Id]);
+                return View("create_constraints", daos[id].tabledata);
             }
-            catch (KeyNotFoundException)
+            else
             {
                 return RedirectToAction("DatabaseConnection");
             }
@@ -209,11 +226,12 @@ namespace TFG.Controllers
         [HttpGet]
         public IActionResult Performance()
         {
-            try
+            string id = HttpContext.Session.GetString("id");
+            if (HttpContext.Session.Id == id)
             {
-                return View("Performance", Manager.Instance().selections[HttpContext.Session.Id]);
+                return View("Performance", daos[id].tabledata);
             }
-            catch (KeyNotFoundException)
+            else
             {
                 return RedirectToAction("DatabaseConnection");
             }
@@ -222,11 +240,12 @@ namespace TFG.Controllers
         [HttpGet]
         public IActionResult Selection()
         {
-            try
+            string id = HttpContext.Session.GetString("id");
+            if (HttpContext.Session.Id == id)
             {
-                return View("Selection", Manager.Instance().selections[HttpContext.Session.Id]);
+                return View("Selection", daos[id].tabledata);
             }
-            catch (KeyNotFoundException)
+            else
             {
                 return RedirectToAction("DatabaseConnection");
             }
@@ -271,16 +290,10 @@ namespace TFG.Controllers
                     }
                 }
 
-                // Save a init variable in the session to stop it for resetting, then save the connection and the database name
-                HttpContext.Session.SetInt32("init", 0);
-                if (Manager.Instance().connections.ContainsKey(HttpContext.Session.Id))
-                {
-                    Manager.Instance().connections.Remove(HttpContext.Session.Id);
-                    Manager.Instance().selections.Remove(HttpContext.Session.Id);
-                }
-
-                Manager.Instance().connections.Add(HttpContext.Session.Id, con);
-                Manager.Instance().selections.Add(HttpContext.Session.Id, new ScriptsResults(splits[1], HttpContext.Session.Id));
+                // Save a id variable in the session to stop it for resetting, then save the connection and create the dao
+                HttpContext.Session.SetString("id", HttpContext.Session.Id);
+                daos = new Dictionary<string, MetatableDao>();
+                daos.Add(HttpContext.Session.Id, new MetatableDao(new Metatable(splits[1]), con));
 
                 return RedirectToAction("MainPage");
             }
@@ -294,13 +307,14 @@ namespace TFG.Controllers
         public IActionResult GoToSelection(string functionalitySelected)
         {
             // this method is used to go to the Selection page while saving the functionality selected and the table and column data
-            try
+            string id = HttpContext.Session.GetString("id");
+            if (HttpContext.Session.Id == id)
             {
-                Manager.Instance().selections[HttpContext.Session.Id].functionality = functionalitySelected;
-                Manager.Instance().selections[HttpContext.Session.Id].ColumnsSelected = Manager.Instance().getTableAndColumnData(HttpContext.Session.Id);
+                daos[id].tabledata.functionality = functionalitySelected;
+                daos[id].tabledata.ColumnsSelected = daos[id].getTableAndColumnData();
                 return RedirectToAction("Selection");
             }
-            catch (KeyNotFoundException)
+            else
             {
                 return RedirectToAction("DatabaseConnection");
             }
@@ -309,15 +323,16 @@ namespace TFG.Controllers
         public IActionResult GoToPage(string functionalitySelected, string selection)
         {
             // this method is used to go to the selected page while sending the corresponding functionality name and the selected columns and tables
-            try
+            string id = HttpContext.Session.GetString("id");
+            if (HttpContext.Session.Id == id)
             {
                 if (functionalitySelected != "MainPage")
                 {
-                    Manager.Instance().saveSelections(selection, HttpContext.Session.Id);
+                    daos[id].saveSelections(selection);
                 }
-                return RedirectToAction(functionalitySelected, Manager.Instance().selections[HttpContext.Session.Id]);
+                return RedirectToAction(functionalitySelected, daos[id].tabledata);
             }
-            catch (KeyNotFoundException)
+            else
             {
                 return RedirectToAction("DatabaseConnection");
             }
@@ -327,11 +342,12 @@ namespace TFG.Controllers
         public IActionResult GoBackToPage(string functionalitySelected)
         {
             // this method is used to go to the selected page while sending the corresponding functionality name and the selected columns and tables
-            try
+            string id = HttpContext.Session.GetString("id");
+            if (HttpContext.Session.Id == id)
             {
-                return RedirectToAction(functionalitySelected, Manager.Instance().selections[HttpContext.Session.Id]);
+                return RedirectToAction(functionalitySelected, daos[id].tabledata);
             }
-            catch (KeyNotFoundException)
+            else
             {
                 return RedirectToAction("DatabaseConnection");
             }
@@ -341,13 +357,14 @@ namespace TFG.Controllers
         public IActionResult GoToPageAll(string functionalitySelected)
         {
             // this method is like the one above but when every column and table is selected
-            try
+            string id = HttpContext.Session.GetString("id");
+            if (HttpContext.Session.Id == id)
             {
-                Manager.Instance().selections[HttpContext.Session.Id].functionality = functionalitySelected;
-                Manager.Instance().selections[HttpContext.Session.Id].ColumnsSelected = Manager.Instance().getTableAndColumnData(HttpContext.Session.Id);
-                return RedirectToAction(functionalitySelected, Manager.Instance().selections[HttpContext.Session.Id]);
+                daos[id].tabledata.functionality = functionalitySelected;
+                daos[id].tabledata.ColumnsSelected = daos[id].getTableAndColumnData();
+                return RedirectToAction(functionalitySelected, daos[id].tabledata);
             }
-            catch (KeyNotFoundException)
+            else
             {
                 return RedirectToAction("DatabaseConnection");
             }
@@ -357,12 +374,13 @@ namespace TFG.Controllers
         public IActionResult GoToPageAfterCreate(string functionalitySelected, string data)
         {
             // this method is only used for the 2 functionalities with extra steps to redirect after the create step
-            try
+            string id = HttpContext.Session.GetString("id");
+            if (HttpContext.Session.Id == id)
             {
-                Manager.Instance().saveTypes(HttpContext.Session.Id, data, true);
-                return RedirectToAction(functionalitySelected, Manager.Instance().selections[HttpContext.Session.Id]);
+                daos[id].saveTypes(data, true);
+                return RedirectToAction(functionalitySelected, daos[id].tabledata);
             }
-            catch (KeyNotFoundException)
+            else
             {
                 return RedirectToAction("DatabaseConnection");
             }
@@ -372,14 +390,15 @@ namespace TFG.Controllers
         public IActionResult Confirm(string data, string functionalitySelected)
         {
             // this method is only used to confirm the changes to the database
-            try
+            string id = HttpContext.Session.GetString("id");
+            if (HttpContext.Session.Id == id)
             {
-                Manager.Instance().selectRows(data, HttpContext.Session.Id);
-                Manager.Instance().update(HttpContext.Session.Id);
-                Manager.Instance().selections[HttpContext.Session.Id].log += functionalitySelected + "\t" + DateTime.Now.ToString();
-                return RedirectToAction("MainPage", Manager.Instance().selections[HttpContext.Session.Id]);
+                daos[id].selectRows(data);
+                daos[id].update();
+                daos[id].tabledata.log += functionalitySelected + "\t" + DateTime.Now.ToString();
+                return RedirectToAction("MainPage", daos[id].tabledata);
             }
-            catch (KeyNotFoundException)
+            else
             {
                 return RedirectToAction("DatabaseConnection");
             }
@@ -389,19 +408,37 @@ namespace TFG.Controllers
         public IActionResult GetRecord(string record, string functionalitySelected, string accordionInfo, string data2)
         {
             // this method is only used to confirm the changes to the database
-            try
+            string id = HttpContext.Session.GetString("id");
+            if (HttpContext.Session.Id == id)
             {
-                Manager.Instance().selections[HttpContext.Session.Id].tableAccordion = accordionInfo;
-                Manager.Instance().selections[HttpContext.Session.Id].columnAccordion = record;
+                daos[id].tabledata.tableAccordion = accordionInfo;
+                daos[id].tabledata.columnAccordion = record;
 
                 if (data2 != "undefined")
                 {
-                    Manager.Instance().saveTypes(HttpContext.Session.Id, data2, false);
+                    daos[id].saveTypes(data2, false);
                 }
-                Manager.Instance().selections[HttpContext.Session.Id].records = Manager.Instance().getRecords(HttpContext.Session.Id, record);
-                return View(functionalitySelected, Manager.Instance().selections[HttpContext.Session.Id]);
+                daos[id].tabledata.records = daos[id].getRecords(record);
+                return View(functionalitySelected, daos[id].tabledata);
             }
-            catch (KeyNotFoundException)
+            else
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
+        }
+
+        [HttpPost]
+        public IActionResult GetAvailableMasks(string name)
+        {
+            // this method is only used to confirm the changes to the database
+            string id = HttpContext.Session.GetString("id");
+            if (HttpContext.Session.Id == id)
+            {
+                daos[id].getAvailableMasks(name);
+
+                return View(daos[id].tabledata.functionality, daos[id].tabledata);
+            }
+            else
             {
                 return RedirectToAction("DatabaseConnection");
             }

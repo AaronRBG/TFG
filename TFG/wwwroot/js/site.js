@@ -138,6 +138,13 @@ function confirm(functionality) {
     }
 }
 
+// used as a middleware to activate a hidden button which is the one who connects to the controller and also inputs the functionality to a hidden input connected to the controller
+function getAvailableMasks(name) {
+
+    document.getElementById("name").value = name;
+    $("#hidden-btn7").click();
+}
+
 // this method parameter is the id of the table checkbox
 // this method is called when the table checkbox is clicked
 // first checks if that checkbox is checked

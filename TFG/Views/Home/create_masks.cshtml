@@ -1,6 +1,6 @@
 ﻿@{
     @using TFG.Models
-    @model TFG.Models.ScriptsResults
+    @model TFG.Models.Metatable
 
     ViewData["Title"] = "Data Masking Report";
 }
@@ -27,6 +27,11 @@
 {
     <input type="text" id="functionalitySelected3" class="functionalitySelected" name="functionalitySelected" />
     <input id="hidden-btn3" class="hidden-btn" type="submit" style="display: none;" />
+}
+@using (Html.BeginForm("GetAvailableMasks", "Home"))
+{
+    <input type="text" id="name" class="functionalitySelected" name="name" />
+    <input id="hidden-btn7" class="hidden-btn" type="submit" style="display: none;" />
 }
 <!-- A navegation bar which does not navigate, it only shows the chosen database name along with a button that
     allows the user to go to the corresponding page to change it, if needed and show the current page (receiving the functionality selected from the controller)-->
@@ -180,26 +185,36 @@
                 }
 
                 <div class="dropdown">
-                    <button class="btn btn-outline-dark dropdown-toggle tabcontent" type="button" id="@dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="display: @display;">
-                        <span id="@text">@stri</span>
-                    </button>
+                    @if (Model.masksAvailable.ContainsKey(name))
+                    {
+                        <button class="btn btn-outline-dark dropdown-toggle tabcontent" type="button" id="@dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="display: @display;">
+                            <span id="@text">@stri</span>
+                        </button>
+                    }
+                    else
+                    {
+                        <button class="btn btn-outline-dark dropdown-toggle tabcontent" type="button" id="@dropdown" onclick="getAvailableMasks('@name')" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="display: @display;">
+                            <span id="@text">@stri</span>
+                        </button>
+                    }
 
-                    @if (Model.records.ContainsKey(name))
+
+                    @if (Model.records.ContainsKey(name) && Model.masksAvailable.ContainsKey(name))
                     {
                         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                            @if (Manager.Instance().isType(Model.id, name, "DNI"))
+                            @if (Model.masksAvailable[name][0])
                             {
                                 <a class="dropdown-item" onclick="changeName('@text', 'DNI')">DNI</a>
                             }
-                            @if (Manager.Instance().isType(Model.id, name, "Email"))
+                            @if (Model.masksAvailable[name][1])
                             {
                                 <a class="dropdown-item" onclick="changeName('@text', 'Email')">Email</a>
                             }
-                            @if (Manager.Instance().isType(Model.id, name, "Phone"))
+                            @if (Model.masksAvailable[name][2])
                             {
                                 <a class="dropdown-item" onclick="changeName('@text', 'Phone Number')">Phone Number</a>
                             }
-                            @if (Manager.Instance().isType(Model.id, name, "CCN"))
+                            @if (Model.masksAvailable[name][3])
                             {
                                 <a class="dropdown-item" onclick="changeName('@text', 'Credit card')">Credit card</a>
                             }
