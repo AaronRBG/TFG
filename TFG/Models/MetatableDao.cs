@@ -12,7 +12,7 @@ namespace TFG
 {
     public class MetatableDao
     {
-
+        // The variables are the Model in which the methods results are saved and the connection to the database
         public Metatable tabledata { get; set; }
         public SqlConnection con { get; set; }
 
@@ -22,96 +22,7 @@ namespace TFG
             this.con = con;
         }
 
-        public void saveSelections(string selection)
-        {
-            tabledata.ColumnsSelected = parseSelection(selection);
-        }
-
-        private Dictionary<string, string[]> parseSelection(string selection)
-        {
-            Dictionary<string, string[]> res = new Dictionary<string, string[]>();
-
-            string[] tables = selection.Split('/');
-            for (int i = 1; i < tables.Length; i++)
-            {
-                string[] columns = tables[i].Split(',');
-                res.Add(columns[0], columns.Skip(1).ToArray());
-            }
-
-            return res;
-        }
-
-        public void saveTypes(string data, Boolean deleteSelection)
-        {
-            Dictionary<string, string> types = new Dictionary<string, string>();
-            Dictionary<string, string[]> selection = new Dictionary<string, string[]>();
-
-            string[] columns = data.Split('/');
-            for (int i = 1; i < columns.Length; i++)
-            {
-                string[] names = columns[i].Split(',');
-                types.Add(names[0], names[1]);
-
-                string[] pair = names[0].Split('.');
-                if (deleteSelection)
-                {
-                    if (selection.ContainsKey(pair[0]))
-                    {
-                        string[] aux = new string[selection[pair[0]].Length + 1];
-                        for (int j = 0; j < selection[pair[0]].Length; j++)
-                        {
-                            aux[j] = selection[pair[0]][j];
-                        }
-                        aux[aux.Length - 1] = pair[1];
-                        selection[pair[0]] = aux;
-                    }
-                    else
-                    {
-                        string[] aux = { pair[1] };
-                        selection.Add(pair[0], aux);
-                    }
-                }
-            }
-            tabledata.types = types;
-            if (deleteSelection)
-            {
-                tabledata.ColumnsSelected = selection;
-            }
-            getMaskedRecords();
-        }
-
-        public string getTableSchemaName(string table)
-        {
-            DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT '[' + TABLE_SCHEMA + '].[' + TABLE_NAME + ']' FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = '" + table + "'", con), "schema");
-            DataTable dt = ds.Tables["schema"];
-            DataRow row = dt.Rows[0];
-            return (string)row[0];
-        }
-
-        public string getDataType(string column)
-        {
-            DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE COLUMN_NAME = '" + column + "'", con), "type");
-            DataTable dt = ds.Tables["type"];
-            DataRow row = dt.Rows[0];
-            return (string)row[0];
-        }
-
-        public string[] getPrimaryKey(string table)
-        {
-            string path = Path.Combine(Directory.GetCurrentDirectory(), @"Scripts\getPrimaryKey.sql");
-            string sql = System.IO.File.ReadAllText(path);
-            DataSet ds = Broker.Instance().Run(new SqlCommand(sql + table + "'", con), "schema");
-            DataTable dt = ds.Tables["schema"];
-            string[] res = new string[dt.Rows.Count];
-
-            for (int i = 0; i < dt.Rows.Count; i++)
-            {
-                res[i] = (string)dt.Rows[i][0];
-            }
-
-            return res;
-        }
-
+        // This method applies the selected masks to the records and saves the results in the corresponding Model variable
         public void getMaskedRecords()
         {
             getPrimaryKeysRecords();
@@ -139,7 +50,7 @@ namespace TFG
 
                 DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT [" + mask + pair[1] + "]) FROM " + getTableSchemaName(pair[0]), con), "records");
                 DataTable dt = ds.Tables["records"];
-                String[] container = new string[dt.Rows.Count];
+                string[] container = new string[dt.Rows.Count];
                 for (int x = 0; x < dt.Rows.Count; x++)
                 {
                     container[x] = dt.Rows[x][0].ToString();
@@ -153,39 +64,8 @@ namespace TFG
             tabledata.records = res;
         }
 
-        public void getPrimaryKeysRecords()
-        {
-            Dictionary<string, string[]> res = tabledata.records;
-            Dictionary<string, string[]> tablePks = new Dictionary<string, string[]>();
-
-            foreach (KeyValuePair<string, string> entry in tabledata.types)
-            {
-                string[] table = entry.Key.Split('.');
-
-                string[] pks = getPrimaryKey(table[0]);
-                tablePks.Add(table[0], pks);
-
-                for (int j = 0; j < pks.Length; j++)
-                {
-                    DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT [" + pks[j] + "] FROM " + getTableSchemaName(table[0]), con), "records");
-                    DataTable dt = ds.Tables["records"];
-                    String[] container = new string[dt.Rows.Count];
-                    for (int x = 0; x < dt.Rows.Count; x++)
-                    {
-                        container[x] = dt.Rows[x][0].ToString();
-                    }
-                    string key = table[0] + '.' + pks[j];
-                    if (!res.ContainsKey(key))
-                    {
-                        res.Add(key, container);
-                    }
-                }
-            }
-            tabledata.records = res;
-            tabledata.tablePks = tablePks;
-        }
-
-        public Dictionary<string, string[]> getRecords(string record)
+        // This method creates the needed scripts and gets the data of the column from the database
+        public void getRecord(string record)
         {
             Dictionary<string, string[]> res = tabledata.records;
 
@@ -215,15 +95,13 @@ namespace TFG
                     container[x] = dt.Rows[x][0].ToString();
                 }
                 res.Add(record, container);
+                tabledata.records = res;
             }
-            return res;
         }
-
-        public Dictionary<string, string[]> getTableAndColumnData()
+        
+        // This method gathers the names of the tables and their columns from the database and saves the result to the corresponding Model variable
+        public void getTableAndColumnData()
         {
-            // then it runs a query that returns all the tables names from that database
-            // then processes the result to run a nested for loop which itself runs another query that returns all the column names of that table
-            // when the for loop is finished we have a double string array which stores for each table its name and the names of all its columns, then saves this in the viewbag
 
             DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'", con), "tables");
             DataSet dsC;
@@ -285,139 +163,10 @@ namespace TFG
                 result.Add(entry.Key, entry.Value);
             }
 
-            return result;
+            tabledata.ColumnsSelected = result;
         }
 
-        private bool isSpacial(string type)
-        {
-            if (type == "geometry")
-            {
-                return true;
-            }
-            if (type == "geography")
-            {
-                return true;
-            }
-            if (type == "hierarchyid")
-            {
-                return true;
-            }
-            return false;
-        }
-
-        public void getAvailableMasks(string column)
-        {
-            bool[] res = new bool[4];
-            float[] comply = new float[4];
-            string[] data = tabledata.records[column];
-
-            foreach (string value in data)
-            {
-
-                if (isDNI(value))
-                {
-                    comply[0]++;
-                }
-
-                if (isEmail(value))
-                {
-                    comply[1]++;
-                }
-
-                if (isPhone(value))
-                {
-                    comply[2]++;
-                }
-
-                if (isCCN(value))
-                {
-                    comply[3]++;
-                }
-
-            }
-
-            for (int i = 0; i < 4; i++)
-            {
-                float aux = (comply[i] * 100) / data.Length;
-                if (aux >= 50)
-                {
-                    res[i] = true;
-                }
-                else
-                {
-                    res[i] = false;
-                }
-            }
-
-            tabledata.masksAvailable.Add(column, res);
-        }
-
-        private static bool isDNI(string value)
-        {
-            char[] aux = value.ToCharArray();
-            int INTcount = 0;
-            int LETTERcount = 0;
-            foreach (char i in aux)
-            {
-                if (Char.IsDigit(i))
-                {
-                    INTcount++;
-                }
-                if (Char.IsLetter(i))
-                {
-                    LETTERcount++;
-                }
-            }
-            if ((INTcount == 8 || INTcount == 9) && LETTERcount == 1)
-            {
-                return true;
-            }
-            return false;
-        }
-        private bool isEmail(string value)
-        {
-            if (value.Contains('@') && value.Contains('.') && value.IndexOf('@') < value.IndexOf('.'))
-            {
-                return true;
-            }
-            return false;
-        }
-        private bool isPhone(string value)
-        {
-            char[] aux = value.ToCharArray();
-            int count = 0;
-            foreach (char i in aux)
-            {
-                if (Char.IsDigit(i))
-                {
-                    count++;
-                }
-            }
-            if (count >= 7 && count <= 15)
-            {
-                return true;
-            }
-            return false;
-        }
-
-        private bool isCCN(string value)
-        {
-            char[] aux = value.ToCharArray();
-            int count = 0;
-            foreach (char i in aux)
-            {
-                if (Char.IsDigit(i))
-                {
-                    count++;
-                }
-            }
-            if (count >= 13 && count <= 19)
-            {
-                return true;
-            }
-            return false;
-        }
-
+        // This method updates the database with the corresponding changes
         public void update()
         {
             foreach (KeyValuePair<string, string[]> entry in tabledata.ColumnsSelected)
@@ -479,34 +228,216 @@ namespace TFG
             }
         }
 
-        public void selectRows(string data)
+        // This method is used to filter the masks available to each column according to the data stored in it
+        public void getAvailableMasks(string column)
         {
-            Dictionary<string, string[]> res = parseSelection(data);
+            bool[] res = new bool[4];
+            float[] comply = new float[4];
+            string[] data = tabledata.records[column];
 
-            foreach (KeyValuePair<string, string[]> record in tabledata.records)
+            if (data.Length > 1000)
             {
-                foreach (KeyValuePair<string, string[]> entry in res)
-                {
-                    if (record.Key == entry.Key)
-                    {
-                        string[] aux = new string[entry.Value.Length];
-                        string[] aux_masked = new string[entry.Value.Length];
-                        int counter = 0;
-                        for (int i = 0; i < record.Value.Length; i++)
-                        {
-                            if (entry.Value.Contains(i.ToString()))
-                            {
-                                aux[counter] = record.Value[i];
-                                aux_masked[counter] = tabledata.records[record.Key + "Masked"][i];
-                                counter++;
-                            }
-                        }
+                data = (string[])data.Take(1000);
+            }
 
-                        tabledata.records[record.Key] = aux;
-                        tabledata.records[record.Key + "Masked"] = aux_masked;
+            foreach (string value in data)
+            {
+
+                if (isDNI(value))
+                {
+                    comply[0]++;
+                }
+
+                if (isEmail(value))
+                {
+                    comply[1]++;
+                }
+
+                if (isPhone(value))
+                {
+                    comply[2]++;
+                }
+
+                if (isCCN(value))
+                {
+                    comply[3]++;
+                }
+
+            }
+
+            for (int i = 0; i < 4; i++)
+            {
+                float aux = (comply[i] * 100) / data.Length;
+                if (aux >= 50)
+                {
+                    res[i] = true;
+                }
+                else
+                {
+                    res[i] = false;
+                }
+            }
+
+            tabledata.masksAvailable.Add(column, res);
+        }
+
+        // This method gets the data of the primary key(s) columns and saves the results in the corresponding Model variable
+        private void getPrimaryKeysRecords()
+        {
+            Dictionary<string, string[]> res = tabledata.records;
+            Dictionary<string, string[]> tablePks = new Dictionary<string, string[]>();
+
+            foreach (KeyValuePair<string, string> entry in tabledata.types)
+            {
+                string[] table = entry.Key.Split('.');
+
+                string[] pks = getPrimaryKey(table[0]);
+                tablePks.Add(table[0], pks);
+
+                for (int j = 0; j < pks.Length; j++)
+                {
+                    DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT [" + pks[j] + "] FROM " + getTableSchemaName(table[0]), con), "records");
+                    DataTable dt = ds.Tables["records"];
+                    String[] container = new string[dt.Rows.Count];
+                    for (int x = 0; x < dt.Rows.Count; x++)
+                    {
+                        container[x] = dt.Rows[x][0].ToString();
+                    }
+                    string key = table[0] + '.' + pks[j];
+                    if (!res.ContainsKey(key))
+                    {
+                        res.Add(key, container);
                     }
                 }
             }
+            tabledata.records = res;
+            tabledata.tablePks = tablePks;
         }
+
+        // This method gathers the schema name of a table from the database
+        private string getTableSchemaName(string table)
+        {
+            DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT '[' + TABLE_SCHEMA + '].[' + TABLE_NAME + ']' FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = '" + table + "'", con), "schema");
+            DataTable dt = ds.Tables["schema"];
+            DataRow row = dt.Rows[0];
+            return (string)row[0];
+        }
+
+        // This method gathers the datatype of a column from the database
+        private string getDataType(string column)
+        {
+            DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE COLUMN_NAME = '" + column + "'", con), "type");
+            DataTable dt = ds.Tables["type"];
+            DataRow row = dt.Rows[0];
+            return (string)row[0];
+        }
+
+        // This method gathers the primary key(s) of a table from the database
+        public string[] getPrimaryKey(string table)
+        {
+            string path = Path.Combine(Directory.GetCurrentDirectory(), @"Scripts\getPrimaryKey.sql");
+            string sql = System.IO.File.ReadAllText(path);
+            DataSet ds = Broker.Instance().Run(new SqlCommand(sql + table + "'", con), "schema");
+            DataTable dt = ds.Tables["schema"];
+            string[] res = new string[dt.Rows.Count];
+
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                res[i] = (string)dt.Rows[i][0];
+            }
+
+            return res;
+        }
+
+        // This method is used to filter the spacial datatypes 
+        private bool isSpacial(string type)
+        {
+            if (type == "geometry")
+            {
+                return true;
+            }
+            if (type == "geography")
+            {
+                return true;
+            }
+            if (type == "hierarchyid")
+            {
+                return true;
+            }
+            return false;
+        }
+
+        // This method is used to check if a database cell data corresponds to a DNI
+        private static bool isDNI(string value)
+        {
+            char[] aux = value.ToCharArray();
+            int INTcount = 0;
+            int LETTERcount = 0;
+            foreach (char i in aux)
+            {
+                if (Char.IsDigit(i))
+                {
+                    INTcount++;
+                }
+                if (Char.IsLetter(i))
+                {
+                    LETTERcount++;
+                }
+            }
+            if ((INTcount == 8 || INTcount == 9) && LETTERcount == 1)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        // This method is used to check if a database cell data corresponds to an Email
+        private bool isEmail(string value)
+        {
+            if (value.Contains('@') && value.Contains('.') && value.IndexOf('@') < value.IndexOf('.'))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        // This method is used to check if a database cell data corresponds to a Phone Number
+        private bool isPhone(string value)
+        {
+            char[] aux = value.ToCharArray();
+            int count = 0;
+            foreach (char i in aux)
+            {
+                if (Char.IsDigit(i))
+                {
+                    count++;
+                }
+            }
+            if (count >= 7 && count <= 15)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        // This method is used to check if a database cell data corresponds to a Credit Card Number
+        private bool isCCN(string value)
+        {
+            char[] aux = value.ToCharArray();
+            int count = 0;
+            foreach (char i in aux)
+            {
+                if (Char.IsDigit(i))
+                {
+                    count++;
+                }
+            }
+            if (count >= 13 && count <= 19)
+            {
+                return true;
+            }
+            return false;
+        }
+
     }
 }

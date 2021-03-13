@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System;
 using System.Web;
 using Microsoft.AspNetCore.Session;
+using System.Linq;
 
 namespace TFG.Controllers
 {
@@ -45,6 +46,7 @@ namespace TFG.Controllers
         {
             return View("DatabaseConnection", "Home");
         }
+
         // loads the data_masking View
         [HttpGet]
         public IActionResult data_masking()
@@ -64,6 +66,7 @@ namespace TFG.Controllers
         [HttpGet]
         public IActionResult data_unification()
         {
+            
             string id = HttpContext.Session.GetString("id");
             if (HttpContext.Session.Id == id)
             {
@@ -79,6 +82,7 @@ namespace TFG.Controllers
         [HttpGet]
         public IActionResult remove_duplicates()
         {
+            
             string id = HttpContext.Session.GetString("id");
             if (HttpContext.Session.Id == id)
             {
@@ -94,6 +98,7 @@ namespace TFG.Controllers
         [HttpGet]
         public IActionResult constraints()
         {
+            
             string id = HttpContext.Session.GetString("id");
             if (HttpContext.Session.Id == id)
             {
@@ -109,6 +114,7 @@ namespace TFG.Controllers
         [HttpGet]
         public IActionResult missing_values()
         {
+            
             string id = HttpContext.Session.GetString("id");
             if (HttpContext.Session.Id == id)
             {
@@ -124,6 +130,7 @@ namespace TFG.Controllers
         [HttpGet]
         public IActionResult improve_datatypes()
         {
+            
             string id = HttpContext.Session.GetString("id");
             if (HttpContext.Session.Id == id)
             {
@@ -139,6 +146,7 @@ namespace TFG.Controllers
         [HttpGet]
         public IActionResult primary_keys()
         {
+            
             string id = HttpContext.Session.GetString("id");
             if (HttpContext.Session.Id == id)
             {
@@ -154,6 +162,7 @@ namespace TFG.Controllers
         [HttpGet]
         public IActionResult foreign_keys()
         {
+            
             string id = HttpContext.Session.GetString("id");
             if (HttpContext.Session.Id == id)
             {
@@ -169,6 +178,7 @@ namespace TFG.Controllers
         [HttpGet]
         public IActionResult table_defragmentation()
         {
+            
             string id = HttpContext.Session.GetString("id");
             if (HttpContext.Session.Id == id)
             {
@@ -184,6 +194,7 @@ namespace TFG.Controllers
         [HttpGet]
         public IActionResult improve_indexes()
         {
+            
             string id = HttpContext.Session.GetString("id");
             if (HttpContext.Session.Id == id)
             {
@@ -198,6 +209,7 @@ namespace TFG.Controllers
         [HttpGet]
         public IActionResult create_masks()
         {
+            
             string id = HttpContext.Session.GetString("id");
             if (HttpContext.Session.Id == id)
             {
@@ -212,6 +224,7 @@ namespace TFG.Controllers
         [HttpGet]
         public IActionResult create_constraints()
         {
+            
             string id = HttpContext.Session.GetString("id");
             if (HttpContext.Session.Id == id)
             {
@@ -226,6 +239,7 @@ namespace TFG.Controllers
         [HttpGet]
         public IActionResult Performance()
         {
+            
             string id = HttpContext.Session.GetString("id");
             if (HttpContext.Session.Id == id)
             {
@@ -240,6 +254,7 @@ namespace TFG.Controllers
         [HttpGet]
         public IActionResult Selection()
         {
+            
             string id = HttpContext.Session.GetString("id");
             if (HttpContext.Session.Id == id)
             {
@@ -303,15 +318,16 @@ namespace TFG.Controllers
                 return RedirectToAction("Help");
             }
         }
+
+        // this method is used to go to the Selection page while saving the functionality selected and the table and column data
         [HttpPost]
         public IActionResult GoToSelection(string functionalitySelected)
         {
-            // this method is used to go to the Selection page while saving the functionality selected and the table and column data
             string id = HttpContext.Session.GetString("id");
             if (HttpContext.Session.Id == id)
             {
                 daos[id].tabledata.functionality = functionalitySelected;
-                daos[id].tabledata.ColumnsSelected = daos[id].getTableAndColumnData();
+                daos[id].getTableAndColumnData();
                 return RedirectToAction("Selection");
             }
             else
@@ -319,16 +335,17 @@ namespace TFG.Controllers
                 return RedirectToAction("DatabaseConnection");
             }
         }
+
+        // this method is used to go to the selected page while sending the corresponding functionality name and the selected columns and tables
         [HttpPost]
         public IActionResult GoToPage(string functionalitySelected, string selection)
         {
-            // this method is used to go to the selected page while sending the corresponding functionality name and the selected columns and tables
             string id = HttpContext.Session.GetString("id");
             if (HttpContext.Session.Id == id)
             {
                 if (functionalitySelected != "MainPage")
                 {
-                    daos[id].saveSelections(selection);
+                    saveSelections(selection);
                 }
                 return RedirectToAction(functionalitySelected, daos[id].tabledata);
             }
@@ -338,10 +355,10 @@ namespace TFG.Controllers
             }
         }
 
+        // this method is used to go to the selected page while sending the corresponding functionality name and the selected columns and tables
         [HttpPost]
         public IActionResult GoBackToPage(string functionalitySelected)
         {
-            // this method is used to go to the selected page while sending the corresponding functionality name and the selected columns and tables
             string id = HttpContext.Session.GetString("id");
             if (HttpContext.Session.Id == id)
             {
@@ -353,15 +370,15 @@ namespace TFG.Controllers
             }
         }
 
+        // this method is like the one above but when every column and table is selected
         [HttpPost]
         public IActionResult GoToPageAll(string functionalitySelected)
         {
-            // this method is like the one above but when every column and table is selected
             string id = HttpContext.Session.GetString("id");
             if (HttpContext.Session.Id == id)
             {
                 daos[id].tabledata.functionality = functionalitySelected;
-                daos[id].tabledata.ColumnsSelected = daos[id].getTableAndColumnData();
+                daos[id].getTableAndColumnData();
                 return RedirectToAction(functionalitySelected, daos[id].tabledata);
             }
             else
@@ -370,14 +387,14 @@ namespace TFG.Controllers
             }
         }
 
+        // this method is only used for the 2 functionalities with extra steps to redirect after the create step
         [HttpPost]
         public IActionResult GoToPageAfterCreate(string functionalitySelected, string data)
         {
-            // this method is only used for the 2 functionalities with extra steps to redirect after the create step
             string id = HttpContext.Session.GetString("id");
             if (HttpContext.Session.Id == id)
             {
-                daos[id].saveTypes(data, true);
+                saveTypes(data, true);
                 return RedirectToAction(functionalitySelected, daos[id].tabledata);
             }
             else
@@ -386,14 +403,14 @@ namespace TFG.Controllers
             }
         }
 
+        // this method is only used to confirm the changes to the database
         [HttpPost]
         public IActionResult Confirm(string data, string functionalitySelected)
         {
-            // this method is only used to confirm the changes to the database
             string id = HttpContext.Session.GetString("id");
             if (HttpContext.Session.Id == id)
             {
-                daos[id].selectRows(data);
+                selectRows(data);
                 daos[id].update();
                 daos[id].tabledata.log += functionalitySelected + "\t" + DateTime.Now.ToString();
                 return RedirectToAction("MainPage", daos[id].tabledata);
@@ -404,10 +421,10 @@ namespace TFG.Controllers
             }
         }
 
+        // this method is only used to confirm the changes to the database
         [HttpPost]
         public IActionResult GetRecord(string record, string functionalitySelected, string accordionInfo, string data2)
         {
-            // this method is only used to confirm the changes to the database
             string id = HttpContext.Session.GetString("id");
             if (HttpContext.Session.Id == id)
             {
@@ -416,9 +433,9 @@ namespace TFG.Controllers
 
                 if (data2 != "undefined")
                 {
-                    daos[id].saveTypes(data2, false);
+                    saveTypes(data2, false);
                 }
-                daos[id].tabledata.records = daos[id].getRecords(record);
+                daos[id].getRecord(record);
                 return View(functionalitySelected, daos[id].tabledata);
             }
             else
@@ -427,10 +444,10 @@ namespace TFG.Controllers
             }
         }
 
+        // this method is only used to confirm the changes to the database
         [HttpPost]
         public IActionResult GetAvailableMasks(string name)
-        {
-            // this method is only used to confirm the changes to the database
+        {          
             string id = HttpContext.Session.GetString("id");
             if (HttpContext.Session.Id == id)
             {
@@ -442,6 +459,102 @@ namespace TFG.Controllers
             {
                 return RedirectToAction("DatabaseConnection");
             }
+        }
+
+        // This method is used to save the columns and tables selected in the Selection page to the corresponding Model variable while using a parsing method
+        public void saveSelections(string selection)
+        {
+            string id = HttpContext.Session.GetString("id");
+            daos[id].tabledata.ColumnsSelected = parseSelection(selection);
+        }
+
+        // This method saves the masks selected masks from the dropdowns in the corresponding Model variable
+        public void saveTypes(string data, bool deleteSelection)
+        {
+            string id = HttpContext.Session.GetString("id");
+            Dictionary<string, string> types = new Dictionary<string, string>();
+            Dictionary<string, string[]> selection = new Dictionary<string, string[]>();
+
+            string[] columns = data.Split('/');
+            for (int i = 1; i < columns.Length; i++)
+            {
+                string[] names = columns[i].Split(',');
+                types.Add(names[0], names[1]);
+
+                string[] pair = names[0].Split('.');
+                if (deleteSelection)
+                {
+                    if (selection.ContainsKey(pair[0]))
+                    {
+                        string[] aux = new string[selection[pair[0]].Length + 1];
+                        for (int j = 0; j < selection[pair[0]].Length; j++)
+                        {
+                            aux[j] = selection[pair[0]][j];
+                        }
+                        aux[aux.Length - 1] = pair[1];
+                        selection[pair[0]] = aux;
+                    }
+                    else
+                    {
+                        string[] aux = { pair[1] };
+                        selection.Add(pair[0], aux);
+                    }
+                }
+            }
+            daos[id].tabledata.types = types;
+            if (deleteSelection)
+            {
+                daos[id].tabledata.ColumnsSelected = selection;
+            }
+            daos[id].getMaskedRecords();
+        }
+
+        // This method saves the selection of the rows in the database that will be updated
+        public void selectRows(string data)
+        {
+            Dictionary<string, string[]> res = parseSelection(data);
+            string id = HttpContext.Session.GetString("id");
+
+            foreach (KeyValuePair<string, string[]> record in daos[id].tabledata.records)
+            {
+                foreach (KeyValuePair<string, string[]> entry in res)
+                {
+                    if (record.Key == entry.Key)
+                    {
+                        string[] aux = new string[entry.Value.Length];
+                        string[] aux_masked = new string[entry.Value.Length];
+                        int counter = 0;
+                        for (int i = 0; i < record.Value.Length; i++)
+                        {
+                            if (entry.Value.Contains(i.ToString()))
+                            {
+                                aux[counter] = record.Value[i];
+                                aux_masked[counter] = daos[id].tabledata.records[record.Key + "Masked"][i];
+                                counter++;
+                            }
+                        }
+
+                        daos[id].tabledata.records[record.Key] = aux;
+                        daos[id].tabledata.records[record.Key + "Masked"] = aux_masked;
+                    }
+                }
+            }
+        }
+
+        // This method parses a string into a dictionary
+        private Dictionary<string, string[]> parseSelection(string selection)
+        {
+            Dictionary<string, string[]> res = new Dictionary<string, string[]>();
+            string id = HttpContext.Session.GetString("id");
+
+            string[] tables = selection.Split('/');
+            for (int i = 1; i < tables.Length; i++)
+            {
+                string[] columns = tables[i].Split(',');
+                res.Add(columns[0], columns.Skip(1).ToArray());
+            }
+
+            return res;
         }
 
     }
