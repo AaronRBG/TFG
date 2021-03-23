@@ -237,7 +237,9 @@ namespace TFG
 
             if (data.Length > 1000)
             {
-                data = (string[])data.Take(1000);
+                string[] result = new string[1000];
+                Array.Copy(data, 0, result, 0, 1000);
+                data = result;
             }
 
             foreach (string value in data)
