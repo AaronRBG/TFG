@@ -166,6 +166,26 @@ namespace TFG
             tabledata.ColumnsSelected = result;
         }
 
+        // This method gathers the names of the tables from the database and saves the result to the corresponding Model variable
+        public void getTableData()
+        {
+
+            DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'", con), "tables");
+            DataTable dt = ds.Tables["tables"];
+            DataRow rows;
+            string[] res = new string[dt.Rows.Count];
+
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                rows = dt.Rows[i];
+                res[i] = (string)rows[0];
+            }
+
+            Array.Sort<string>(res);
+
+            tabledata.TablesSelected = res;
+        }
+
         // This method updates the database with the corresponding changes
         public void update()
         {

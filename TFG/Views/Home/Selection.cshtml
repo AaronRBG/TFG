@@ -4,33 +4,7 @@
 
     ViewData["Title"] = "Database Connection";
 
-    // Creating some structures to ensure code reusability and prevent code duplication and if it's run on columns (true) or entry.Values (false)
-    Dictionary<string, string> functionalities_text = new Dictionary<string, string>();
-    Dictionary<string, bool> functionalities_need_columns = new Dictionary<string, bool>();
 
-    // Datacleaning functionalities
-    functionalities_text.Add("create_masks", "Data Masking");
-    functionalities_need_columns.Add("create_masks", true);
-    functionalities_text.Add("data_unification", "Data Unification");
-    functionalities_need_columns.Add("data_unification", true);
-    functionalities_text.Add("remove_duplicates", "Remove Duplicates");
-    functionalities_need_columns.Add("remove_duplicates", true);
-    functionalities_text.Add("create_constraints", "Constraints");
-    functionalities_need_columns.Add("create_constraints", false);
-    functionalities_text.Add("missing_values", "Treating Missing Values");
-    functionalities_need_columns.Add("missing_values", true);
-
-    // Tuning functionalities
-    functionalities_text.Add("improve_datatypes", "Improve Datatypes");
-    functionalities_need_columns.Add("improve_datatypes", true);
-    functionalities_text.Add("primary_keys", "Add/Improve Primary Keys");
-    functionalities_need_columns.Add("primary_keys", false);
-    functionalities_text.Add("foreign_keys", "Add/Improve Foreign Keys");
-    functionalities_need_columns.Add("foreign_keys", false);
-    functionalities_text.Add("entry.Value_defragmentation", "Table Defragmentation");
-    functionalities_need_columns.Add("entry.Value_defragmentation", false);
-    functionalities_text.Add("improve_indexes", "Index Cleaning & Generation");
-    functionalities_need_columns.Add("improve_indexes", false);
 }
 @using (Html.BeginForm("GoToPage", "Home"))
 {
@@ -48,7 +22,7 @@
             <button type="button" onclick='window.location.href="DatabaseConnection"' class="btn btn-default" data-toggle="tooltip" data-placement="auto" title="Change database"><span class='folder_icon'></span></button>
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a id="selection-a" onclick="goToPage('MainPage', false)" style="color: orange;" MainPage">Home</a></li>
-                <li class="breadcrumb-item active" aria-current="page"><text>@functionalities_text[Model.functionality]</text> Selection</li>
+                <li class="breadcrumb-item active" aria-current="page"><text>@Model.functionalities_text[Model.functionality]</text> Selection</li>
             </ol>
         </div>
     </div>
@@ -59,7 +33,7 @@
 <div id="middle_container" class="left-half">
     <div id="selection-top" class="centeredBig">
         <h3>
-            @if (@functionalities_need_columns[Model.functionality])
+            @if (@Model.functionalities_need_columns[Model.functionality])
             {
                 <span>Tables and columns selection</span>
             }
@@ -85,7 +59,7 @@
                         </button>
                     </h5>
                 </div>
-                @if (@functionalities_need_columns[Model.functionality])
+                @if (@Model.functionalities_need_columns[Model.functionality])
                 {
                     <div id="@collapse.Substring(1)" class="collapse hide" aria-labelledby="@entry.Key" data-parent="#accordion">
                         <div class="card-body nav_color_2">
