@@ -22,10 +22,28 @@ namespace TFG
             this.con = con;
         }
 
+        // This method creates the needed scripts
+        public void loadScripts()
+        {
+            string path = Path.Combine(Directory.GetCurrentDirectory(), @"Scripts\createDNIMask.sql");
+            string sql = System.IO.File.ReadAllText(path);
+            Broker.Instance().Run(new SqlCommand(sql, con), "createFunctions");
+            path = Path.Combine(Directory.GetCurrentDirectory(), @"Scripts\createPhoneMask.sql");
+            sql = System.IO.File.ReadAllText(path);
+            Broker.Instance().Run(new SqlCommand(sql, con), "createFunctions");
+            path = Path.Combine(Directory.GetCurrentDirectory(), @"Scripts\createEmailMask.sql");
+            sql = System.IO.File.ReadAllText(path);
+            Broker.Instance().Run(new SqlCommand(sql, con), "createFunctions");
+            path = Path.Combine(Directory.GetCurrentDirectory(), @"Scripts\createCreditCardMask.sql");
+            sql = System.IO.File.ReadAllText(path);
+            Broker.Instance().Run(new SqlCommand(sql, con), "createFunctions");
+        }
+
         // This method applies the selected masks to the records and saves the results in the corresponding Model variable
         public void getMaskedRecords()
         {
-            getPrimaryKeysRecords();
+            tabledata.TablesSelected = tabledata.ColumnsSelected.Keys.ToArray();
+            GetPrimaryKeysRecords();
             Dictionary<string, string[]> res = tabledata.records;
 
             foreach (KeyValuePair<string, string> entry in tabledata.types)
@@ -64,27 +82,55 @@ namespace TFG
             tabledata.records = res;
         }
 
-        // This method creates the needed scripts and gets the data of the column from the database
+        // This method applies the selected masks to the records and saves the results in the corresponding Model variable
+        public void getSuggestedPks()
+        {
+            getInitData();
+            Dictionary<string, string[]> res = tabledata.records;
+
+            foreach (KeyValuePair<string, string> entry in tabledata.types)
+            {
+                string[] pair = entry.Key.Split('.');
+                string mask;
+                switch (entry.Value)
+                {
+                    case "DNI":
+                        mask = "dbo].[DNIMask]([";
+                        break;
+                    case "Phone Number":
+                        mask = "dbo].[phoneMask]([";
+                        break;
+                    case "Credit card":
+                        mask = "dbo].[creditCardMask]([";
+                        break;
+                    default:
+                        mask = "dbo].[emailMask]([";
+                        break;
+                }
+
+                DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT [" + mask + pair[1] + "]) FROM " + getTableSchemaName(pair[0]), con), "records");
+                DataTable dt = ds.Tables["records"];
+                string[] container = new string[dt.Rows.Count];
+                for (int x = 0; x < dt.Rows.Count; x++)
+                {
+                    container[x] = dt.Rows[x][0].ToString();
+                }
+                string name = entry.Key + "Masked";
+                if (!res.ContainsKey(name))
+                {
+                    res.Add((name), container);
+                }
+            }
+            tabledata.records = res;
+        }
+
+        // This method gets the data of the column from the database
         public void getRecord(string record)
         {
             Dictionary<string, string[]> res = tabledata.records;
 
             if (!res.ContainsKey(record))
             {
-
-                string path = Path.Combine(Directory.GetCurrentDirectory(), @"Scripts\createDNIMask.sql");
-                string sql = System.IO.File.ReadAllText(path);
-                Broker.Instance().Run(new SqlCommand(sql, con), "createFunctions");
-                path = Path.Combine(Directory.GetCurrentDirectory(), @"Scripts\createPhoneMask.sql");
-                sql = System.IO.File.ReadAllText(path);
-                Broker.Instance().Run(new SqlCommand(sql, con), "createFunctions");
-                path = Path.Combine(Directory.GetCurrentDirectory(), @"Scripts\createEmailMask.sql");
-                sql = System.IO.File.ReadAllText(path);
-                Broker.Instance().Run(new SqlCommand(sql, con), "createFunctions");
-                path = Path.Combine(Directory.GetCurrentDirectory(), @"Scripts\createCreditCardMask.sql");
-                sql = System.IO.File.ReadAllText(path);
-                Broker.Instance().Run(new SqlCommand(sql, con), "createFunctions");
-
                 string[] column = record.Split('.');
 
                 DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT [" + column[1] + "] FROM " + getTableSchemaName(column[0]), con), "records");
@@ -98,11 +144,10 @@ namespace TFG
                 tabledata.records = res;
             }
         }
-        
+
         // This method gathers the names of the tables and their columns from the database and saves the result to the corresponding Model variable
         public void getTableAndColumnData()
         {
-
             DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'", con), "tables");
             DataSet dsC;
             DataTable dt = ds.Tables["tables"];
@@ -303,29 +348,50 @@ namespace TFG
             tabledata.masksAvailable.Add(column, res);
         }
 
-        // This method gets the data of the primary key(s) columns and saves the results in the corresponding Model variable
-        private void getPrimaryKeysRecords()
+        // This method gathers the initial data for most functionalities
+        private void getInitData()
         {
-            Dictionary<string, string[]> res = tabledata.records;
+            GetPrimaryKeysRecords();
+
+            foreach (KeyValuePair<string, string[]> entry in tabledata.ColumnsSelected)
+            {
+                for (int i = 0; i < entry.Value.Length; i++)
+                {
+                    string name = entry.Key + '.' + entry.Value[i];
+                    getRecord(name);
+                }
+            }
+        }
+
+        // This method gets the data of the primary key(s) columns and saves the results in the corresponding Model variable
+        private void GetPrimaryKeysRecords()
+        {
+            Dictionary<string, string[]> res;
+            if (tabledata.records != null)
+            {
+                res = tabledata.records;
+            }
+            else
+            {
+                res = new Dictionary<string, string[]>();
+            }
             Dictionary<string, string[]> tablePks = new Dictionary<string, string[]>();
 
-            foreach (KeyValuePair<string, string> entry in tabledata.types)
+            foreach (string entry in tabledata.TablesSelected)
             {
-                string[] table = entry.Key.Split('.');
-
-                string[] pks = getPrimaryKey(table[0]);
-                tablePks.Add(table[0], pks);
+                string[] pks = getPrimaryKey(entry);
+                tablePks.Add(entry, pks);
 
                 for (int j = 0; j < pks.Length; j++)
                 {
-                    DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT [" + pks[j] + "] FROM " + getTableSchemaName(table[0]), con), "records");
+                    DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT [" + pks[j] + "] FROM " + getTableSchemaName(entry), con), "records");
                     DataTable dt = ds.Tables["records"];
                     String[] container = new string[dt.Rows.Count];
                     for (int x = 0; x < dt.Rows.Count; x++)
                     {
                         container[x] = dt.Rows[x][0].ToString();
                     }
-                    string key = table[0] + '.' + pks[j];
+                    string key = entry + '.' + pks[j];
                     if (!res.ContainsKey(key))
                     {
                         res.Add(key, container);

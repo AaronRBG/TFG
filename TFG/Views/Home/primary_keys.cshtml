@@ -45,85 +45,36 @@
             <span>Primary Keys Report</span>
         </h3>
     </div>
-    <div id="accordion" class="overflow-auto left-half" style="width:20vw;">
-        <span class="font-weight-bold">Tables:</span>
-        <br />
-        @foreach (string entry in Model.TablesSelected)
-        {
-            string collapse = "#collapse" + entry;
-            string CheckBox = entry + "CheckBox";
 
-            <div class="card">
-                <div class="card-header nav_color_1" id="@entry">
-                    <h5>
-                        <input type="checkbox" id="@CheckBox" name="@entry" onclick="checkChilds('@CheckBox')" />
-                        <button class="btn btn-link" data-toggle="collapse" data-target="@collapse" aria-expanded="true" aria-controls="collapseOne">
-                            @entry
-                        </button>
-                    </h5>
-                </div>
-            </div>
-        }
-    </div>
     <div id="Tab-contents" class="overflow-auto">
-        <div id="default" class="tabcontent">
-            <h2 style="padding-top:35vh;">No column selected, select one from the dropdown on the left</h2>
-        </div>
-        @foreach (string entry in Model.TablesSelected)
-        {
-            string[] pks = Model.tablePks[entry];
-            string[][] pk_data = new string[pks.Length][];
-            for (int i = 0; i < pks.Length; i++)
-            {
-                pks[i] = @entry + '.' + pks[i];
-                pk_data[i] = Model.records[pks[i]];
-            }
 
-            for (int i = 0; i < entry.Value.Length; i++)
-            {
-                string name = @entry.Key + '.' + @entry.Value[i];
-                string divName = name + "Div";
-                string masked = name + "Masked";
-                string[] record = Model.records[name];
-                string[] recordMasked = Model.records[masked];
+        <table class="table table-striped overflow-auto">
 
-                <div id="@divName" class="tabcontent" style="display: none;">
-                    <table class="table table-striped overflow-auto">
-                        <thead class="thead-dark">
-                            <tr>
-                                <th scope="col">Selections</th>
-                                @for (int k = 0; k < pks.Length; k++)
-                                {
-                                    int l = k + 1;
-                                    <th scope="col">Pk column @l (@pks[k].Substring(pks[k].IndexOf('.') + 1))</th>
-                                }
-                                <th scope="col">Original Column data (@entry.Value[i])</th>
-                                <th scope="col">Data after applying mask (@entry.Value[i])</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @for (int j = 0; j < record.Length; j++)
-                            {
-                                string idname = @entry.Value[i] + @j + "Record";
-                                <tr>
-                                    <th scope="row"><input type="checkbox" id="@idname" name="@idname" data-parent="@name" onclick="checkParent('@name', '@idname')" /></th>
-                                    @for (int k = 0; k < pks.Length; k++)
-                                    {
-                                        <td>@pk_data[k][j]</td>
-                                    }
-                                    <td style="border-left: 1px solid;">@record[j]</td>
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">Selections</th>
+                    <th scope="col">Table name</th>
+                    <th scope="col">Table original pks</th>
+                    <th scope="col">Table suggested pks</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (string entry in Model.TablesSelected)
+                {
+                    string pks = Model.tablePks[entry].ToString();
+                    string suggestedPks = Model.tableSuggestedPks[entry].ToString();
 
-                                    <td>@recordMasked[j]</td>
+                    <tr>
+                        <th scope="row"><input type="checkbox" id="@entry" name="@entry" /></th>
+                        <td>@entry</td>
+                        <td style="border-left: 1px solid;">@pks</td>
+                        <td>@suggestedPks</td>
 
+                    </tr>
+                }
+            </tbody>
+        </table>
 
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-
-            }
-        }
     </div>
 </div>
 <!-- This part is perform whole actions like selecting everything or nothing and running the functionality with the selected items -->

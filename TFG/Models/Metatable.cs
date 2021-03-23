@@ -47,6 +47,7 @@ namespace TFG.Models
         public string[] TablesSelected { get; set; }
         public Dictionary<string, bool[]> masksAvailable { get; set; }
         public Dictionary<string, string[]> tablePks { get; set; }
+        public Dictionary<string, string[]> tableSuggestedPks { get; set; }
         public Dictionary<string, string[]> ColumnsSelected { get; set; }
         public Dictionary<string, string> types { get; set; }
         public Dictionary<string, string[]> records { get; set; }

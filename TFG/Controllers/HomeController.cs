@@ -309,6 +309,7 @@ namespace TFG.Controllers
                 HttpContext.Session.SetString("id", HttpContext.Session.Id);
                 daos = new Dictionary<string, MetatableDao>();
                 daos.Add(HttpContext.Session.Id, new MetatableDao(new Metatable(splits[1]), con));
+                daos[HttpContext.Session.Id].loadScripts();
 
                 return RedirectToAction("MainPage");
             }
@@ -327,14 +328,7 @@ namespace TFG.Controllers
             if (HttpContext.Session.Id == id)
             {
                 daos[id].tabledata.functionality = functionalitySelected;
-                if (daos[id].tabledata.functionalities_need_columns[functionalitySelected])
-                {
-                    daos[id].getTableAndColumnData();
-                }
-                else
-                {
-                    daos[id].getTableData();
-                }
+                daos[id].getTableAndColumnData();
                 return RedirectToAction("Selection");
             }
             else
@@ -352,7 +346,18 @@ namespace TFG.Controllers
             {
                 if (functionalitySelected != "MainPage")
                 {
-                    saveSelections(selection);
+                    if (selection.Contains(','))
+                    {
+                        daos[id].tabledata.ColumnsSelected = parseColumnSelection(selection);
+                    }
+                    else
+                    {
+                        daos[id].tabledata.TablesSelected = parseTableSelection(selection);
+                    }
+                    if (functionalitySelected == "primary_keys")
+                    {
+                        daos[id].getSuggestedPks();
+                    }
                 }
                 return RedirectToAction(functionalitySelected, daos[id].tabledata);
             }
@@ -392,6 +397,10 @@ namespace TFG.Controllers
                 else
                 {
                     daos[id].getTableData();
+                }
+                if (functionalitySelected == "primary_keys")
+                {
+                    daos[id].getSuggestedPks();
                 }
                 return RedirectToAction(functionalitySelected, daos[id].tabledata);
             }
@@ -472,20 +481,6 @@ namespace TFG.Controllers
             else
             {
                 return RedirectToAction("DatabaseConnection");
-            }
-        }
-
-        // This method is used to save the columns and tables selected in the Selection page to the corresponding Model variable while using a parsing method
-        public void saveSelections(string selection)
-        {
-            string id = HttpContext.Session.GetString("id");
-            if (selection.Contains(','))
-            {
-                daos[id].tabledata.ColumnsSelected = parseColumnSelection(selection);
-            }
-            else
-            {
-                daos[id].tabledata.TablesSelected = parseTableSelection(selection);
             }
         }
 
