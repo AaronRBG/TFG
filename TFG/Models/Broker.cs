@@ -32,7 +32,7 @@ namespace TFG
             {
                 adp.SelectCommand = comm;
                 adp.Fill(ds, reff);
-            } catch (Exception)
+            } catch (Exception e)
             {
                 Console.WriteLine();
             }

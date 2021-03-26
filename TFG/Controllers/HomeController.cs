@@ -393,10 +393,14 @@ namespace TFG.Controllers
                 if (daos[id].tabledata.functionalities_need_columns[functionalitySelected])
                 {
                     daos[id].getTableAndColumnData();
+                    daos[id].tabledata.TablesSelected = null;
+                    daos[id].tabledata.records = null;
                 }
                 else
                 {
                     daos[id].getTableData();
+                    daos[id].tabledata.ColumnsSelected = null;
+                    daos[id].tabledata.records = null;
                 }
                 if (functionalitySelected == "primary_keys")
                 {

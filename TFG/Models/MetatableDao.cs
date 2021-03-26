@@ -82,46 +82,49 @@ namespace TFG
             tabledata.records = res;
         }
 
-        // This method applies the selected masks to the records and saves the results in the corresponding Model variable
+        // This method applies runs queries to calculate the best suitable pks for the given tables
         public void getSuggestedPks()
         {
-            getInitData();
-            Dictionary<string, string[]> res = tabledata.records;
+            GetPrimaryKeysRecords();
+            Dictionary<string, string[]> res = new Dictionary<string, string[]>();
 
-            foreach (KeyValuePair<string, string> entry in tabledata.types)
+            foreach (string entry in tabledata.TablesSelected)
             {
-                string[] pair = entry.Key.Split('.');
-                string mask;
-                switch (entry.Value)
-                {
-                    case "DNI":
-                        mask = "dbo].[DNIMask]([";
-                        break;
-                    case "Phone Number":
-                        mask = "dbo].[phoneMask]([";
-                        break;
-                    case "Credit card":
-                        mask = "dbo].[creditCardMask]([";
-                        break;
-                    default:
-                        mask = "dbo].[emailMask]([";
-                        break;
-                }
+                string values = getSuggestedPks(entry);
+                string[] container = new string[1];
+                container[0] = values;
+                res.Add(entry, container);          
+            }
+            tabledata.tableSuggestedPks = res;
+        }
 
-                DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT [" + mask + pair[1] + "]) FROM " + getTableSchemaName(pair[0]), con), "records");
-                DataTable dt = ds.Tables["records"];
-                string[] container = new string[dt.Rows.Count];
-                for (int x = 0; x < dt.Rows.Count; x++)
+        // This method applies the selected masks to the records and saves the results in the corresponding Model variable
+        public string getSuggestedPks(string table)
+        {
+            string res = "";
+            bool found = false;
+            int count = 0;
+            int distinct = 0, total = 0;
+
+            string[] columns = getTableColumns(table);
+            while(!found && count<columns.Length)
+            {
+                DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT DISTINCT COUNT([" + columns[count] + "]) FROM " + getTableSchemaName(table), con), "distinct");
+                distinct = (int)ds.Tables["distinct"].Rows[0][0];
+                ds = Broker.Instance().Run(new SqlCommand("SELECT DISTINCT COUNT([" + columns[count] + "]) FROM " + getTableSchemaName(table), con), "total");
+                total = (int)ds.Tables["total"].Rows[0][0];
+                if(distinct == total)
                 {
-                    container[x] = dt.Rows[x][0].ToString();
+                    found = true;
+                    res = columns[count];
                 }
-                string name = entry.Key + "Masked";
-                if (!res.ContainsKey(name))
+                else
                 {
-                    res.Add((name), container);
+                    count++;
                 }
             }
-            tabledata.records = res;
+            
+            return res;
         }
 
         // This method gets the data of the column from the database
@@ -135,7 +138,7 @@ namespace TFG
 
                 DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT [" + column[1] + "] FROM " + getTableSchemaName(column[0]), con), "records");
                 DataTable dt = ds.Tables["records"];
-                String[] container = new string[dt.Rows.Count];
+                string[] container = new string[dt.Rows.Count];
                 for (int x = 0; x < dt.Rows.Count; x++)
                 {
                     container[x] = dt.Rows[x][0].ToString();
@@ -149,56 +152,14 @@ namespace TFG
         public void getTableAndColumnData()
         {
             DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'", con), "tables");
-            DataSet dsC;
             DataTable dt = ds.Tables["tables"];
-            DataTable dtC;
             DataRow rows;
             Dictionary<string, string[]> res = new Dictionary<string, string[]>();
-            string[] aux;
-            string tablename;
 
             for (int i = 0; i < dt.Rows.Count; i++)
             {
                 rows = dt.Rows[i];
-                dsC = Broker.Instance().Run(new SqlCommand("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '" + rows[0] + "'", con), "columns");
-                dtC = dsC.Tables["columns"];
-
-                aux = new string[dtC.Rows.Count];
-                tablename = (string)rows[0];
-
-                int index = dtC.Rows.Count;
-
-                for (int j = 0; j < dtC.Rows.Count; j++)
-                {
-                    rows = dtC.Rows[j];
-                    string type = getDataType((string)rows[0]);
-                    if (!isSpacial(type))
-                    {
-                        aux[j] = (string)rows[0];
-                    }
-                    else
-                    {
-                        index--;
-                    }
-                }
-
-                string[] other = new string[index];
-                index = 0;
-
-                for (int j = 0; j < dtC.Rows.Count; j++)
-                {
-                    if (aux[j] != null)
-                    {
-                        other[index] = aux[j];
-                        index++;
-                    }
-                }
-                aux = other;
-
-                Array.Sort<string>(aux);
-
-                dsC.Reset();
-                res.Add(tablename, aux);
+                res.Add((string)rows[0], getTableColumns((string)rows[0]));
             }
 
             Dictionary<string, string[]> result = new Dictionary<string, string[]>();
@@ -229,6 +190,49 @@ namespace TFG
             Array.Sort<string>(res);
 
             tabledata.TablesSelected = res;
+        }
+
+        // This method gathers the names of the columns of a given table from the database and returns the result
+        public string[] getTableColumns(string table)
+        {
+            DataSet dsC;
+            DataTable dtC;
+            DataRow rows;
+
+            dsC = Broker.Instance().Run(new SqlCommand("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '" + table + "'", con), "columns");
+            dtC = dsC.Tables["columns"];
+
+            string[] aux = new string[dtC.Rows.Count];
+            int index = dtC.Rows.Count;
+
+            for (int j = 0; j < dtC.Rows.Count; j++)
+            {
+                rows = dtC.Rows[j];
+                string type = getDataType((string)rows[0]);
+                if (!isSpacial(type))
+                {
+                    aux[j] = (string)rows[0];
+                }
+                else
+                {
+                    index--;
+                }
+            }
+
+            string[] other = new string[index];
+            index = 0;
+
+            for (int j = 0; j < dtC.Rows.Count; j++)
+            {
+                if (aux[j] != null)
+                {
+                    other[index] = aux[j];
+                    index++;
+                }
+            }
+            aux = other;
+            Array.Sort<string>(aux);
+            return aux;
         }
 
         // This method updates the database with the corresponding changes
@@ -428,11 +432,33 @@ namespace TFG
             DataSet ds = Broker.Instance().Run(new SqlCommand(sql + table + "'", con), "schema");
             DataTable dt = ds.Tables["schema"];
             string[] res = new string[dt.Rows.Count];
+            int index = dt.Rows.Count;
 
-            for (int i = 0; i < dt.Rows.Count; i++)
+            for (int j = 0; j < dt.Rows.Count; j++)
             {
-                res[i] = (string)dt.Rows[i][0];
+                string type = getDataType((string)dt.Rows[j][0]);
+                if (!isSpacial(type))
+                {
+                    res[j] = (string)dt.Rows[j][0];
+                }
+                else
+                {
+                    index--;
+                }
             }
+
+            string[] other = new string[index];
+            index = 0;
+
+            for (int j = 0; j < dt.Rows.Count; j++)
+            {
+                if (res[j] != null)
+                {
+                    other[index] = res[j];
+                    index++;
+                }
+            }
+            res = other;
 
             return res;
         }
