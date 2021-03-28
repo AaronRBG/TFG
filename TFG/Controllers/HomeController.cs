@@ -10,6 +10,7 @@ using System;
 using System.Web;
 using Microsoft.AspNetCore.Session;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace TFG.Controllers
 {
@@ -27,9 +28,10 @@ namespace TFG.Controllers
         // loads the MainPage View saving the database name in the viewdata to be accesed later
 
         [HttpGet]
-        public IActionResult MainPage()
+        public ActionResult MainPage()
         {
             string id = HttpContext.Session.GetString("id");
+
             if (HttpContext.Session.Id == id)
             {
                 return View("MainPage", daos[id].tabledata);
@@ -38,18 +40,19 @@ namespace TFG.Controllers
             {
                 return RedirectToAction("DatabaseConnection");
             }
+
         }
 
         // loads the DatabaseConnection View
         [HttpGet]
-        public IActionResult DatabaseConnection()
+        public ActionResult DatabaseConnection()
         {
             return View("DatabaseConnection", "Home");
         }
 
         // loads the data_masking View
         [HttpGet]
-        public IActionResult data_masking()
+        public ActionResult data_masking()
         {
             string id = HttpContext.Session.GetString("id");
             if (HttpContext.Session.Id == id)
@@ -64,7 +67,7 @@ namespace TFG.Controllers
 
         // loads the data_unification View
         [HttpGet]
-        public IActionResult data_unification()
+        public ActionResult data_unification()
         {
 
             string id = HttpContext.Session.GetString("id");
@@ -80,7 +83,7 @@ namespace TFG.Controllers
 
         // loads the remove_duplicates View
         [HttpGet]
-        public IActionResult remove_duplicates()
+        public ActionResult remove_duplicates()
         {
 
             string id = HttpContext.Session.GetString("id");
@@ -96,7 +99,7 @@ namespace TFG.Controllers
 
         // loads the constraints View
         [HttpGet]
-        public IActionResult constraints()
+        public ActionResult constraints()
         {
 
             string id = HttpContext.Session.GetString("id");
@@ -112,7 +115,7 @@ namespace TFG.Controllers
 
         // loads the missing_values View
         [HttpGet]
-        public IActionResult missing_values()
+        public ActionResult missing_values()
         {
 
             string id = HttpContext.Session.GetString("id");
@@ -128,7 +131,7 @@ namespace TFG.Controllers
 
         // loads the improve_Metatable daos[id].tabledatatypes View
         [HttpGet]
-        public IActionResult improve_datatypes()
+        public ActionResult improve_datatypes()
         {
 
             string id = HttpContext.Session.GetString("id");
@@ -144,7 +147,7 @@ namespace TFG.Controllers
 
         // loads the primary_keys View
         [HttpGet]
-        public IActionResult primary_keys()
+        public ActionResult primary_keys()
         {
 
             string id = HttpContext.Session.GetString("id");
@@ -160,7 +163,7 @@ namespace TFG.Controllers
 
         // loads the foreign_keys View
         [HttpGet]
-        public IActionResult foreign_keys()
+        public ActionResult foreign_keys()
         {
 
             string id = HttpContext.Session.GetString("id");
@@ -176,7 +179,7 @@ namespace TFG.Controllers
 
         // loads the table_defragmentation View
         [HttpGet]
-        public IActionResult table_defragmentation()
+        public ActionResult table_defragmentation()
         {
 
             string id = HttpContext.Session.GetString("id");
@@ -192,7 +195,7 @@ namespace TFG.Controllers
 
         // loads the improve_indexes View
         [HttpGet]
-        public IActionResult improve_indexes()
+        public ActionResult improve_indexes()
         {
 
             string id = HttpContext.Session.GetString("id");
@@ -207,7 +210,7 @@ namespace TFG.Controllers
         }
 
         [HttpGet]
-        public IActionResult create_masks()
+        public ActionResult create_masks()
         {
 
             string id = HttpContext.Session.GetString("id");
@@ -222,7 +225,7 @@ namespace TFG.Controllers
             }
         }
         [HttpGet]
-        public IActionResult create_constraints()
+        public ActionResult create_constraints()
         {
 
             string id = HttpContext.Session.GetString("id");
@@ -237,7 +240,7 @@ namespace TFG.Controllers
         }
 
         [HttpGet]
-        public IActionResult Performance()
+        public ActionResult Performance()
         {
 
             string id = HttpContext.Session.GetString("id");
@@ -252,7 +255,7 @@ namespace TFG.Controllers
         }
 
         [HttpGet]
-        public IActionResult Selection()
+        public ActionResult Selection()
         {
 
             string id = HttpContext.Session.GetString("id");
@@ -267,20 +270,20 @@ namespace TFG.Controllers
         }
 
         [HttpGet]
-        public IActionResult Help()
+        public ActionResult Help()
         {
             return View("Help");
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         [HttpGet]
-        public IActionResult Error()
+        public ActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
         [HttpPost]
-        public IActionResult Connect(string connectionString)
+        public ActionResult Connect(string connectionString)
         {
             // this method checks the connection string to see it is not empty
             if (connectionString == null || connectionString == "")
@@ -289,42 +292,46 @@ namespace TFG.Controllers
             }
 
             // then tries to open it to see if it is valid
-            try
-            {
-                SqlConnection con = new SqlConnection(connectionString);
-                con.Open();
 
-                // if it is valid it gets the database name
-                string[] splits = connectionString.Split(';');
-                foreach (string splitted in splits)
+            {
+                try
                 {
-                    if (splitted.Contains("database"))
+                    SqlConnection con = new SqlConnection(connectionString);
+                    con.Open();
+
+                    // if it is valid it gets the database name
+                    string[] splits = connectionString.Split(';');
+                    foreach (string splitted in splits)
                     {
-                        splits = splitted.Split('=');
-                        break;
+                        if (splitted.Contains("database"))
+                        {
+                            splits = splitted.Split('=');
+                            break;
+                        }
                     }
+
+                    // Save a id variable in the session to stop it for resetting, then save the connection and create the dao
+                    HttpContext.Session.SetString("id", HttpContext.Session.Id);
+                    daos = new Dictionary<string, MetatableDao>();
+                    daos.Add(HttpContext.Session.Id, new MetatableDao(new Metatable(splits[1]), con));
+                    daos[HttpContext.Session.Id].loadScripts();
+
+                    return RedirectToAction("MainPage");
                 }
-
-                // Save a id variable in the session to stop it for resetting, then save the connection and create the dao
-                HttpContext.Session.SetString("id", HttpContext.Session.Id);
-                daos = new Dictionary<string, MetatableDao>();
-                daos.Add(HttpContext.Session.Id, new MetatableDao(new Metatable(splits[1]), con));
-                daos[HttpContext.Session.Id].loadScripts();
-
-                return RedirectToAction("MainPage");
-            }
-            catch (Exception)
-            {
-                // if it is not valid it return the Help View
-                return RedirectToAction("Help");
+                catch (Exception)
+                {
+                    // if it is not valid it return the Help View
+                    return RedirectToAction("Help");
+                }
             }
         }
 
         // this method is used to go to the Selection page while saving the functionality selected and the table and column data
         [HttpPost]
-        public IActionResult GoToSelection(string functionalitySelected)
+        public ActionResult GoToSelection(string functionalitySelected)
         {
             string id = HttpContext.Session.GetString("id");
+
             if (HttpContext.Session.Id == id)
             {
                 daos[id].tabledata.functionality = functionalitySelected;
@@ -335,13 +342,15 @@ namespace TFG.Controllers
             {
                 return RedirectToAction("DatabaseConnection");
             }
+
         }
 
         // this method is used to go to the selected page while sending the corresponding functionality name and the selected columns and tables
         [HttpPost]
-        public IActionResult GoToPage(string functionalitySelected, string selection)
+        public ActionResult GoToPage(string functionalitySelected, string selection)
         {
             string id = HttpContext.Session.GetString("id");
+
             if (HttpContext.Session.Id == id)
             {
                 if (functionalitySelected != "MainPage")
@@ -365,11 +374,12 @@ namespace TFG.Controllers
             {
                 return RedirectToAction("DatabaseConnection");
             }
+
         }
 
         // this method is used to go to the selected page while sending the corresponding functionality name and the selected columns and tables
         [HttpPost]
-        public IActionResult GoBackToPage(string functionalitySelected)
+        public ActionResult GoBackToPage(string functionalitySelected)
         {
             string id = HttpContext.Session.GetString("id");
             if (HttpContext.Session.Id == id)
@@ -384,7 +394,7 @@ namespace TFG.Controllers
 
         // this method is like the one above but when every column and table is selected
         [HttpPost]
-        public IActionResult GoToPageAll(string functionalitySelected)
+        public ActionResult GoToPageAll(string functionalitySelected)
         {
             string id = HttpContext.Session.GetString("id");
             if (HttpContext.Session.Id == id)
@@ -416,7 +426,7 @@ namespace TFG.Controllers
 
         // this method is only used for the 2 functionalities with extra steps to redirect after the create step
         [HttpPost]
-        public IActionResult GoToPageAfterCreate(string functionalitySelected, string data)
+        public ActionResult GoToPageAfterCreate(string functionalitySelected, string data)
         {
             string id = HttpContext.Session.GetString("id");
             if (HttpContext.Session.Id == id)
@@ -432,7 +442,7 @@ namespace TFG.Controllers
 
         // this method is only used to confirm the changes to the database
         [HttpPost]
-        public IActionResult Confirm(string data, string functionalitySelected)
+        public ActionResult Confirm(string data, string functionalitySelected)
         {
             string id = HttpContext.Session.GetString("id");
             if (HttpContext.Session.Id == id)
@@ -450,7 +460,7 @@ namespace TFG.Controllers
 
         // this method is only used to confirm the changes to the database
         [HttpPost]
-        public IActionResult GetRecord(string record, string functionalitySelected, string accordionInfo, string data2)
+        public ActionResult GetRecord(string record, string functionalitySelected, string accordionInfo, string data2)
         {
             string id = HttpContext.Session.GetString("id");
             if (HttpContext.Session.Id == id)
@@ -473,7 +483,7 @@ namespace TFG.Controllers
 
         // this method is only used to confirm the changes to the database
         [HttpPost]
-        public IActionResult GetAvailableMasks(string name)
+        public ActionResult GetAvailableMasks(string name)
         {
             string id = HttpContext.Session.GetString("id");
             if (HttpContext.Session.Id == id)

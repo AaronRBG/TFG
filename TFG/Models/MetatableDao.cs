@@ -91,9 +91,8 @@ namespace TFG
             foreach (string entry in tabledata.TablesSelected)
             {
                 string values = getSuggestedPks(entry);
-                string[] container = new string[1];
-                container[0] = values;
-                res.Add(entry, container);          
+                string[] pks = values.Split(',');
+                res.Add(entry, pks);
             }
             tabledata.tableSuggestedPks = res;
         }
@@ -106,24 +105,72 @@ namespace TFG
             int count = 0;
             int distinct = 0, total = 0;
 
-            string[] columns = getTableColumns(table);
-            while(!found && count<columns.Length)
+            string[] combinations = getCombinations(table);
+            while (!found && count < combinations.Length)
             {
-                DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT DISTINCT COUNT([" + columns[count] + "]) FROM " + getTableSchemaName(table), con), "distinct");
-                distinct = (int)ds.Tables["distinct"].Rows[0][0];
-                ds = Broker.Instance().Run(new SqlCommand("SELECT DISTINCT COUNT([" + columns[count] + "]) FROM " + getTableSchemaName(table), con), "total");
-                total = (int)ds.Tables["total"].Rows[0][0];
-                if(distinct == total)
+                DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT DISTINCT " + combinations[count] + " FROM " + getTableSchemaName(table), con), "distinct");
+                distinct = (int)ds.Tables["distinct"].Rows.Count;
+                ds = Broker.Instance().Run(new SqlCommand("SELECT " + combinations[count] + " FROM " + getTableSchemaName(table), con), "total");
+                total = (int)ds.Tables["total"].Rows.Count;
+                if (distinct == total)
                 {
                     found = true;
-                    res = columns[count];
+                    res = combinations[count];
                 }
                 else
                 {
                     count++;
                 }
             }
-            
+
+            return res;
+        }
+
+        // This method calculates and returns all the possible pk combinations ordered
+        public string[] getCombinations(string table)
+        {
+            string[] columns = getTableColumns(table);
+            int count = (int)Math.Pow(2, columns.Length);
+            string[] res = new string[count - 1];
+            for (int i = 1; i < count; i++)
+            {
+                string str = Convert.ToString(i, 2).PadLeft(columns.Length, '0');
+                string combination = "";
+                for (int j = 0; j < str.Length; j++)
+                {
+                    if (str[j] == '1')
+                    {
+                        combination += columns[j];
+                        combination += ',';
+                    }
+                }
+                combination = combination.Remove(combination.Length - 1);
+                res[i - 1] = combination;
+            }
+
+            Array.Sort(res, delegate (string comb1, string comb2)
+            {
+                int count1 = comb1.Split(',').Length - 1;
+                int count2 = comb2.Split(',').Length - 1;
+                if (count1 < count2)
+                {
+                    return -1;
+                }
+                if (count2 < count1)
+                {
+                    return 1;
+                }
+                if (comb1.Contains("ID") && !comb2.Contains("ID"))
+                {
+                    return -1;
+                }
+                if (!comb1.Contains("ID") && comb2.Contains("ID"))
+                {
+                    return 1;
+                }
+                return string.Compare(comb1, comb2);
+            });
+
             return res;
         }
 
