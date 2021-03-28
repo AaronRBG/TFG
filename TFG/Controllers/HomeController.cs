@@ -357,11 +357,11 @@ namespace TFG.Controllers
                 {
                     if (selection.Contains(','))
                     {
-                        daos[id].tabledata.ColumnsSelected = parseColumnSelection(selection);
+                        daos[id].tabledata.ColumnsSelected = daos[id].parseColumnSelection(selection);
                     }
                     else
                     {
-                        daos[id].tabledata.TablesSelected = parseTableSelection(selection);
+                        daos[id].tabledata.TablesSelected = daos[id].parseTableSelection(selection);
                     }
                     if (functionalitySelected == "primary_keys")
                     {
@@ -403,14 +403,10 @@ namespace TFG.Controllers
                 if (daos[id].tabledata.functionalities_need_columns[functionalitySelected])
                 {
                     daos[id].getTableAndColumnData();
-                    daos[id].tabledata.TablesSelected = null;
-                    daos[id].tabledata.records = null;
                 }
                 else
                 {
                     daos[id].getTableData();
-                    daos[id].tabledata.ColumnsSelected = null;
-                    daos[id].tabledata.records = null;
                 }
                 if (functionalitySelected == "primary_keys")
                 {
@@ -447,8 +443,7 @@ namespace TFG.Controllers
             string id = HttpContext.Session.GetString("id");
             if (HttpContext.Session.Id == id)
             {
-                selectRows(data);
-                daos[id].update();
+                daos[id].update(data);
                 daos[id].tabledata.log += functionalitySelected + "\t" + DateTime.Now.ToString();
                 return RedirectToAction("MainPage", daos[id].tabledata);
             }
@@ -538,62 +533,5 @@ namespace TFG.Controllers
             }
             daos[id].getMaskedRecords();
         }
-
-        // This method saves the selection of the rows in the database that will be updated
-        public void selectRows(string data)
-        {
-            Dictionary<string, string[]> res = parseColumnSelection(data);
-            string id = HttpContext.Session.GetString("id");
-
-            foreach (KeyValuePair<string, string[]> record in daos[id].tabledata.records)
-            {
-                foreach (KeyValuePair<string, string[]> entry in res)
-                {
-                    if (record.Key == entry.Key)
-                    {
-                        string[] aux = new string[entry.Value.Length];
-                        string[] aux_masked = new string[entry.Value.Length];
-                        int counter = 0;
-                        for (int i = 0; i < record.Value.Length; i++)
-                        {
-                            if (entry.Value.Contains(i.ToString()))
-                            {
-                                aux[counter] = record.Value[i];
-                                aux_masked[counter] = daos[id].tabledata.records[record.Key + "Masked"][i];
-                                counter++;
-                            }
-                        }
-
-                        daos[id].tabledata.records[record.Key] = aux;
-                        daos[id].tabledata.records[record.Key + "Masked"] = aux_masked;
-                    }
-                }
-            }
-        }
-
-        // This method parses a string into a dictionary
-        private Dictionary<string, string[]> parseColumnSelection(string selection)
-        {
-            Dictionary<string, string[]> res = new Dictionary<string, string[]>();
-
-            string[] tables = selection.Split('/');
-            for (int i = 1; i < tables.Length; i++)
-            {
-                string[] columns = tables[i].Split(',');
-                res.Add(columns[0], columns.Skip(1).ToArray());
-            }
-
-            return res;
-        }
-
-        // This method parses a string into an array
-        private string[] parseTableSelection(string selection)
-        {
-            string[] tables = selection.Split('/');
-            string[] res = new string[tables.Length - 1];
-            Array.Copy(tables, 1, res, 0, res.Length);
-            return res;
-        }
-
     }
 }

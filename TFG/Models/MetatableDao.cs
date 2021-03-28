@@ -85,13 +85,19 @@ namespace TFG
         // This method applies runs queries to calculate the best suitable pks for the given tables
         public void getSuggestedPks()
         {
-            GetPrimaryKeysRecords();
             Dictionary<string, string[]> res = new Dictionary<string, string[]>();
+            foreach (string table in tabledata.TablesSelected)
+            {
+                res.Add(table, getPrimaryKey(table, true));
+            }
+            tabledata.tablePks = res;
+            res = new Dictionary<string, string[]>();
 
             foreach (string entry in tabledata.TablesSelected)
             {
                 string values = getSuggestedPks(entry);
                 string[] pks = values.Split(',');
+                Array.Sort(pks);
                 res.Add(entry, pks);
             }
             tabledata.tableSuggestedPks = res;
@@ -283,11 +289,27 @@ namespace TFG
         }
 
         // This method updates the database with the corresponding changes
-        public void update()
+        public void update(string data)
+        {
+            switch (tabledata.functionality)
+            {
+                case "data_masking":
+                    selectMaskedRecords(data);
+                    updateDataMasking();
+                    break;
+                case "primary_keys":
+                    selectPksTables(data);
+                    updatePrimaryKeys();
+                    break;
+            }
+        }
+
+        // This method updates the database with the corresponding changes for functionality data_masking
+        public void updateDataMasking()
         {
             foreach (KeyValuePair<string, string[]> entry in tabledata.ColumnsSelected)
             {
-                string[] pks = getPrimaryKey(entry.Key);
+                string[] pks = getPrimaryKey(entry.Key, false);
                 string[][] pk_data = new string[pks.Length][];
 
                 for (int i = 0; i < pks.Length; i++)
@@ -341,6 +363,22 @@ namespace TFG
                         Broker.Instance().Run(new SqlCommand("UPDATE " + getTableSchemaName(entry.Key) + " SET " + column + " = '" + data[i] + "'" + str, con), "update");
                     }
                 }
+            }
+        }
+
+        // This method updates the database with the corresponding changes for functionality primary_keys
+        public void updatePrimaryKeys()
+        {
+            foreach (string entry in tabledata.TablesSelected)
+            {
+                string constraint_name="";
+                if(tabledata.tablePks[entry].Length!=0)
+                {
+                    constraint_name = getPKConstraint(entry);
+                    Broker.Instance().Run(new SqlCommand("ALTER TABLE " + getTableSchemaName(entry) + " DROP CONSTRAINT " + constraint_name, con), "dropPK");
+                }
+                constraint_name = "pk_" + entry;
+                Broker.Instance().Run(new SqlCommand("ALTER TABLE " + getTableSchemaName(entry) + " ADD CONSTRAINT " + constraint_name + " PRIMARY KEY (" + ArrayToString(tabledata.tableSuggestedPks[entry]) + ")", con), "addPK");
             }
         }
 
@@ -430,7 +468,7 @@ namespace TFG
 
             foreach (string entry in tabledata.TablesSelected)
             {
-                string[] pks = getPrimaryKey(entry);
+                string[] pks = getPrimaryKey(entry, false);
                 tablePks.Add(entry, pks);
 
                 for (int j = 0; j < pks.Length; j++)
@@ -471,8 +509,19 @@ namespace TFG
             return (string)row[0];
         }
 
+        // This method gathers the PK constraint name of a table from the database
+        private string getPKConstraint(string table)
+        {
+            string path = Path.Combine(Directory.GetCurrentDirectory(), @"Scripts\getPKConstraint.sql");
+            string sql = System.IO.File.ReadAllText(path);
+            DataSet ds = Broker.Instance().Run(new SqlCommand(sql + table + "'", con), "schema");
+            DataTable dt = ds.Tables["schema"];
+            DataRow row = dt.Rows[0];
+            return (string)row[0];
+        }
+
         // This method gathers the primary key(s) of a table from the database
-        public string[] getPrimaryKey(string table)
+        public string[] getPrimaryKey(string table, bool getSpacial)
         {
             string path = Path.Combine(Directory.GetCurrentDirectory(), @"Scripts\getPrimaryKey.sql");
             string sql = System.IO.File.ReadAllText(path);
@@ -484,7 +533,7 @@ namespace TFG
             for (int j = 0; j < dt.Rows.Count; j++)
             {
                 string type = getDataType((string)dt.Rows[j][0]);
-                if (!isSpacial(type))
+                if (getSpacial || !isSpacial(type))
                 {
                     res[j] = (string)dt.Rows[j][0];
                 }
@@ -494,18 +543,22 @@ namespace TFG
                 }
             }
 
-            string[] other = new string[index];
-            index = 0;
-
-            for (int j = 0; j < dt.Rows.Count; j++)
+            if (!getSpacial)
             {
-                if (res[j] != null)
+                string[] other = new string[index];
+                index = 0;
+
+                for (int j = 0; j < dt.Rows.Count; j++)
                 {
-                    other[index] = res[j];
-                    index++;
+                    if (res[j] != null)
+                    {
+                        other[index] = res[j];
+                        index++;
+                    }
                 }
+                res = other;
             }
-            res = other;
+            Array.Sort(res);
 
             return res;
         }
@@ -600,5 +653,103 @@ namespace TFG
             return false;
         }
 
+        // This method saves the selection of the records selected for the data_masking functionality
+        public void selectMaskedRecords(string data)
+        {
+            Dictionary<string, string[]> res = parseColumnSelection(data);
+
+            foreach (KeyValuePair<string, string[]> record in tabledata.records)
+            {
+                foreach (KeyValuePair<string, string[]> entry in res)
+                {
+                    if (record.Key == entry.Key)
+                    {
+                        string[] aux = new string[entry.Value.Length];
+                        string[] aux_masked = new string[entry.Value.Length];
+                        int counter = 0;
+                        for (int i = 0; i < record.Value.Length; i++)
+                        {
+                            if (entry.Value.Contains(i.ToString()))
+                            {
+                                aux[counter] = record.Value[i];
+                                aux_masked[counter] = tabledata.records[record.Key + "Masked"][i];
+                                counter++;
+                            }
+                        }
+
+                        tabledata.records[record.Key] = aux;
+                        tabledata.records[record.Key + "Masked"] = aux_masked;
+                    }
+                }
+            }
+        }
+
+        // This method saves the selection of the tables selected for the primary_keys functionality
+        public void selectPksTables(string data)
+        {
+            string[] aux = data.Split(',');
+            string[] tables = new string[aux.Length - 1];
+            Array.Copy(aux, 1, tables, 0, aux.Length - 1);
+            Dictionary<string, string[]> pks = new Dictionary<string, string[]>();
+            Dictionary<string, string[]> suggestedPks = new Dictionary<string, string[]>();
+
+            foreach (string table in tables)
+            {
+                if (ArrayToString(tabledata.tablePks[table]) != ArrayToString(tabledata.tableSuggestedPks[table]))
+                {
+                    pks.Add(table, tabledata.tablePks[table]);
+                    suggestedPks.Add(table, tabledata.tableSuggestedPks[table]);
+                }
+            }
+            tabledata.TablesSelected = pks.Keys.ToArray();
+            tabledata.tablePks = pks;
+            tabledata.tableSuggestedPks = suggestedPks;
+        }
+
+        // This method parses a string into a dictionary
+        public Dictionary<string, string[]> parseColumnSelection(string selection)
+        {
+            Dictionary<string, string[]> res = new Dictionary<string, string[]>();
+
+            string[] tables = selection.Split('/');
+            for (int i = 1; i < tables.Length; i++)
+            {
+                string[] columns = tables[i].Split(',');
+                res.Add(columns[0], columns.Skip(1).ToArray());
+            }
+
+            return res;
+        }
+
+        // This method parses a string into an array
+        public string[] parseTableSelection(string selection)
+        {
+            string[] tables = selection.Split('/');
+            string[] res = new string[tables.Length - 1];
+            Array.Copy(tables, 1, res, 0, res.Length);
+            return res;
+        }
+
+        //
+        private string ArrayToString(object[] array)
+        {
+            string res = "";
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (i == 0)
+                {
+                    res = array[i].ToString();
+                }
+                else
+                {
+                    res += array[i].ToString();
+                }
+                if (i != array.Length - 1)
+                {
+                    res += ',';
+                }
+            }
+            return res;
+        }
     }
 }
