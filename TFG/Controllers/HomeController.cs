@@ -334,6 +334,7 @@ namespace TFG.Controllers
 
             if (HttpContext.Session.Id == id)
             {
+                resetMetatable(id);
                 daos[id].tabledata.functionality = functionalitySelected;
                 daos[id].getTableAndColumnData();
                 return RedirectToAction("Selection");
@@ -399,6 +400,7 @@ namespace TFG.Controllers
             string id = HttpContext.Session.GetString("id");
             if (HttpContext.Session.Id == id)
             {
+                resetMetatable(id);
                 daos[id].tabledata.functionality = functionalitySelected;
                 if (daos[id].tabledata.functionalities_need_columns[functionalitySelected])
                 {
@@ -444,7 +446,7 @@ namespace TFG.Controllers
             if (HttpContext.Session.Id == id)
             {
                 daos[id].update(data);
-                daos[id].tabledata.log += functionalitySelected + "\t" + DateTime.Now.ToString();
+                daos[id].tabledata.log += functionalitySelected + "\t" + DateTime.Now.ToString() + "\n";
                 return RedirectToAction("MainPage", daos[id].tabledata);
             }
             else
@@ -532,6 +534,15 @@ namespace TFG.Controllers
                 daos[id].tabledata.ColumnsSelected = selection;
             }
             daos[id].getMaskedRecords();
+        }
+        
+        // Resets tabledata object for performance reasons
+        private void resetMetatable(string id)
+        {
+            string database = daos[id].tabledata.database;
+            string log = daos[id].tabledata.log;
+            daos[id].tabledata = new Metatable(database);
+            daos[id].tabledata.log = log;
         }
     }
 }

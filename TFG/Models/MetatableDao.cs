@@ -378,6 +378,12 @@ namespace TFG
                     Broker.Instance().Run(new SqlCommand("ALTER TABLE " + getTableSchemaName(entry) + " DROP CONSTRAINT " + constraint_name, con), "dropPK");
                 }
                 constraint_name = "pk_" + entry;
+                foreach (string column in tabledata.tableSuggestedPks[entry])
+                {
+                    makeNotNull(column, entry);
+                    constraint_name += "_";
+                    constraint_name += column;
+                }
                 Broker.Instance().Run(new SqlCommand("ALTER TABLE " + getTableSchemaName(entry) + " ADD CONSTRAINT " + constraint_name + " PRIMARY KEY (" + ArrayToString(tabledata.tableSuggestedPks[entry]) + ")", con), "addPK");
             }
         }
@@ -507,6 +513,12 @@ namespace TFG
             DataTable dt = ds.Tables["type"];
             DataRow row = dt.Rows[0];
             return (string)row[0];
+        }
+
+        // This method sets a column to not null
+        private void makeNotNull(string column, string table)
+        {
+            DataSet ds = Broker.Instance().Run(new SqlCommand("ALTER TABLE " + getTableSchemaName(table) + " ALTER COLUMN " + column + " " + getDataType(column) + " NOT NULL", con), "type");
         }
 
         // This method gathers the PK constraint name of a table from the database

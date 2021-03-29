@@ -10,6 +10,7 @@ namespace TFG.Models
         public Metatable(string database)
         {
             this.database = database;
+            this.log = "";
             this.masksAvailable = new Dictionary<string, bool[]>();
             this.functionalities_text = new Dictionary<string, string>();
             this.functionalities_need_columns = new Dictionary<string, bool>();
