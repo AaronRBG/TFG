@@ -1,6 +1,6 @@
 ﻿@{
     @using TFG.Models
-    @model TFG.Models.Metatable
+    @model TFG.Models.Interchange
 
     ViewData["Title"] = "Data Masking Report";
 }
@@ -26,12 +26,12 @@
     <div id="Top-container">
         <div id="Top">
             <span class='database_icon'></span>
-            <span class="top-text">@Model.database</span>
+            <span class="top-text">@Model.Database</span>
             <button type="button" onclick='window.location.href="DatabaseConnection"' class="btn btn-default" data-toggle="tooltip" data-placement="auto" title="Change database"><span class='folder_icon'></span></button>
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a id="selection-a" onclick="goToPage('MainPage', false)" style="color: orange;" MainPage">Home</a></li>
-                <li class="breadcrumb-item"><a id="selection-a" onclick="goToSelection('@Model.functionality')" style="color: orange;" Selection">Selection</a></li>
-                <li class="breadcrumb-item"><a id="selection-a" onclick="goToPage('@Model.functionality', false)" style="color: orange;" Create_Masks">Create Masks</a></li>
+                <li class="breadcrumb-item"><a id="selection-a" onclick="goToSelection('@Model.Functionality')" style="color: orange;" Selection">Selection</a></li>
+                <li class="breadcrumb-item"><a id="selection-a" onclick="goToPage('@Model.Functionality', false)" style="color: orange;" Create_Masks">Create Masks</a></li>
                 <li class="breadcrumb-item active" aria-current="page">Data Masking Report</li>
             </ol>
         </div>
@@ -87,12 +87,12 @@
         </div>
         @foreach (KeyValuePair<string, string[]> entry in Model.ColumnsSelected)
         {
-            string[] pks =  Model.tablePks[entry.Key];
+            string[] pks =  Model.TablePks[entry.Key];
             string[][] pk_data = new string[pks.Length][];
             for (int i = 0; i < pks.Length; i++)
             {
                 pks[i] = @entry.Key + '.' + pks[i];
-                pk_data[i] = Model.records[pks[i]];
+                pk_data[i] = Model.Records[pks[i]];
             }
 
             for (int i = 0; i < entry.Value.Length; i++)
@@ -100,8 +100,8 @@
                 string name = @entry.Key + '.' + @entry.Value[i];
                 string divName = name + "Div";
                 string masked = name + "Masked";
-                string[] record = Model.records[name];
-                string[] recordMasked = Model.records[masked];
+                string[] record = Model.Records[name];
+                string[] recordMasked = Model.Records[masked];
 
                 <div id="@divName" class="tabcontent" style="display: none;">
                     <table class="table table-striped overflow-auto">
@@ -151,7 +151,7 @@
     <br />
     <span id="selection-text">None selected</span>
     <div id="controls-inside">
-        <button type="button" onclick='confirm("@Model.functionality")' class="btn btn-outline-primary">Confirm and run</button>
+        <button type="button" onclick='confirm("@Model.Functionality")' class="btn btn-outline-primary">Confirm and run</button>
     </div>
     <br />
     <div id="controls-inside">

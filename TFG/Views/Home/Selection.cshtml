@@ -1,6 +1,6 @@
 ﻿@{
     @using TFG.Models
-    @model TFG.Models.Metatable
+    @model TFG.Models.Interchange
 
     ViewData["Title"] = "Database Connection";
 
@@ -18,11 +18,11 @@
     <div id="Top-container">
         <div id="Top">
             <span class='database_icon'></span>
-            <span class="top-text">@Model.database</span>
+            <span class="top-text">@Model.Database</span>
             <button type="button" onclick='window.location.href="DatabaseConnection"' class="btn btn-default" data-toggle="tooltip" data-placement="auto" title="Change database"><span class='folder_icon'></span></button>
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a id="selection-a" onclick="goToPage('MainPage', false)" style="color: orange;" MainPage">Home</a></li>
-                <li class="breadcrumb-item active" aria-current="page"><text>@Model.functionalities_text[Model.functionality]</text> Selection</li>
+                <li class="breadcrumb-item active" aria-current="page"><text>@Model.Functionalities_text[Model.Functionality]</text> Selection</li>
             </ol>
         </div>
     </div>
@@ -33,7 +33,7 @@
 <div id="middle_container" class="left-half">
     <div id="selection-top" class="centeredBig">
         <h3>
-            @if (@Model.functionalities_need_columns[Model.functionality])
+            @if (@Model.Functionalities_need_columns[Model.Functionality])
             {
                 <span>Tables and columns selection</span>
             }
@@ -59,7 +59,7 @@
                         </button>
                     </h5>
                 </div>
-                @if (@Model.functionalities_need_columns[Model.functionality])
+                @if (@Model.Functionalities_need_columns[Model.Functionality])
                 {
                     <div id="@collapse.Substring(1)" class="collapse hide" aria-labelledby="@entry.Key" data-parent="#accordion">
                         <div class="card-body nav_color_2">
@@ -84,6 +84,6 @@
     <br />
     <span id="selection-text">None selected</span>
     <div id="controls-inside">
-        <button type="button" onclick='goToPage("@Model.functionality", true)' class="btn btn-outline-primary">Confirm and run</button>
+        <button type="button" onclick='goToPage("@Model.Functionality", true)' class="btn btn-outline-primary">Confirm and run</button>
     </div>
 </div>
