@@ -60,7 +60,14 @@
         </h3>
     </div>
     <br />
-    <span id="selection-text">@Model.log</span>
+    @{
+        string[] rows = Model.log.Split("\n");
+    }
+    @foreach (string row in rows)
+    {
+        <span id="selection-text">@row</span>
+        <br/>
+    }
     <div id="controls-inside">
         <button type="button" onclick="download()" class="btn btn-outline-primary"><span class='download_icon'></span></button>
     </div>

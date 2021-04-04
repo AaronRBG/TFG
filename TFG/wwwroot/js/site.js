@@ -117,20 +117,33 @@ function confirm(functionality) {
         var selected;
         var aux;
 
-        document.querySelectorAll('input[type=checkbox][id$=Record]').forEach(
-            function (item) {
-                if (item.checked) {
+        if (functionality == "create_masks") {
 
-                    if (aux == undefined || item.attributes["data-parent"].value != aux) {
-                        selected += "/";
-                        aux = item.attributes["data-parent"].value;
-                        selected += aux;
+            document.querySelectorAll('input[type=checkbox][id$=Record]').forEach(
+                function (item) {
+                    if (item.checked) {
+
+                        if (aux == undefined || item.attributes["data-parent"].value != aux) {
+                            selected += "/";
+                            aux = item.attributes["data-parent"].value;
+                            selected += aux;
+                        }
+                        selected += ',';
+                        var temp = aux.split('.')
+                        selected += (item.id.replace(temp[1], '').replace('Record', ''));;
                     }
-                    selected += ',';
-                    var temp = aux.split('.')
-                    selected += (item.id.replace(temp[1], '').replace('Record', ''));;
-                }
-            });
+                });
+        }
+
+        if (functionality == "primary_keys") {
+            document.querySelectorAll('input[type=checkbox][id$=CheckBox]').forEach(
+                function (item) {
+                    if (item.checked) {
+                        selected += ",";
+                        selected += item.name;
+                    }
+                });
+        }
 
         document.getElementById("data").value = selected;
         document.getElementById("functionalitySelected5").value = functionality;
@@ -145,17 +158,8 @@ function getAvailableMasks(name) {
     $("#hidden-btn7").click();
 }
 
-// this method parameter is the id of the table checkbox
-// this method is called when the table checkbox is clicked
-// first checks if that checkbox is checked
-// then applies that value to all columns checkbox of that table and updates the output text
-function checkChilds(CheckBoxparent) {
-    var boo = document.getElementById(CheckBoxparent).checked;
-    document.querySelectorAll('[ data-parent=' + '"' + CheckBoxparent + '"' + ']').forEach(
-        function (item) {
-            item.checked = boo;
-            checkChilds(item.id);
-        });
+// used to update the selection text field
+function updateSelectionText(name) {
     if (getRecords() == 0) {
         if (getColumns() == 0) {
             if (getTables() != 0) {
@@ -169,6 +173,20 @@ function checkChilds(CheckBoxparent) {
     } else {
         document.getElementById('selection-text').innerHTML = getRecords() + ' records selected from ' + getColumns() + ' different columns and ' + getTables() + ' different tables.'
     }
+}
+
+// this method parameter is the id of the table checkbox
+// this method is called when the table checkbox is clicked
+// first checks if that checkbox is checked
+// then applies that value to all columns checkbox of that table and updates the output text
+function checkChilds(CheckBoxparent) {
+    var boo = document.getElementById(CheckBoxparent).checked;
+    document.querySelectorAll('[ data-parent=' + '"' + CheckBoxparent + '"' + ']').forEach(
+        function (item) {
+            item.checked = boo;
+            checkChilds(item.id);
+        });
+    updateSelectionText();
 }
 
 // this method parameter is the id of the table checkbox and the id of the column checkbox clicked
@@ -191,19 +209,7 @@ function checkParent(CheckBoxparent, child) {
     if (!boo) {
         document.getElementById(CheckBoxparent).checked = boo;
     }
-    if (getRecords() == 0) {
-        if (getColumns() == 0) {
-            if (getTables() != 0) {
-                document.getElementById('selection-text').innerHTML = getTables() + ' tables selected'
-            } else {
-                document.getElementById('selection-text').innerHTML = 'None selected'
-            }
-        } else {
-            document.getElementById('selection-text').innerHTML = getColumns() + ' columns selected from ' + getTables() + ' different tables.'
-        }
-    } else {
-        document.getElementById('selection-text').innerHTML = getRecords() + ' records selected from ' + getColumns() + ' different columns and ' + getTables() + ' different tables.'
-    }
+    updateSelectionText();
     checkParent(document.getElementById(CheckBoxparent).attributes["data-parent"].value, CheckBoxparent);
 }
 
@@ -219,15 +225,7 @@ function selectAll() {
         function (item) {
             item.checked = true;
         });
-    if (getRecords() == 0) {
-        if (getColumns() == 0) {
-            document.getElementById('selection-text').innerHTML = getTables() + ' tables selected'
-        } else {
-            document.getElementById('selection-text').innerHTML = getColumns() + ' columns selected from ' + getTables() + ' different tables.'
-        }
-    } else {
-        document.getElementById('selection-text').innerHTML = getRecords() + ' records selected from ' + getColumns() + ' different columns and ' + getTables() + ' different tables.'
-    }
+    updateSelectionText();
 }
 
 // this method parameter unchecks all the checkboxes and updates the output text
