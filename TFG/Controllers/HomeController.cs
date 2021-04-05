@@ -216,7 +216,6 @@ namespace TFG.Controllers
             string id = HttpContext.Session.GetString("id");
             if (HttpContext.Session.Id == id)
             {
-                daos[id].tabledata.Records = new Dictionary<string, string[]>();
                 return View("create_masks", daos[id].info);
             }
             else
@@ -321,7 +320,7 @@ namespace TFG.Controllers
                     return RedirectToAction("MainPage");
                 });
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 // if it is not valid it return the Help View
                 return await Task.Run<ActionResult>(() =>
@@ -338,6 +337,8 @@ namespace TFG.Controllers
             string id = HttpContext.Session.GetString("id");
             resetInfo();
             daos[id].info.Functionality = functionalitySelected;
+            daos[id].info.Functionalities_text = daos[id].tabledata.Functionalities_text[functionalitySelected];
+            daos[id].info.Functionalities_need_columns = daos[id].tabledata.Functionalities_need_columns[functionalitySelected];
             daos[id].info.ColumnsSelected = daos[id].tabledata.TablesColumns;
             if (HttpContext.Session.Id == id)
             {
@@ -355,12 +356,12 @@ namespace TFG.Controllers
         public ActionResult GoToPage(string functionalitySelected, string selection)
         {
             string id = HttpContext.Session.GetString("id");
-            resetInfo(functionalitySelected);
 
             if (HttpContext.Session.Id == id)
             {
                 if (functionalitySelected != "MainPage")
                 {
+                    resetInfo(functionalitySelected);
                     if (selection.Contains(','))
                     {
                         daos[id].info.ColumnsSelected = daos[id].parseColumnSelection(selection);
@@ -372,12 +373,15 @@ namespace TFG.Controllers
                     if (functionalitySelected == "create_masks")
                     {
                         daos[id].getAvailableMasks();
-                        daos[id].getRecords();
                     }
                     if (functionalitySelected == "primary_keys")
                     {
                         daos[id].getPks();
                     }
+                }
+                else
+                {
+                    resetInfo();
                 }
                 return RedirectToAction(functionalitySelected, daos[id].info);
             }
@@ -411,6 +415,8 @@ namespace TFG.Controllers
             string id = HttpContext.Session.GetString("id");
             resetInfo();
             daos[id].info.Functionality = functionalitySelected;
+            daos[id].info.Functionalities_text = daos[id].tabledata.Functionalities_text[functionalitySelected];
+            daos[id].info.Functionalities_need_columns = daos[id].tabledata.Functionalities_need_columns[functionalitySelected];
             if (daos[id].tabledata.Functionalities_need_columns[functionalitySelected])
             {
                 daos[id].info.ColumnsSelected = daos[id].tabledata.TablesColumns;
@@ -425,7 +431,6 @@ namespace TFG.Controllers
                 if (functionalitySelected == "create_masks")
                 {
                     daos[id].getAvailableMasks();
-                    daos[id].getRecords();
                 }
                 if (functionalitySelected == "primary_keys")
                 {
@@ -447,6 +452,7 @@ namespace TFG.Controllers
             if (HttpContext.Session.Id == id)
             {
                 saveMaskTypes(data, true);
+                daos[id].getPrimaryKeysRecords();
                 return RedirectToAction(functionalitySelected, daos[id].info);
             }
             else
@@ -465,6 +471,29 @@ namespace TFG.Controllers
                 daos[id].update(data);
                 daos[id].tabledata.Log += functionalitySelected + "\t" + DateTime.Now.ToString() + "\n";
                 return RedirectToAction("MainPage", daos[id].info);
+            }
+            else
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
+        }
+
+        // this method is only used to confirm the changes to the database
+        [HttpPost]
+        public ActionResult GetRecord(string record, string functionalitySelected, string accordionInfo, string data2)
+        {
+            string id = HttpContext.Session.GetString("id");
+            if (HttpContext.Session.Id == id)
+            {
+                daos[id].info.TableAccordion = accordionInfo;
+                daos[id].info.ColumnAccordion = record;
+
+                if (data2 != "undefined")
+                {
+                    saveMaskTypes(data2, false);
+                }
+                daos[id].getRecord(record);
+                return View(functionalitySelected, daos[id].info);
             }
             else
             {
@@ -520,6 +549,8 @@ namespace TFG.Controllers
             string database = daos[id].tabledata.Database;
             string log = daos[id].tabledata.Log;
             daos[id].info = new Interchange(database, log);
+            daos[id].info.Records = new Dictionary<string, string[]>();
+            daos[id].info.TablePks = new Dictionary<string, string[]>();
         }
 
         // This method is used to send the simplest model possible to the view to improve performance
@@ -540,6 +571,8 @@ namespace TFG.Controllers
 
             resetInfo();
             daos[id].info.Functionality = functionality;
+            daos[id].info.Functionalities_text = daos[id].tabledata.Functionalities_text[functionality];
+            daos[id].info.Functionalities_need_columns = daos[id].tabledata.Functionalities_need_columns[functionality];
 
             if (daos[id].tabledata.Functionalities_need_columns[functionality])
             {

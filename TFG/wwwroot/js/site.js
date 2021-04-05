@@ -151,13 +151,6 @@ function confirm(functionality) {
     }
 }
 
-// used as a middleware to activate a hidden button which is the one who connects to the controller and also inputs the functionality to a hidden input connected to the controller
-function getAvailableMasks(name) {
-
-    document.getElementById("name").value = name;
-    $("#hidden-btn7").click();
-}
-
 // used to update the selection text field
 function updateSelectionText(name) {
     if (getRecords() == 0) {

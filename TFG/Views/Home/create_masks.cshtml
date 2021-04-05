@@ -28,11 +28,6 @@
     <input type="text" id="functionalitySelected3" class="functionalitySelected" name="functionalitySelected" />
     <input id="hidden-btn3" class="hidden-btn" type="submit" style="display: none;" />
 }
-@using (Html.BeginForm("GetAvailableMasks", "Home"))
-{
-    <input type="text" id="name" class="functionalitySelected" name="name" />
-    <input id="hidden-btn7" class="hidden-btn" type="submit" style="display: none;" />
-}
 <!-- A navegation bar which does not navigate, it only shows the chosen database name along with a button that
     allows the user to go to the corresponding page to change it, if needed and show the current page (receiving the functionality selected from the controller)-->
 <nav class="navbar nav_color_1">
@@ -129,7 +124,7 @@
                     }
 
                     string[] record = Model.Records[name];
-                    if(record == null)
+                    if (record == null)
                     {
                         record = new string[0];
                     }
@@ -189,19 +184,9 @@
                 }
 
                 <div class="dropdown">
-                    @if (Model.MasksAvailable.ContainsKey(name))
-                    {
-                        <button class="btn btn-outline-dark dropdown-toggle tabcontent" type="button" id="@dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="display: @display;">
-                            <span id="@text">@stri</span>
-                        </button>
-                    }
-                    else
-                    {
-                        <button class="btn btn-outline-dark dropdown-toggle tabcontent" type="button" id="@dropdown" onclick="getAvailableMasks('@name')" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="display: @display;">
-                            <span id="@text">@stri</span>
-                        </button>
-                    }
-
+                    <button class="btn btn-outline-dark dropdown-toggle tabcontent" type="button" id="@dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="display: @display;">
+                        <span id="@text">@stri</span>
+                    </button>
 
                     @if (Model.Records.ContainsKey(name) && Model.MasksAvailable.ContainsKey(name))
                     {

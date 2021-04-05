@@ -22,7 +22,7 @@
             <button type="button" onclick='window.location.href="DatabaseConnection"' class="btn btn-default" data-toggle="tooltip" data-placement="auto" title="Change database"><span class='folder_icon'></span></button>
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a id="selection-a" onclick="goToPage('MainPage', false)" style="color: orange;" MainPage">Home</a></li>
-                <li class="breadcrumb-item active" aria-current="page"><text>@Model.Functionalities_text[Model.Functionality]</text> Selection</li>
+                <li class="breadcrumb-item active" aria-current="page"><text>@Model.Functionalities_text</text> Selection</li>
             </ol>
         </div>
     </div>
@@ -33,7 +33,7 @@
 <div id="middle_container" class="left-half">
     <div id="selection-top" class="centeredBig">
         <h3>
-            @if (@Model.Functionalities_need_columns[Model.Functionality])
+            @if (@Model.Functionalities_need_columns)
             {
                 <span>Tables and columns selection</span>
             }
@@ -59,7 +59,7 @@
                         </button>
                     </h5>
                 </div>
-                @if (@Model.Functionalities_need_columns[Model.Functionality])
+                @if (@Model.Functionalities_need_columns)
                 {
                     <div id="@collapse.Substring(1)" class="collapse hide" aria-labelledby="@entry.Key" data-parent="#accordion">
                         <div class="card-body nav_color_2">
