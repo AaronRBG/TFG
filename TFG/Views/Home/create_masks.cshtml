@@ -1,6 +1,6 @@
 ﻿@{
     @using TFG.Models
-    @model TFG.Models.Metatable
+    @model TFG.Models.Interchange
 
     ViewData["Title"] = "Data Masking Report";
 }
@@ -28,22 +28,17 @@
     <input type="text" id="functionalitySelected3" class="functionalitySelected" name="functionalitySelected" />
     <input id="hidden-btn3" class="hidden-btn" type="submit" style="display: none;" />
 }
-@using (Html.BeginForm("GetAvailableMasks", "Home"))
-{
-    <input type="text" id="name" class="functionalitySelected" name="name" />
-    <input id="hidden-btn7" class="hidden-btn" type="submit" style="display: none;" />
-}
 <!-- A navegation bar which does not navigate, it only shows the chosen database name along with a button that
     allows the user to go to the corresponding page to change it, if needed and show the current page (receiving the functionality selected from the controller)-->
 <nav class="navbar nav_color_1">
     <div id="Top-container">
         <div id="Top">
             <span class='database_icon'></span>
-            <span class="top-text">@Model.database</span>
+            <span class="top-text">@Model.Database</span>
             <button type="button" onclick='window.location.href="DatabaseConnection"' class="btn btn-default" data-toggle="tooltip" data-placement="auto" title="Change database"><span class='folder_icon'></span></button>
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a id="selection-a" onclick="goToPage('MainPage', false)" style="color: orange;" MainPage">Home</a></li>
-                <li class="breadcrumb-item"><a id="selection-a" onclick="goToSelection('@Model.functionality')" style="color: orange;" Selection">Selection</a></li>
+                <li class="breadcrumb-item"><a id="selection-a" onclick="goToSelection('@Model.Functionality')" style="color: orange;" Selection">Selection</a></li>
                 <li class="breadcrumb-item active" aria-current="page">Create Masks</li>
             </ol>
         </div>
@@ -66,7 +61,7 @@
             string collapse = "#collapse" + entry.Key;
             string collapseState = "collapse hide";
 
-            if (collapse.Substring(1) == Model.tableAccordion)
+            if (collapse.Substring(1) == Model.TableAccordion)
             {
                 collapseState = "hide collapse show";
             }
@@ -87,14 +82,14 @@
                         @for (int i = 0; i < ((string[])entry.Value).Length; i++)
                         {
                             string name = @entry.Key + '.' + @entry.Value[i];
-                            if (Model.records.ContainsKey(name))
+                            if (Model.Records.ContainsKey(name))
                             {
                                 <button class="btn btn-link" onclick="openTab(event, '@name', true)">@entry.Value[i]</button>
                                 <br />
                             }
                             else
                             {
-                                <button class="btn btn-link" onclick="checkRecord(event, '@name', '@Model.functionality')">@entry.Value[i]</button>
+                                <button class="btn btn-link" onclick="checkRecord(event, '@name', '@Model.Functionality')">@entry.Value[i]</button>
                                 <br />
                             }
                         }
@@ -107,7 +102,7 @@
     <div id="Tab-contents" class="overflow-auto">
         @{
             string defaultDisplay = "none";
-            if (Model.columnAccordion == null)
+            if (Model.ColumnAccordion == null)
             {
                 defaultDisplay = "block";
             }
@@ -121,14 +116,18 @@
             {
                 string name = @entry.Key + '.' + @entry.Value[i];
                 string display = "none";
-                if (Model.records.ContainsKey(name))
+                if (Model.Records.ContainsKey(name))
                 {
-                    if (name == Model.columnAccordion)
+                    if (name == Model.ColumnAccordion)
                     {
                         display = "block";
                     }
 
-                    string[] record = Model.records[name];
+                    string[] record = Model.Records[name];
+                    if (record == null)
+                    {
+                        record = new string[0];
+                    }
 
                     <div id="@name" class="tabcontent" style="display: @display;">
                         <table class="table table-striped overflow-auto">
@@ -170,14 +169,14 @@
                 string stri;
                 string display = "none";
 
-                if (name == Model.columnAccordion)
+                if (name == Model.ColumnAccordion)
                 {
                     display = "inline";
                 }
 
-                if (Model.types != null && Model.types.ContainsKey(name))
+                if (Model.MasksSelected != null && Model.MasksSelected.ContainsKey(name))
                 {
-                    stri = Model.types[name];
+                    stri = Model.MasksSelected[name];
                 }
                 else
                 {
@@ -185,36 +184,26 @@
                 }
 
                 <div class="dropdown">
-                    @if (Model.masksAvailable.ContainsKey(name))
-                    {
-                        <button class="btn btn-outline-dark dropdown-toggle tabcontent" type="button" id="@dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="display: @display;">
-                            <span id="@text">@stri</span>
-                        </button>
-                    }
-                    else
-                    {
-                        <button class="btn btn-outline-dark dropdown-toggle tabcontent" type="button" id="@dropdown" onclick="getAvailableMasks('@name')" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="display: @display;">
-                            <span id="@text">@stri</span>
-                        </button>
-                    }
+                    <button class="btn btn-outline-dark dropdown-toggle tabcontent" type="button" id="@dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="display: @display;">
+                        <span id="@text">@stri</span>
+                    </button>
 
-
-                    @if (Model.records.ContainsKey(name) && Model.masksAvailable.ContainsKey(name))
+                    @if (Model.Records.ContainsKey(name) && Model.MasksAvailable.ContainsKey(name))
                     {
                         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                            @if (Model.masksAvailable[name][0])
+                            @if (Model.MasksAvailable[name][0])
                             {
                                 <a class="dropdown-item" onclick="changeName('@text', 'DNI')">DNI</a>
                             }
-                            @if (Model.masksAvailable[name][1])
+                            @if (Model.MasksAvailable[name][1])
                             {
                                 <a class="dropdown-item" onclick="changeName('@text', 'Email')">Email</a>
                             }
-                            @if (Model.masksAvailable[name][2])
+                            @if (Model.MasksAvailable[name][2])
                             {
                                 <a class="dropdown-item" onclick="changeName('@text', 'Phone Number')">Phone Number</a>
                             }
-                            @if (Model.masksAvailable[name][3])
+                            @if (Model.MasksAvailable[name][3])
                             {
                                 <a class="dropdown-item" onclick="changeName('@text', 'Credit card')">Credit card</a>
                             }
@@ -225,7 +214,7 @@
             }
         }
         <div id="bottom-buttons">
-            <button type="button" onclick='goToPageAfterCreate("@Model.functionality")' class="btn btn-outline-primary">Confirm masks selections</button>
+            <button type="button" onclick='goToPageAfterCreate("@Model.Functionality")' class="btn btn-outline-primary">Confirm masks selections</button>
         </div>
     </div>
 </div>

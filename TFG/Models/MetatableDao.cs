@@ -14,6 +14,7 @@ namespace TFG
     {
         // The variables are the Model in which the methods results are saved and the connection to the database
         public Metatable tabledata { get; set; }
+        public Interchange info { get; set; }
         public SqlConnection con { get; set; }
 
         public MetatableDao(Metatable tabledata, SqlConnection con)
@@ -42,11 +43,9 @@ namespace TFG
         // This method applies the selected masks to the records and saves the results in the corresponding Model variable
         public void getMaskedRecords()
         {
-            tabledata.TablesSelected = tabledata.ColumnsSelected.Keys.ToArray();
-            GetPrimaryKeysRecords();
-            Dictionary<string, string[]> res = tabledata.records;
+            Dictionary<string, string[]> res = info.Records;
 
-            foreach (KeyValuePair<string, string> entry in tabledata.types)
+            foreach (KeyValuePair<string, string> entry in info.MasksSelected)
             {
                 string[] pair = entry.Key.Split('.');
                 string mask;
@@ -76,48 +75,154 @@ namespace TFG
                 string name = entry.Key + "Masked";
                 if (!res.ContainsKey(name))
                 {
-                    res.Add((name), container);
+                    res.Add(name, container);
                 }
             }
-            tabledata.records = res;
+            info.Records = res;
         }
 
         // This method applies runs queries to calculate the best suitable pks for the given tables
-        public void getSuggestedPks()
+        public void getPks()
         {
-            Dictionary<string, string[]> res = new Dictionary<string, string[]>();
-            foreach (string table in tabledata.TablesSelected)
-            {
-                res.Add(table, getPrimaryKey(table, true));
-            }
-            tabledata.tablePks = res;
-            res = new Dictionary<string, string[]>();
+            getPrimaryKeys(true);
+            getSuggestedKeys();
+        }
 
-            foreach (string entry in tabledata.TablesSelected)
+        // This method applies runs queries to calculate the best suitable pks for the given tables
+        private void findPks()
+        {
+            Dictionary<string, string[]> pks = new Dictionary<string, string[]>();
+            Dictionary<string, string[]> suggested_pks = new Dictionary<string, string[]>();
+
+            foreach (string entry in tabledata.Tables)
             {
-                string values = getSuggestedPks(entry);
-                string[] pks = values.Split(',');
-                Array.Sort(pks);
-                res.Add(entry, pks);
+                suggested_pks.Add(entry, findSuggestedPks(entry));
+                pks.Add(entry, findPrimaryKey(entry));
             }
-            tabledata.tableSuggestedPks = res;
+
+            tabledata.TablePks = pks;
+            tabledata.TableSuggestedPks = suggested_pks;
+        }
+
+        // This method is used to retrieve the primary keys from tabledata to info
+        public void getPrimaryKeys(bool getSpacial)
+        {
+            Dictionary<string, string[]> pks = new Dictionary<string, string[]>();
+
+            if (info.TablesSelected != null)
+            {
+                foreach (string entry in info.TablesSelected)
+                {
+                    pks.Add(entry, getPrimaryKey(entry, getSpacial));
+                }
+            }
+            else
+            {
+                foreach (string entry in info.ColumnsSelected.Keys.ToArray())
+                {
+                    pks.Add(entry, getPrimaryKey(entry, getSpacial));
+                }
+            }
+            info.TablePks = pks;
+        }
+
+        // This method retrieves the primary key(s) of a table (all or only the non spacial ones)
+        private string[] getPrimaryKey(string table, bool getSpacial)
+        {
+            string[] data = tabledata.TablePks[table];
+            int index = data.Length;
+            string[] res = new string[index];
+
+            for (int j = 0; j < data.Length; j++)
+            {
+                string type = getDataType(data[j]);
+                if (getSpacial || !isSpacial(type))
+                {
+                    res[j] = data[j];
+                }
+                else
+                {
+                    index--;
+                }
+            }
+
+            if (!getSpacial)
+            {
+                string[] other = new string[index];
+                index = 0;
+
+                for (int j = 0; j < data.Length; j++)
+                {
+                    if (res[j] != null)
+                    {
+                        other[index] = res[j];
+                        index++;
+                    }
+                }
+                res = other;
+            }
+
+            return res;
+        }
+
+        // This method gathers the primary key(s) of a table from the database
+        private string[] findPrimaryKey(string table)
+        {
+            string path = Path.Combine(Directory.GetCurrentDirectory(), @"Scripts\getPrimaryKey.sql");
+            string sql = System.IO.File.ReadAllText(path);
+            DataSet ds = Broker.Instance().Run(new SqlCommand(sql + table + "'", con), "schema");
+            DataTable dt = ds.Tables["schema"];
+            string[] res = new string[dt.Rows.Count];
+
+            for (int j = 0; j < dt.Rows.Count; j++)
+            {
+                res[j] = (string)dt.Rows[j][0];
+            }
+            Array.Sort(res);
+
+            return res;
+        }
+
+        // This method is used to retrieve the suggested keys from tabledata to info
+        public void getSuggestedKeys()
+        {
+            Dictionary<string, string[]> suggested_pks = new Dictionary<string, string[]>();
+
+            foreach (string entry in info.TablesSelected)
+            {
+                suggested_pks.Add(entry, tabledata.TableSuggestedPks[entry]);
+            }
+            info.TableSuggestedPks = suggested_pks;
         }
 
         // This method applies the selected masks to the records and saves the results in the corresponding Model variable
-        public string getSuggestedPks(string table)
+        private string[] findSuggestedPks(string table)
         {
             string res = "";
             bool found = false;
             int count = 0;
             int distinct = 0, total = 0;
 
-            string[] combinations = getCombinations(table);
+            string[] columns = getTableColumns(table);
+            string[] IDcolumns = new string[columns.Length];
+            for (int i = 0; i < columns.Length; i++)
+            {
+                if (columns[i].Contains("ID"))
+                {
+                    IDcolumns[count] = columns[i];
+                    count++;
+                }
+            }
+            string[] aux = new string[count];
+            Array.Copy(IDcolumns, 0, aux, 0, count);
+            count = 0;
+            string[] combinations = getCombinations(aux);
             while (!found && count < combinations.Length)
             {
                 DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT DISTINCT " + combinations[count] + " FROM " + getTableSchemaName(table), con), "distinct");
-                distinct = (int)ds.Tables["distinct"].Rows.Count;
+                distinct = ds.Tables["distinct"].Rows.Count;
                 ds = Broker.Instance().Run(new SqlCommand("SELECT " + combinations[count] + " FROM " + getTableSchemaName(table), con), "total");
-                total = (int)ds.Tables["total"].Rows.Count;
+                total = ds.Tables["total"].Rows.Count;
                 if (distinct == total)
                 {
                     found = true;
@@ -128,14 +233,35 @@ namespace TFG
                     count++;
                 }
             }
-
-            return res;
+            if (!found)
+            {
+                count = 0;
+                combinations = getCombinations(columns);
+            }
+            while (!found && count < combinations.Length)
+            {
+                DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT DISTINCT " + combinations[count] + " FROM " + getTableSchemaName(table), con), "distinct");
+                distinct = ds.Tables["distinct"].Rows.Count;
+                ds = Broker.Instance().Run(new SqlCommand("SELECT " + combinations[count] + " FROM " + getTableSchemaName(table), con), "total");
+                total = ds.Tables["total"].Rows.Count;
+                if (distinct == total)
+                {
+                    found = true;
+                    res = combinations[count];
+                }
+                else
+                {
+                    count++;
+                }
+            }
+            string[] suggested = res.Split(',');
+            Array.Sort(suggested);
+            return suggested;
         }
 
         // This method calculates and returns all the possible pk combinations ordered
-        public string[] getCombinations(string table)
+        private string[] getCombinations(string[] columns)
         {
-            string[] columns = getTableColumns(table);
             int count = (int)Math.Pow(2, columns.Length);
             string[] res = new string[count - 1];
             for (int i = 1; i < count; i++)
@@ -180,39 +306,75 @@ namespace TFG
             return res;
         }
 
-        // This method gets the data of the column from the database
+        // This method is used to retrieve only the necessary pks and their records for some functionalities
+        public void getPrimaryKeysRecords()
+        {
+            foreach (KeyValuePair<string, string[]> entry in info.ColumnsSelected)
+            {
+                string[] pks = getPrimaryKey(entry.Key, false);
+                foreach (string pk in pks)
+                {
+                    string name = entry.Key + '.' + pk;
+                    if (!info.Records.ContainsKey(name))
+                    {
+                        getRecord(name);
+                    }
+                }
+                if(!info.TablePks.ContainsKey(entry.Key))
+                {
+                    info.TablePks.Add(entry.Key, pks);
+                }
+            }
+
+        }
+
+        // This method retrieves the already loaded data from the selected columns
         public void getRecord(string record)
         {
-            Dictionary<string, string[]> res = tabledata.records;
+            info.Records.Add(record, tabledata.Records[record]);
+        }
 
-            if (!res.ContainsKey(record))
+        // This method gets the data of the columns from the database
+        private void findRecords()
+        {
+            Dictionary<string, string[]> res = new Dictionary<string, string[]>();
+            foreach (KeyValuePair<string, string[]> entry in tabledata.TablesColumns)
             {
-                string[] column = record.Split('.');
+                string columnsNames = ArrayToString(entry.Value);
 
-                DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT [" + column[1] + "] FROM " + getTableSchemaName(column[0]), con), "records");
+                DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT " + columnsNames + " FROM " + getTableSchemaName(entry.Key), con), "records");
                 DataTable dt = ds.Tables["records"];
-                string[] container = new string[dt.Rows.Count];
+                string[][] container = new string[entry.Value.Length][];
+
                 for (int x = 0; x < dt.Rows.Count; x++)
                 {
-                    container[x] = dt.Rows[x][0].ToString();
+                    for (int i = 0; i < entry.Value.Length; i++)
+                    {
+                        if (x == 0)
+                        {
+                            container[i] = new string[dt.Rows.Count];
+                        }
+                        container[i][x] = dt.Rows[x][i].ToString();
+                    }
                 }
-                res.Add(record, container);
-                tabledata.records = res;
+                for (int i = 0; i < entry.Value.Length; i++)
+                {
+                    string name = entry.Key + '.' + entry.Value[i];
+                    res.Add(name, container[i]);
+                }
             }
+            tabledata.Records = res;
         }
 
         // This method gathers the names of the tables and their columns from the database and saves the result to the corresponding Model variable
-        public void getTableAndColumnData()
+        private Dictionary<string, string[]> getTableAndColumnData()
         {
-            DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'", con), "tables");
-            DataTable dt = ds.Tables["tables"];
-            DataRow rows;
+            string[] tables = getTableData();
             Dictionary<string, string[]> res = new Dictionary<string, string[]>();
 
-            for (int i = 0; i < dt.Rows.Count; i++)
+            for (int i = 0; i < tables.Length; i++)
             {
-                rows = dt.Rows[i];
-                res.Add((string)rows[0], getTableColumns((string)rows[0]));
+                res.Add(tables[i], getTableColumns(tables[i]));
             }
 
             Dictionary<string, string[]> result = new Dictionary<string, string[]>();
@@ -222,11 +384,11 @@ namespace TFG
                 result.Add(entry.Key, entry.Value);
             }
 
-            tabledata.ColumnsSelected = result;
+            return result;
         }
 
         // This method gathers the names of the tables from the database and saves the result to the corresponding Model variable
-        public void getTableData()
+        private string[] getTableData()
         {
 
             DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'", con), "tables");
@@ -242,11 +404,11 @@ namespace TFG
 
             Array.Sort<string>(res);
 
-            tabledata.TablesSelected = res;
+            return res;
         }
 
         // This method gathers the names of the columns of a given table from the database and returns the result
-        public string[] getTableColumns(string table)
+        private string[] getTableColumns(string table)
         {
             DataSet dsC;
             DataTable dtC;
@@ -291,7 +453,7 @@ namespace TFG
         // This method updates the database with the corresponding changes
         public void update(string data)
         {
-            switch (tabledata.functionality)
+            switch (info.Functionality)
             {
                 case "data_masking":
                     selectMaskedRecords(data);
@@ -305,9 +467,9 @@ namespace TFG
         }
 
         // This method updates the database with the corresponding changes for functionality data_masking
-        public void updateDataMasking()
+        private void updateDataMasking()
         {
-            foreach (KeyValuePair<string, string[]> entry in tabledata.ColumnsSelected)
+            foreach (KeyValuePair<string, string[]> entry in info.ColumnsSelected)
             {
                 string[] pks = getPrimaryKey(entry.Key, false);
                 string[][] pk_data = new string[pks.Length][];
@@ -315,15 +477,15 @@ namespace TFG
                 for (int i = 0; i < pks.Length; i++)
                 {
                     string aux = entry.Key + '.' + pks[i];
-                    pk_data[i] = tabledata.records[aux];
+                    pk_data[i] = tabledata.Records[aux];
                 }
 
                 foreach (string column in entry.Value)
                 {
                     string name = entry.Key + '.' + column;
                     string aux = name + "Masked";
-                    string[] data = tabledata.records[(aux)];
-                    string[] data_aux = tabledata.records[(name)];
+                    string[] data = tabledata.Records[(aux)];
+                    string[] data_aux = tabledata.Records[(name)];
 
                     for (int i = 0; i < data.Length; i++)
                     {
@@ -367,134 +529,138 @@ namespace TFG
         }
 
         // This method updates the database with the corresponding changes for functionality primary_keys
-        public void updatePrimaryKeys()
+        private void updatePrimaryKeys()
         {
-            foreach (string entry in tabledata.TablesSelected)
+            foreach (string entry in info.TablesSelected)
             {
-                string constraint_name="";
-                if(tabledata.tablePks[entry].Length!=0)
+                string constraint_name = "";
+                if (tabledata.TablePks[entry].Length != 0)
                 {
                     constraint_name = getPKConstraint(entry);
                     Broker.Instance().Run(new SqlCommand("ALTER TABLE " + getTableSchemaName(entry) + " DROP CONSTRAINT " + constraint_name, con), "dropPK");
                 }
                 constraint_name = "pk_" + entry;
-                foreach (string column in tabledata.tableSuggestedPks[entry])
+                foreach (string column in tabledata.TableSuggestedPks[entry])
                 {
                     makeNotNull(column, entry);
                     constraint_name += "_";
                     constraint_name += column;
                 }
-                Broker.Instance().Run(new SqlCommand("ALTER TABLE " + getTableSchemaName(entry) + " ADD CONSTRAINT " + constraint_name + " PRIMARY KEY (" + ArrayToString(tabledata.tableSuggestedPks[entry]) + ")", con), "addPK");
+                Broker.Instance().Run(new SqlCommand("ALTER TABLE " + getTableSchemaName(entry) + " ADD CONSTRAINT " + constraint_name + " PRIMARY KEY (" + ArrayToString(tabledata.TableSuggestedPks[entry]) + ")", con), "addPK");
             }
         }
 
-        // This method is used to filter the masks available to each column according to the data stored in it
-        public void getAvailableMasks(string column)
+        // This method is used to retrieve the already computed available masks for a column
+        public void getAvailableMasks()
         {
-            bool[] res = new bool[4];
-            float[] comply = new float[4];
-            string[] data = tabledata.records[column];
+            Dictionary<string, bool[]> res = new Dictionary<string, bool[]>();
+            Dictionary<string, string[]> selection = new Dictionary<string, string[]>();
 
-            if (data.Length > 1000)
+            foreach (KeyValuePair<string, string[]> entry in info.ColumnsSelected)
             {
-                string[] result = new string[1000];
-                Array.Copy(data, 0, result, 0, 1000);
-                data = result;
-            }
+                string[] aux = new string[entry.Value.Length];
+                int index = 0;
 
-            foreach (string value in data)
-            {
-
-                if (isDNI(value))
-                {
-                    comply[0]++;
-                }
-
-                if (isEmail(value))
-                {
-                    comply[1]++;
-                }
-
-                if (isPhone(value))
-                {
-                    comply[2]++;
-                }
-
-                if (isCCN(value))
-                {
-                    comply[3]++;
-                }
-
-            }
-
-            for (int i = 0; i < 4; i++)
-            {
-                float aux = (comply[i] * 100) / data.Length;
-                if (aux >= 50)
-                {
-                    res[i] = true;
-                }
-                else
-                {
-                    res[i] = false;
-                }
-            }
-
-            tabledata.masksAvailable.Add(column, res);
-        }
-
-        // This method gathers the initial data for most functionalities
-        private void getInitData()
-        {
-            GetPrimaryKeysRecords();
-
-            foreach (KeyValuePair<string, string[]> entry in tabledata.ColumnsSelected)
-            {
                 for (int i = 0; i < entry.Value.Length; i++)
                 {
                     string name = entry.Key + '.' + entry.Value[i];
-                    getRecord(name);
+
+                    if (tabledata.MasksAvailable.ContainsKey(name))
+                    {
+                        res.Add(name, tabledata.MasksAvailable[name]);
+                        aux[index] = entry.Value[i];
+                        index++;
+                    }
+                }
+                if (aux != null)
+                {
+                    string[] other = new string[index];
+                    Array.Copy(aux, 0, other, 0, index);
+                    selection.Add(entry.Key, other);
                 }
             }
+            info.MasksAvailable = res;
+            info.ColumnsSelected = selection;
         }
 
-        // This method gets the data of the primary key(s) columns and saves the results in the corresponding Model variable
-        private void GetPrimaryKeysRecords()
+        // This method is used to filter the masks available to each column according to the data stored in it
+        private void findAvailableMasks()
         {
-            Dictionary<string, string[]> res;
-            if (tabledata.records != null)
-            {
-                res = tabledata.records;
-            }
-            else
-            {
-                res = new Dictionary<string, string[]>();
-            }
-            Dictionary<string, string[]> tablePks = new Dictionary<string, string[]>();
+            Dictionary<string, bool[]> auxDict = new Dictionary<string, bool[]>();
 
-            foreach (string entry in tabledata.TablesSelected)
+            foreach (KeyValuePair<string, string[]> entry in tabledata.TablesColumns)
             {
-                string[] pks = getPrimaryKey(entry, false);
-                tablePks.Add(entry, pks);
-
-                for (int j = 0; j < pks.Length; j++)
+                for (int i = 0; i < entry.Value.Length; i++)
                 {
-                    DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT [" + pks[j] + "] FROM " + getTableSchemaName(entry), con), "records");
-                    DataTable dt = ds.Tables["records"];
-                    String[] container = new string[dt.Rows.Count];
-                    for (int x = 0; x < dt.Rows.Count; x++)
+                    bool[] res = new bool[4];
+                    float[] comply = new float[4];
+                    string name = entry.Key + '.' + entry.Value[i];
+                    string[] data = tabledata.Records[name];
+
+                    if (data != null)
                     {
-                        container[x] = dt.Rows[x][0].ToString();
+                        if (data.Length > 1000)
+                        {
+                            string[] result = new string[1000];
+                            Array.Copy(data, 0, result, 0, 1000);
+                            data = result;
+                        }
+
+                        foreach (string value in data)
+                        {
+
+                            if (isDNI(value))
+                            {
+                                comply[0]++;
+                            }
+
+                            if (isEmail(value))
+                            {
+                                comply[1]++;
+                            }
+
+                            if (isPhone(value))
+                            {
+                                comply[2]++;
+                            }
+
+                            if (isCCN(value))
+                            {
+                                comply[3]++;
+                            }
+
+                        }
+
+                        for (int j = 0; j < 4; j++)
+                        {
+                            float aux = (comply[j] * 100) / data.Length;
+                            if (aux >= 50)
+                            {
+                                res[j] = true;
+                            }
+                            else
+                            {
+                                res[j] = false;
+                            }
+                        }
+                        if (res.Contains(true))
+                        {
+                            auxDict.Add(name, res);
+                        }
                     }
-                    string key = entry + '.' + pks[j];
-                    if (!res.ContainsKey(key))
-                    {
-                        res.Add(key, container);
-                    }
+
                 }
             }
-            tabledata.records = res;
-            tabledata.tablePks = tablePks;
+            tabledata.MasksAvailable = auxDict;
+        }
+        public void initMetatable()
+        {
+            this.tabledata.Tables = getTableData();
+            this.tabledata.TablesColumns = getTableAndColumnData();
+            findRecords();
+            findAvailableMasks();
+            findPks();
+            System.Diagnostics.Debug.Write("hello");
         }
 
         // This method gathers the schema name of a table from the database
@@ -518,7 +684,7 @@ namespace TFG
         // This method sets a column to not null
         private void makeNotNull(string column, string table)
         {
-            DataSet ds = Broker.Instance().Run(new SqlCommand("ALTER TABLE " + getTableSchemaName(table) + " ALTER COLUMN " + column + " " + getDataType(column) + " NOT NULL", con), "type");
+            Broker.Instance().Run(new SqlCommand("ALTER TABLE " + getTableSchemaName(table) + " ALTER COLUMN " + column + " " + getDataType(column) + " NOT NULL", con), "type");
         }
 
         // This method gathers the PK constraint name of a table from the database
@@ -530,49 +696,6 @@ namespace TFG
             DataTable dt = ds.Tables["schema"];
             DataRow row = dt.Rows[0];
             return (string)row[0];
-        }
-
-        // This method gathers the primary key(s) of a table from the database
-        public string[] getPrimaryKey(string table, bool getSpacial)
-        {
-            string path = Path.Combine(Directory.GetCurrentDirectory(), @"Scripts\getPrimaryKey.sql");
-            string sql = System.IO.File.ReadAllText(path);
-            DataSet ds = Broker.Instance().Run(new SqlCommand(sql + table + "'", con), "schema");
-            DataTable dt = ds.Tables["schema"];
-            string[] res = new string[dt.Rows.Count];
-            int index = dt.Rows.Count;
-
-            for (int j = 0; j < dt.Rows.Count; j++)
-            {
-                string type = getDataType((string)dt.Rows[j][0]);
-                if (getSpacial || !isSpacial(type))
-                {
-                    res[j] = (string)dt.Rows[j][0];
-                }
-                else
-                {
-                    index--;
-                }
-            }
-
-            if (!getSpacial)
-            {
-                string[] other = new string[index];
-                index = 0;
-
-                for (int j = 0; j < dt.Rows.Count; j++)
-                {
-                    if (res[j] != null)
-                    {
-                        other[index] = res[j];
-                        index++;
-                    }
-                }
-                res = other;
-            }
-            Array.Sort(res);
-
-            return res;
         }
 
         // This method is used to filter the spacial datatypes 
@@ -666,11 +789,11 @@ namespace TFG
         }
 
         // This method saves the selection of the records selected for the data_masking functionality
-        public void selectMaskedRecords(string data)
+        private void selectMaskedRecords(string data)
         {
             Dictionary<string, string[]> res = parseColumnSelection(data);
 
-            foreach (KeyValuePair<string, string[]> record in tabledata.records)
+            foreach (KeyValuePair<string, string[]> record in tabledata.Records)
             {
                 foreach (KeyValuePair<string, string[]> entry in res)
                 {
@@ -684,20 +807,20 @@ namespace TFG
                             if (entry.Value.Contains(i.ToString()))
                             {
                                 aux[counter] = record.Value[i];
-                                aux_masked[counter] = tabledata.records[record.Key + "Masked"][i];
+                                aux_masked[counter] = tabledata.Records[record.Key + "Masked"][i];
                                 counter++;
                             }
                         }
 
-                        tabledata.records[record.Key] = aux;
-                        tabledata.records[record.Key + "Masked"] = aux_masked;
+                        tabledata.Records[record.Key] = aux;
+                        tabledata.Records[record.Key + "Masked"] = aux_masked;
                     }
                 }
             }
         }
 
         // This method saves the selection of the tables selected for the primary_keys functionality
-        public void selectPksTables(string data)
+        private void selectPksTables(string data)
         {
             string[] aux = data.Split(',');
             string[] tables = new string[aux.Length - 1];
@@ -707,15 +830,15 @@ namespace TFG
 
             foreach (string table in tables)
             {
-                if (ArrayToString(tabledata.tablePks[table]) != ArrayToString(tabledata.tableSuggestedPks[table]))
+                if (ArrayToString(tabledata.TablePks[table]) != ArrayToString(tabledata.TableSuggestedPks[table]))
                 {
-                    pks.Add(table, tabledata.tablePks[table]);
-                    suggestedPks.Add(table, tabledata.tableSuggestedPks[table]);
+                    pks.Add(table, tabledata.TablePks[table]);
+                    suggestedPks.Add(table, tabledata.TableSuggestedPks[table]);
                 }
             }
-            tabledata.TablesSelected = pks.Keys.ToArray();
-            tabledata.tablePks = pks;
-            tabledata.tableSuggestedPks = suggestedPks;
+            info.TablesSelected = pks.Keys.ToArray();
+            info.TablePks = pks;
+            info.TableSuggestedPks = suggestedPks;
         }
 
         // This method parses a string into a dictionary
@@ -750,11 +873,13 @@ namespace TFG
             {
                 if (i == 0)
                 {
-                    res = array[i].ToString();
+                    res = '[' + array[i].ToString() + ']';
                 }
                 else
                 {
+                    res += '[';
                     res += array[i].ToString();
+                    res += ']';
                 }
                 if (i != array.Length - 1)
                 {

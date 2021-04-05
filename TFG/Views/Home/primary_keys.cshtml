@@ -1,6 +1,6 @@
 ﻿@{
     @using TFG.Models
-    @model TFG.Models.Metatable
+    @model TFG.Models.Interchange
 
     ViewData["Title"] = "Primary Keys Report";
 }
@@ -26,11 +26,11 @@
     <div id="Top-container">
         <div id="Top">
             <span class='database_icon'></span>
-            <span class="top-text">@Model.database</span>
+            <span class="top-text">@Model.Database</span>
             <button type="button" onclick='window.location.href="DatabaseConnection"' class="btn btn-default" data-toggle="tooltip" data-placement="auto" title="Change database"><span class='folder_icon'></span></button>
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a id="selection-a" onclick="goToPage('MainPage', false)" style="color: orange;" MainPage">Home</a></li>
-                <li class="breadcrumb-item"><a id="selection-a" onclick="goToSelection('@Model.functionality')" style="color: orange;" Selection">Selection</a></li>
+                <li class="breadcrumb-item"><a id="selection-a" onclick="goToSelection('@Model.Functionality')" style="color: orange;" Selection">Selection</a></li>
                 <li class="breadcrumb-item active" aria-current="page">Primary Keys Report</li>
             </ol>
         </div>
@@ -64,21 +64,21 @@
                     string pks = "", suggestedPks = "";
                     string chechBox = entry + "CheckBox";
 
-                    for (int i = 0; i < Model.tablePks[entry].Length; i++)
+                    for (int i = 0; i < Model.TablePks[entry].Length; i++)
                     {
-                        pks += Model.tablePks[entry][i];
+                        pks += Model.TablePks[entry][i];
 
-                        if(i!=Model.tablePks[entry].Length-1)
+                        if(i!=Model.TablePks[entry].Length-1)
                         {
                             pks += " + ";
                         }
                     }
 
-                    for (int i = 0; i < Model.tableSuggestedPks[entry].Length; i++)
+                    for (int i = 0; i < Model.TableSuggestedPks[entry].Length; i++)
                     {
-                        suggestedPks += Model.tableSuggestedPks[entry][i];
+                        suggestedPks += Model.TableSuggestedPks[entry][i];
 
-                        if (i != Model.tableSuggestedPks[entry].Length - 1)
+                        if (i != Model.TableSuggestedPks[entry].Length - 1)
                         {
                             suggestedPks += " + ";
                         }
@@ -106,7 +106,7 @@
     <br />
     <span id="selection-text">None selected</span>
     <div id="controls-inside">
-        <button type="button" onclick='confirm("@Model.functionality")' class="btn btn-outline-primary">Confirm and run</button>
+        <button type="button" onclick='confirm("@Model.Functionality")' class="btn btn-outline-primary">Confirm and run</button>
     </div>
     <br />
     <div id="controls-inside">
