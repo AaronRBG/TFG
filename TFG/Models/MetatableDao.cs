@@ -130,39 +130,11 @@ namespace TFG
         private string[] getPrimaryKey(string table, bool getSpacial)
         {
             string[] data = tabledata.TablePks[table];
-            int index = data.Length;
-            string[] res = new string[index];
-
-            for (int j = 0; j < data.Length; j++)
+            if (getSpacial)
             {
-                string type = getDataType(data[j]);
-                if (getSpacial || !isSpacial(type))
-                {
-                    res[j] = data[j];
-                }
-                else
-                {
-                    index--;
-                }
+                return data;
             }
-
-            if (!getSpacial)
-            {
-                string[] other = new string[index];
-                index = 0;
-
-                for (int j = 0; j < data.Length; j++)
-                {
-                    if (res[j] != null)
-                    {
-                        other[index] = res[j];
-                        index++;
-                    }
-                }
-                res = other;
-            }
-
-            return res;
+            return filterSpacial(data);
         }
 
         // This method gathers the primary key(s) of a table from the database
@@ -203,7 +175,7 @@ namespace TFG
             int count = 0;
             int distinct = 0, total = 0;
 
-            string[] columns = getTableColumns(table);
+            string[] columns = getTableColumns(table, true);
             string[] IDcolumns = new string[columns.Length];
             for (int i = 0; i < columns.Length; i++)
             {
@@ -219,10 +191,10 @@ namespace TFG
             string[] combinations = getCombinations(aux);
             while (!found && count < combinations.Length)
             {
-                DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT DISTINCT " + combinations[count] + " FROM " + getTableSchemaName(table), con), "distinct");
-                distinct = ds.Tables["distinct"].Rows.Count;
-                ds = Broker.Instance().Run(new SqlCommand("SELECT " + combinations[count] + " FROM " + getTableSchemaName(table), con), "total");
-                total = ds.Tables["total"].Rows.Count;
+                DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT COUNT(*) FROM (SELECT DISTINCT " + combinations[count] + " FROM " + getTableSchemaName(table) + ") AS internalQuery", con), "distinct");
+                distinct = (int)ds.Tables["distinct"].Rows[0][0];
+                ds = Broker.Instance().Run(new SqlCommand("SELECT COUNT(*) FROM (SELECT " + combinations[count] + " FROM " + getTableSchemaName(table) + ") AS internalQuery", con), "total");
+                total = (int)ds.Tables["total"].Rows[0][0];
                 if (distinct == total)
                 {
                     found = true;
@@ -240,10 +212,10 @@ namespace TFG
             }
             while (!found && count < combinations.Length)
             {
-                DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT DISTINCT " + combinations[count] + " FROM " + getTableSchemaName(table), con), "distinct");
-                distinct = ds.Tables["distinct"].Rows.Count;
-                ds = Broker.Instance().Run(new SqlCommand("SELECT " + combinations[count] + " FROM " + getTableSchemaName(table), con), "total");
-                total = ds.Tables["total"].Rows.Count;
+                DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT COUNT(*) FROM (SELECT DISTINCT " + combinations[count] + " FROM " + getTableSchemaName(table) + ") AS internalQuery", con), "distinct");
+                distinct = (int)ds.Tables["distinct"].Rows[0][0];
+                ds = Broker.Instance().Run(new SqlCommand("SELECT COUNT(*) FROM (SELECT " + combinations[count] + " FROM " + getTableSchemaName(table) + ") AS internalQuery", con), "total");
+                total = (int)ds.Tables["total"].Rows[0][0];
                 if (distinct == total)
                 {
                     found = true;
@@ -320,7 +292,7 @@ namespace TFG
                         getRecord(name);
                     }
                 }
-                if(!info.TablePks.ContainsKey(entry.Key))
+                if (!info.TablePks.ContainsKey(entry.Key))
                 {
                     info.TablePks.Add(entry.Key, pks);
                 }
@@ -374,7 +346,7 @@ namespace TFG
 
             for (int i = 0; i < tables.Length; i++)
             {
-                res.Add(tables[i], getTableColumns(tables[i]));
+                res.Add(tables[i], getTableColumns(tables[i], false));
             }
 
             Dictionary<string, string[]> result = new Dictionary<string, string[]>();
@@ -408,7 +380,7 @@ namespace TFG
         }
 
         // This method gathers the names of the columns of a given table from the database and returns the result
-        private string[] getTableColumns(string table)
+        private string[] getTableColumns(string table, bool getSpacial)
         {
             DataSet dsC;
             DataTable dtC;
@@ -418,35 +390,17 @@ namespace TFG
             dtC = dsC.Tables["columns"];
 
             string[] aux = new string[dtC.Rows.Count];
-            int index = dtC.Rows.Count;
 
             for (int j = 0; j < dtC.Rows.Count; j++)
             {
-                rows = dtC.Rows[j];
-                string type = getDataType((string)rows[0]);
-                if (!isSpacial(type))
-                {
-                    aux[j] = (string)rows[0];
-                }
-                else
-                {
-                    index--;
-                }
+                aux[j] = (string)dtC.Rows[j][0];
             }
 
-            string[] other = new string[index];
-            index = 0;
-
-            for (int j = 0; j < dtC.Rows.Count; j++)
+            if (!getSpacial)
             {
-                if (aux[j] != null)
-                {
-                    other[index] = aux[j];
-                    index++;
-                }
+                return filterSpacial(aux);
             }
-            aux = other;
-            Array.Sort<string>(aux);
+
             return aux;
         }
 
@@ -697,6 +651,43 @@ namespace TFG
             DataRow row = dt.Rows[0];
             return (string)row[0];
         }
+
+        // This method is used to filter the spacial datatypes 
+        private string[] filterSpacial(string[] array)
+        {
+            int index = array.Length;
+            string[] res = new string[index];
+
+            for (int j = 0; j < array.Length; j++)
+            {
+                string type = getDataType(array[j]);
+                if (!isSpacial(type))
+                {
+                    res[j] = array[j];
+                }
+                else
+                {
+                    index--;
+                }
+            }
+
+            string[] other = new string[index];
+            index = 0;
+
+            for (int j = 0; j < array.Length; j++)
+            {
+                if (res[j] != null)
+                {
+                    other[index] = res[j];
+                    index++;
+                }
+            }
+            res = other;
+
+            Array.Sort(res);
+            return res;
+        }
+
 
         // This method is used to filter the spacial datatypes 
         private bool isSpacial(string type)
