@@ -438,8 +438,8 @@ namespace TFG
                 {
                     string name = entry.Key + '.' + column;
                     string aux = name + "Masked";
-                    string[] data = tabledata.Records[(aux)];
-                    string[] data_aux = tabledata.Records[(name)];
+                    string[] data_masked = tabledata.Records[aux];
+                    string[] data = tabledata.Records[name];
 
                     for (int i = 0; i < data.Length; i++)
                     {
@@ -465,7 +465,7 @@ namespace TFG
                         if (pks.Length == 0)
                         {
                             string type = getDataType(column);
-                            str += " " + column + " = convert(" + type + ", '" + data_aux[i];
+                            str += " " + column + " = convert(" + type + ", '" + data[i];
                             if (type == "datetime")
                             {
                                 str += "', 103)";
@@ -476,8 +476,10 @@ namespace TFG
                             }
                         }
 
-                        Broker.Instance().Run(new SqlCommand("UPDATE " + getTableSchemaName(entry.Key) + " SET " + column + " = '" + data[i] + "'" + str, con), "update");
+                        Broker.Instance().Run(new SqlCommand("UPDATE " + getTableSchemaName(entry.Key) + " SET " + column + " = '" + data_masked[i] + "'" + str, con), "update");
                     }
+                    tabledata.Records[name] = data_masked;
+                    tabledata.Records.Remove(aux);
                 }
             }
         }
@@ -501,6 +503,7 @@ namespace TFG
                     constraint_name += column;
                 }
                 Broker.Instance().Run(new SqlCommand("ALTER TABLE " + getTableSchemaName(entry) + " ADD CONSTRAINT " + constraint_name + " PRIMARY KEY (" + ArrayToString(tabledata.TableSuggestedPks[entry]) + ")", con), "addPK");
+                tabledata.TablePks[entry] = tabledata.TableSuggestedPks[entry];
             }
         }
 
