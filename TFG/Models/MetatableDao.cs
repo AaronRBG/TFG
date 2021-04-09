@@ -134,7 +134,7 @@ namespace TFG
             {
                 return data;
             }
-            return filterSpacial(data);
+            return filterSpacial(table, data);
         }
 
         // This method gathers the primary key(s) of a table from the database
@@ -310,7 +310,7 @@ namespace TFG
         private void findRecords()
         {
             Dictionary<string, string[]> res = new Dictionary<string, string[]>();
-            foreach (KeyValuePair<string, string[]> entry in tabledata.TablesColumns)
+            foreach (KeyValuePair<string, string[]> entry in getColumns(false))
             {
                 string columnsNames = ArrayToString(entry.Value);
 
@@ -339,14 +339,14 @@ namespace TFG
         }
 
         // This method gathers the names of the tables and their columns from the database and saves the result to the corresponding Model variable
-        private Dictionary<string, string[]> getTableAndColumnData()
+        private void findTableAndColumnData()
         {
-            string[] tables = getTableData();
+            string[] tables = tabledata.Tables;
             Dictionary<string, string[]> res = new Dictionary<string, string[]>();
 
             for (int i = 0; i < tables.Length; i++)
             {
-                res.Add(tables[i], getTableColumns(tables[i], false));
+                res.Add(tables[i], findTableColumns(tables[i]));
             }
 
             Dictionary<string, string[]> result = new Dictionary<string, string[]>();
@@ -356,11 +356,11 @@ namespace TFG
                 result.Add(entry.Key, entry.Value);
             }
 
-            return result;
+            tabledata.TablesColumns = result;
         }
 
         // This method gathers the names of the tables from the database and saves the result to the corresponding Model variable
-        private string[] getTableData()
+        private void findTableData()
         {
 
             DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'", con), "tables");
@@ -376,15 +376,37 @@ namespace TFG
 
             Array.Sort<string>(res);
 
+            tabledata.Tables = res;
+        }
+
+        // This method gathers the names of the columns of a given table from the database and returns the result
+        public Dictionary<string, string[]> getColumns(bool getSpacial)
+        {
+            Dictionary<string, string[]> res = new Dictionary<string, string[]>();
+            foreach (string table in tabledata.Tables)
+            {
+                res.Add(table, getTableColumns(table, getSpacial));
+            }
             return res;
         }
 
         // This method gathers the names of the columns of a given table from the database and returns the result
         private string[] getTableColumns(string table, bool getSpacial)
         {
+            string[] res = tabledata.TablesColumns[table];
+
+            if (!getSpacial)
+            {
+                res = filterSpacial(table, res);
+            }
+            return res;
+        }
+
+        // This method gathers the names of the columns of from the database and returns the result
+        private string[] findTableColumns(string table)
+        {
             DataSet dsC;
             DataTable dtC;
-            DataRow rows;
 
             dsC = Broker.Instance().Run(new SqlCommand("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '" + table + "'", con), "columns");
             dtC = dsC.Tables["columns"];
@@ -394,11 +416,6 @@ namespace TFG
             for (int j = 0; j < dtC.Rows.Count; j++)
             {
                 aux[j] = (string)dtC.Rows[j][0];
-            }
-
-            if (!getSpacial)
-            {
-                return filterSpacial(aux);
             }
 
             return aux;
@@ -430,8 +447,8 @@ namespace TFG
 
                 for (int i = 0; i < pks.Length; i++)
                 {
-                    string aux = entry.Key + '.' + pks[i];
-                    pk_data[i] = tabledata.Records[aux];
+                    string pkName = entry.Key + '.' + pks[i];
+                    pk_data[i] = tabledata.Records[pkName];
                 }
 
                 foreach (string column in entry.Value)
@@ -447,7 +464,8 @@ namespace TFG
 
                         for (int j = 0; j < pks.Length; j++)
                         {
-                            string type = getDataType(pks[j]);
+                            string pkName = entry.Key + '.' + pks[j];
+                            string type = getDatatype(pkName);
                             str += " " + pks[j] + " = convert(" + type + ", '" + pk_data[j][i];
                             if (type == "datetime")
                             {
@@ -464,7 +482,7 @@ namespace TFG
                         }
                         if (pks.Length == 0)
                         {
-                            string type = getDataType(column);
+                            string type = getDatatype(name);
                             str += " " + column + " = convert(" + type + ", '" + data[i];
                             if (type == "datetime")
                             {
@@ -545,7 +563,7 @@ namespace TFG
         {
             Dictionary<string, bool[]> auxDict = new Dictionary<string, bool[]>();
 
-            foreach (KeyValuePair<string, string[]> entry in tabledata.TablesColumns)
+            foreach (KeyValuePair<string, string[]> entry in getColumns(false))
             {
                 for (int i = 0; i < entry.Value.Length; i++)
                 {
@@ -612,36 +630,117 @@ namespace TFG
         }
         public void initMetatable()
         {
-            this.tabledata.Tables = getTableData();
-            this.tabledata.TablesColumns = getTableAndColumnData();
+            findTableData();
+            findTableAndColumnData();
+            findTablesSchemaNames();
+            findAllDatatypes();
             findRecords();
             findAvailableMasks();
             findPks();
             System.Diagnostics.Debug.Write("hello");
         }
 
+        // This method gathers the schema names of the tables from the database
+        private void findTablesSchemaNames()
+        {
+            Dictionary<string, string> res = new Dictionary<string, string>();
+
+            foreach (string table in tabledata.Tables)
+            {
+                DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT '[' + TABLE_SCHEMA + '].[' + TABLE_NAME + ']' FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = '" + table + "'", con), "schema");
+                DataTable dt = ds.Tables["schema"];
+                DataRow row = dt.Rows[0];
+                res.Add(table, (string)row[0]);
+            }
+
+            tabledata.TablesSchemaNames = res;
+
+        }
+
         // This method gathers the schema name of a table from the database
         private string getTableSchemaName(string table)
         {
-            DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT '[' + TABLE_SCHEMA + '].[' + TABLE_NAME + ']' FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME = '" + table + "'", con), "schema");
-            DataTable dt = ds.Tables["schema"];
-            DataRow row = dt.Rows[0];
-            return (string)row[0];
+            return tabledata.TablesSchemaNames[table];
+        }
+
+        // This method gathers the datatypes of the columns from the database
+        private void findAllDatatypes()
+        {
+            findDatatypes();
+            findSuggestedDatatypes();
+        }
+
+        // This method gathers the datatypes of the columns from the database
+        private void findDatatypes()
+        {
+            Dictionary<string, string> res = new Dictionary<string, string>();
+
+            foreach (KeyValuePair<string, string[]> entry in getColumns(true))
+            {
+                for (int i = 0; i < entry.Value.Length; i++)
+                {
+                    string name = entry.Key + '.' + entry.Value[i];
+                    DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE COLUMN_NAME = '" + entry.Value[i] + "'", con), "type");
+                    DataTable dt = ds.Tables["type"];
+                    DataRow row = dt.Rows[0];
+                    res.Add(name, (string)row[0]);
+                }
+            }
+
+            tabledata.ColumnsDatatypes = res;
+        }
+
+        // This method gathers the datatypes of the columns from the database
+        private void findSuggestedDatatypes()
+        {
+            Dictionary<string, string> res = new Dictionary<string, string>();
+
+            foreach (KeyValuePair<string, string[]> entry in getColumns(true))
+            {
+                for (int i = 0; i < entry.Value.Length; i++)
+                {
+                    string name = entry.Key + '.' + entry.Value[i];
+                    DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE COLUMN_NAME = '" + entry.Value[i] + "'", con), "type");
+                    DataTable dt = ds.Tables["type"];
+                    DataRow row = dt.Rows[0];
+                    res.Add(name, (string)row[0]);
+                }
+            }
+
+            tabledata.ColumnsSuggestedDatatypes = res;
+        }
+
+        // This method retrieves the datatypes information of the selected columns
+        public void getDatatypes()
+        {
+
+            Dictionary<string, string> res = new Dictionary<string, string>();
+            Dictionary<string, string> res_sug = new Dictionary<string, string>();
+
+            foreach (KeyValuePair<string, string[]> entry in info.ColumnsSelected)
+            {
+                for (int i = 0; i < entry.Value.Length; i++)
+                {
+                    string name = entry.Key + '.' + entry.Value[i];
+                    res.Add(name, tabledata.ColumnsDatatypes[name]);
+                    res_sug.Add(name, tabledata.ColumnsSuggestedDatatypes[name]);
+                }
+            }
+            info.ColumnsDatatypes = res;
+            info.ColumnsSuggestedDatatypes = res_sug;
         }
 
         // This method gathers the datatype of a column from the database
-        private string getDataType(string column)
+        private string getDatatype(string column)
         {
-            DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE COLUMN_NAME = '" + column + "'", con), "type");
-            DataTable dt = ds.Tables["type"];
-            DataRow row = dt.Rows[0];
-            return (string)row[0];
+            return tabledata.ColumnsDatatypes[column];
         }
 
         // This method sets a column to not null
         private void makeNotNull(string column, string table)
         {
-            Broker.Instance().Run(new SqlCommand("ALTER TABLE " + getTableSchemaName(table) + " ALTER COLUMN " + column + " " + getDataType(column) + " NOT NULL", con), "type");
+            string name = table + '.' + column;
+            Broker.Instance().Run(new SqlCommand("ALTER TABLE " + getTableSchemaName(table) + " ALTER COLUMN " + column + " " + getDatatype(name) + " NOT NULL", con), "type");
         }
 
         // This method gathers the PK constraint name of a table from the database
@@ -656,14 +755,15 @@ namespace TFG
         }
 
         // This method is used to filter the spacial datatypes 
-        private string[] filterSpacial(string[] array)
+        private string[] filterSpacial(string table, string[] array)
         {
             int index = array.Length;
             string[] res = new string[index];
 
             for (int j = 0; j < array.Length; j++)
             {
-                string type = getDataType(array[j]);
+                string name = table + '.' + array[j];
+                string type = getDatatype(name);
                 if (!isSpacial(type))
                 {
                     res[j] = array[j];

@@ -47,6 +47,9 @@ namespace TFG.Models
         public Dictionary<string, string[]> TableSuggestedPks { get; set; }
         public Dictionary<string, string[]> TablesColumns { get; set; }
         public Dictionary<string, string[]> Records { get; set; }
+        public Dictionary<string, string> ColumnsDatatypes { get; set; }
+        public Dictionary<string, string> ColumnsSuggestedDatatypes { get; set; }
+        public Dictionary<string, string> TablesSchemaNames { get; set; }
 
         // Creating some structures to ensure code reusability and prevent code duplication and if it's run on columns (true) or entry.Values (false)
         public Dictionary<string, string> Functionalities_text { get; set; }
