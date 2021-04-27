@@ -45,40 +45,66 @@
             <span>Improve Datatypes Report</span>
         </h3>
     </div>
+    <div id="accordion" class="overflow-auto left-half" style="width:20vw;">
+        <span class="font-weight-bold">Tables:</span>
+        <br />
+        @foreach (KeyValuePair<string, string[]> entry in Model.ColumnsSelected)
+        {
+            string collapse = "#collapse" + entry.Key;
+            string CheckBox = entry.Key + "CheckBox";
+            string divName = entry.Key + "Div";
 
+            <div class="card">
+                <div class="card-header nav_color_1" id="@entry.Key">
+                    <h5>
+                        <input type="checkbox" id="@CheckBox" name="@entry.Key" onclick="checkChilds('@CheckBox')" />
+                        <button class="btn btn-link" onclick="openTab(event, '@divName', false)" data-toggle="collapse" data-target="@collapse" aria-expanded="true" aria-controls="collapseOne">
+                            @entry.Key
+                        </button>
+                    </h5>
+                </div>
+            </div>
+        }
+    </div>
     <div id="Tab-contents" class="overflow-auto">
+        <div id="default" class="tabcontent">
+            <h2 style="padding-top:35vh;">No column selected, select one from the dropdown on the left</h2>
+        </div>
+        @foreach (KeyValuePair<string, string[]> entry in Model.ColumnsSelected)
+        {
+            string divName = entry.Key + "Div";
 
-        <table class="table table-striped overflow-auto">
+            <div id="@divName" class="tabcontent" style="display: none;">
+                <table class="table table-striped overflow-auto">
 
-            <thead class="thead-dark">
-                <tr>
-                    <th scope="col">Selections</th>
-                    <th scope="col">Table name</th>
-                    <th scope="col">Column name</th>
-                    <th scope="col">Column original datatype</th>
-                    <th scope="col">Column suggested datatype</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (KeyValuePair<string, string[]> entry in Model.ColumnsSelected)
-                {
-                    for (int i = 0; i < entry.Value.Length; i++)
-                    {
-                        string chechBox = entry.Key + entry.Value[i];
-                        string name = entry.Key + '.' + entry.Value[i];
-
+                    <thead class="thead-dark">
                         <tr>
-                            <th scope="row"><input type="checkbox" id="@chechBox" name="@entry" onclick="updateSelectionText();" /></th>
-                            <td>@entry.Key</td>
-                            <td>@entry.Value[i]</td>
-                            <td style="border-left: 1px solid;">@Model.ColumnsDatatypes[name]</td>
-                            <td>@Model.ColumnsSuggestedDatatypes[name]</td>
+                            <th scope="col">Selections</th>
+                            <th scope="col">Table name</th>
+                            <th scope="col">Column name</th>
+                            <th scope="col">Column original datatype</th>
+                            <th scope="col">Column suggested datatype</th>
                         </tr>
-                    }
-                }
-            </tbody>
-        </table>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < entry.Value.Length; i++)
+                        {
+                            string chechBox = entry.Key + entry.Value[i];
+                            string CheckBox = entry.Key + "CheckBox";
+                            string name = entry.Key + '.' + entry.Value[i];
+                            <tr>
+                                <th scope="row"><input type="checkbox" id="@name" name="@name" data-parent="@CheckBox" onclick="checkParent('@CheckBox', '@name')" /></th>
+                                <td>@entry.Key</td>
+                                <td>@entry.Value[i]</td>
+                                <td style="border-left: 1px solid;">@Model.ColumnsDatatypes[name]</td>
+                                <td>@Model.ColumnsSuggestedDatatypes[name]</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
 
+        }
     </div>
 </div>
 <!-- This part is perform whole actions like selecting everything or nothing and running the functionality with the selected items -->

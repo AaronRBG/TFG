@@ -145,6 +145,16 @@ function confirm(functionality) {
                 });
         }
 
+        if (functionality == "improve_datatypes") {
+            document.querySelectorAll('input[type=checkbox]:not([id$=CheckBox])').forEach(
+                function (item) {
+                    if (item.checked) {
+                        selected += ",";
+                        selected += item.name;
+                    }
+                });
+        }
+
         document.getElementById("data").value = selected;
         document.getElementById("functionalitySelected5").value = functionality;
         $("#hidden-btn5").click();

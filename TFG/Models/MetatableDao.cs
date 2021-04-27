@@ -434,6 +434,10 @@ namespace TFG
                     selectPksTables(data);
                     updatePrimaryKeys();
                     break;
+                case "improve_datatypes":
+                    selectDatatypes(data);
+                    updateDatatypes();
+                    break;
             }
         }
 
@@ -522,6 +526,20 @@ namespace TFG
                 }
                 Broker.Instance().Run(new SqlCommand("ALTER TABLE " + getTableSchemaName(entry) + " ADD CONSTRAINT " + constraint_name + " PRIMARY KEY (" + ArrayToString(tabledata.TableSuggestedPks[entry]) + ")", con), "addPK");
                 tabledata.TablePks[entry] = tabledata.TableSuggestedPks[entry];
+            }
+        }
+
+        // This method updates the database with the corresponding changes for functionality improve_datatypes
+        private void updateDatatypes()
+        {
+            foreach (KeyValuePair<string, string[]> entry in info.ColumnsSelected)
+            {
+                for (int i = 0; i < entry.Value.Length; i++)
+                {
+                    string name = entry.Key + '.' + entry.Value[i];
+                    Broker.Instance().Run(new SqlCommand("ALTER TABLE " + getTableSchemaName(entry.Key) + " ALTER COLUMN " + entry.Value[i] + " " + info.ColumnsSuggestedDatatypes[name] + " NOT NULL", con), "datatypeChange");
+                    tabledata.ColumnsDatatypes[name] = tabledata.ColumnsSuggestedDatatypes[name];
+                }
             }
         }
 
@@ -708,19 +726,19 @@ namespace TFG
                             }
                             else
                             {
-                                if (int.Parse(max) < 128)
+                                if (max.Length==0 || long.Parse(max) < 128)
                                 {
                                     result = "tinyint";
                                 }
-                                else if (int.Parse(max) < 32768)
+                                else if (long.Parse(max) < 32768)
                                 {
                                     result = "smallint";
                                 }
-                                else if (int.Parse(max) < 8388608)
+                                else if (long.Parse(max) < 8388608)
                                 {
                                     result = "mediumint";
                                 }
-                                else if (int.Parse(max) < 2147483648)
+                                else if (long.Parse(max) < 2147483648)
                                 {
                                     result = "int";
                                 }
@@ -978,6 +996,52 @@ namespace TFG
             info.TablesSelected = pks.Keys.ToArray();
             info.TablePks = pks;
             info.TableSuggestedPks = suggestedPks;
+        }
+
+        // This method saves the selection of the tables selected for the primary_keys functionality
+        private void selectDatatypes(string data)
+        {
+            string[] aux = data.Split(',');
+            string[] columns = new string[aux.Length - 1];
+            Array.Copy(aux, 1, columns, 0, aux.Length - 1);
+            Dictionary<string, string> datatypes = new Dictionary<string, string>();
+            Dictionary<string, string> suggestedDatatypes = new Dictionary<string, string>();
+            Dictionary<string, string[]> selected = new Dictionary<string, string[]>();
+            string table = "";
+            int index = 0;
+
+            foreach (string column in columns)
+            {
+                string[] name = column.Split('.');
+                if (table == "" || table != name[0])
+                {
+                    if (table != "")
+                    {
+                        string[] other = new string[index];
+                        Array.Copy(aux, 0, other, 0, index);
+                        selected.Add(table, other);
+                    }
+                    table = name[0];
+                    index = 0;
+                    aux = new string[columns.Length];
+                }
+
+                if (tabledata.ColumnsDatatypes[column] != tabledata.ColumnsSuggestedDatatypes[column])
+                {
+                    aux[index] = name[1];
+                    index++;
+                    datatypes.Add(column, tabledata.ColumnsDatatypes[column]);
+                    suggestedDatatypes.Add(column, tabledata.ColumnsSuggestedDatatypes[column]);
+                }
+            }
+
+            string[] other2 = new string[index];
+            Array.Copy(aux, 0, other2, 0, index);
+            selected.Add(table, other2);
+
+            info.ColumnsSelected = selected;
+            info.ColumnsDatatypes = datatypes;
+            info.ColumnsSuggestedDatatypes = suggestedDatatypes;
         }
 
         // This method parses a string into a dictionary

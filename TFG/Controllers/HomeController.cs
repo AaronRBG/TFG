@@ -320,7 +320,7 @@ namespace TFG.Controllers
                     return RedirectToAction("MainPage");
                 });
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 // if it is not valid it return the Help View
                 return await Task.Run<ActionResult>(() =>
@@ -405,6 +405,14 @@ namespace TFG.Controllers
 
             if (HttpContext.Session.Id == id)
             {
+                if (functionalitySelected != "MainPage" && functionalitySelected != "Performance")
+                {
+                    resetInfo(functionalitySelected);
+                }
+                else
+                {
+                    resetInfo();
+                }
                 return RedirectToAction(functionalitySelected, daos[id].info);
             }
             else
