@@ -633,11 +633,11 @@ namespace TFG
             findTableData();
             findTableAndColumnData();
             findTablesSchemaNames();
-            findAllDatatypes();
+            findDatatypes();
             findRecords();
+            findSuggestedDatatypes();
             findAvailableMasks();
             findPks();
-            System.Diagnostics.Debug.Write("hello");
         }
 
         // This method gathers the schema names of the tables from the database
@@ -661,13 +661,6 @@ namespace TFG
         private string getTableSchemaName(string table)
         {
             return tabledata.TablesSchemaNames[table];
-        }
-
-        // This method gathers the datatypes of the columns from the database
-        private void findAllDatatypes()
-        {
-            findDatatypes();
-            findSuggestedDatatypes();
         }
 
         // This method gathers the datatypes of the columns from the database
@@ -700,10 +693,62 @@ namespace TFG
                 for (int i = 0; i < entry.Value.Length; i++)
                 {
                     string name = entry.Key + '.' + entry.Value[i];
-                    DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE COLUMN_NAME = '" + entry.Value[i] + "'", con), "type");
-                    DataTable dt = ds.Tables["type"];
-                    DataRow row = dt.Rows[0];
-                    res.Add(name, (string)row[0]);
+                    string result = "result";
+
+                    if (tabledata.Records.ContainsKey(name) && tabledata.Records[name] != null)
+                    {
+                        string[] record = tabledata.Records[name];
+                        string max = record.OrderByDescending(s => s.Length).First();
+                        bool number = record.All(r => r.All(char.IsDigit));
+                        if (number)
+                        {
+                            if (record.All(r => (r == "0" || r == "1")))
+                            {
+                                result = "bit";
+                            }
+                            else
+                            {
+                                if (int.Parse(max) < 128)
+                                {
+                                    result = "tinyint";
+                                }
+                                else if (int.Parse(max) < 32768)
+                                {
+                                    result = "smallint";
+                                }
+                                else if (int.Parse(max) < 8388608)
+                                {
+                                    result = "mediumint";
+                                }
+                                else if (int.Parse(max) < 2147483648)
+                                {
+                                    result = "int";
+                                }
+                                else
+                                {
+                                    result = "bigint";
+                                }
+                            }
+                        }
+                        else
+                        {
+                            DateTime dt = new DateTime();
+                            if (record.All(r => DateTime.TryParse(r, out dt)))
+                            {
+                                result = "datetime";
+                            }
+                            else if (record.All(r => r == "True" || r == "False"))
+                            {
+                                result = "bit";
+                            }
+                            else
+                            {
+                                result = "nvarchar(" + max.Length + ')';
+                            }
+                        }
+                    }
+
+                    res.Add(name, result);
                 }
             }
 
