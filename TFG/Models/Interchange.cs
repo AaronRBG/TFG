@@ -25,6 +25,8 @@ namespace TFG.Models
         public Dictionary<string, string[]> ColumnsSelected { get; set; }
         public Dictionary<string, string> MasksSelected { get; set; }
         public Dictionary<string, string[]> Records { get; set; }
+        public Dictionary<string, string> ColumnsDatatypes { get; set; }
+        public Dictionary<string, string> ColumnsSuggestedDatatypes { get; set; }
 
         // Creating some structures to ensure code reusability and prevent code duplication and if it's run on columns (true) or entry.Values (false)
         public string Functionalities_text { get; set; }

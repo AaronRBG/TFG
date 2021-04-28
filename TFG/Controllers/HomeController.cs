@@ -320,7 +320,7 @@ namespace TFG.Controllers
                     return RedirectToAction("MainPage");
                 });
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 // if it is not valid it return the Help View
                 return await Task.Run<ActionResult>(() =>
@@ -339,7 +339,7 @@ namespace TFG.Controllers
             daos[id].info.Functionality = functionalitySelected;
             daos[id].info.Functionalities_text = daos[id].tabledata.Functionalities_text[functionalitySelected];
             daos[id].info.Functionalities_need_columns = daos[id].tabledata.Functionalities_need_columns[functionalitySelected];
-            daos[id].info.ColumnsSelected = daos[id].tabledata.TablesColumns;
+            daos[id].info.ColumnsSelected = daos[id].getColumns(false);
             if (HttpContext.Session.Id == id)
             {
                 return RedirectToAction("Selection");
@@ -370,13 +370,18 @@ namespace TFG.Controllers
                     {
                         daos[id].info.TablesSelected = daos[id].parseTableSelection(selection);
                     }
-                    if (functionalitySelected == "create_masks")
+                    switch (functionalitySelected)
                     {
-                        daos[id].getAvailableMasks();
-                    }
-                    if (functionalitySelected == "primary_keys")
-                    {
-                        daos[id].getPks();
+                        case "create_masks":
+                            daos[id].getAvailableMasks();
+                            break;
+                        case "primary_keys":
+                            daos[id].getPks();
+                            break;
+                        default:
+                            // "improve_datatypes"
+                            daos[id].getDatatypes();
+                            break;
                     }
                 }
                 else
@@ -400,6 +405,14 @@ namespace TFG.Controllers
 
             if (HttpContext.Session.Id == id)
             {
+                if (functionalitySelected != "MainPage" && functionalitySelected != "Performance")
+                {
+                    resetInfo(functionalitySelected);
+                }
+                else
+                {
+                    resetInfo();
+                }
                 return RedirectToAction(functionalitySelected, daos[id].info);
             }
             else
@@ -419,7 +432,7 @@ namespace TFG.Controllers
             daos[id].info.Functionalities_need_columns = daos[id].tabledata.Functionalities_need_columns[functionalitySelected];
             if (daos[id].tabledata.Functionalities_need_columns[functionalitySelected])
             {
-                daos[id].info.ColumnsSelected = daos[id].tabledata.TablesColumns;
+                daos[id].info.ColumnsSelected = daos[id].getColumns(false);
             }
             else
             {
@@ -428,13 +441,18 @@ namespace TFG.Controllers
 
             if (HttpContext.Session.Id == id)
             {
-                if (functionalitySelected == "create_masks")
+                switch (functionalitySelected)
                 {
-                    daos[id].getAvailableMasks();
-                }
-                if (functionalitySelected == "primary_keys")
-                {
-                    daos[id].getPks();
+                    case "create_masks":
+                        daos[id].getAvailableMasks();
+                        break;
+                    case "primary_keys":
+                        daos[id].getPks();
+                        break;
+                    default:
+                        // "improve_datatypes"
+                        daos[id].getDatatypes();
+                        break;
                 }
                 return RedirectToAction(functionalitySelected, daos[id].info);
             }
