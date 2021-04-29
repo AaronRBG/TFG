@@ -556,8 +556,9 @@ namespace TFG.Controllers
             if (deleteSelection)
             {
                 daos[id].info.ColumnsSelected = selection;
+                daos[id].getMaskedRecords();
             }
-            daos[id].getMaskedRecords();
+            
         }
 
         // This method is used to send the simplest model possible to the view to improve performance
