@@ -21,10 +21,21 @@ BEGIN
 		select @other = @other + SUBSTRING(@res, @i, 1)
 		select @at = 1
 	END
-	ELSE IF SUBSTRING(@res, @i, 1) = '.' and @at = 1 and @dot = 0
+	ELSE IF SUBSTRING(@res, @i, 1) = '.' and @dot = 0
 	BEGIN
 		select @other = @other + SUBSTRING(@res, @i, 1)
-		select @dot = 1
+		IF @at = 1
+		BEGIN
+			select @dot = 1
+		END
+	END
+	ELSE IF SUBSTRING(@res, @i, 1) = '-' and @dot = 0
+	BEGIN
+		select @other = @other + SUBSTRING(@res, @i, 1)
+	END
+	ELSE IF SUBSTRING(@res, @i, 1) = '_' and @dot = 0
+	BEGIN
+		select @other = @other + SUBSTRING(@res, @i, 1)
 	END
 	select @i = @i + 1
 END

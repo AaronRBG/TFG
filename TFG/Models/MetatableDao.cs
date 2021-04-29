@@ -65,7 +65,7 @@ namespace TFG
                         break;
                 }
 
-                DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT [" + mask + pair[1] + "]) FROM " + getTableSchemaName(pair[0]), con), "records");
+                DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT [" + mask + pair[1] + "]) FROM " + getTableSchemaName(pair[0]) + " ORDER BY " + getTableColumns(pair[0], true).First().ToString(), con), "records");
                 DataTable dt = ds.Tables["records"];
                 string[] container = new string[dt.Rows.Count];
                 for (int x = 0; x < dt.Rows.Count; x++)
