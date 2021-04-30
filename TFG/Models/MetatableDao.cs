@@ -306,13 +306,67 @@ namespace TFG
             info.Records.Add(record, tabledata.Records[record]);
         }
 
+        public void getDuplicates()
+        {
+            Dictionary<string, string[]> res = new Dictionary<string, string[]>();
+            foreach (KeyValuePair<string, string[]> entry in info.ColumnsSelected)
+            {
+                string[] columns = getTableColumns(entry.Key, false);
+                columns = columns.Select(x => "a." + x).ToArray();
+                string[] SELcolumns = entry.Value.Select(x => "b." + x).ToArray();
+                string joins="";
+                for(int i=0; i<entry.Value.Length;i++)
+                {
+                    int index = Array.IndexOf(getTableColumns(entry.Key, false), entry.Value[i]);
+                    if (i==0)
+                    {
+                        joins = columns[index] + " = " + SELcolumns[i];
+                    }
+                    else
+                    {
+                        joins += " AND " + columns[index] + " = " + SELcolumns[i];
+                    }
+                }
+                DataSet ds = Broker.Instance().Run(
+                    new SqlCommand("SELECT " + ArrayToString(columns, false) + " FROM " + getTableSchemaName(entry.Key)
+                    + " a JOIN ( SELECT " + ArrayToString(entry.Value, true) + " FROM " + getTableSchemaName(entry.Key)
+                    + " GROUP BY " + ArrayToString(entry.Value, true) + " HAVING COUNT(*)>1) b ON " + joins
+                    + " ORDER BY " + ArrayToString(entry.Value, true), con), "duplicates");
+                DataTable dt = ds.Tables["duplicates"];
+                string[][] container = new string[columns.Length][];
+                for (int x = 0; x < dt.Rows.Count; x++)
+                {
+                    for (int i = 0; i < columns.Length; i++)
+                    {
+                        if (x == 0)
+                        {
+                            container[i] = new string[dt.Rows.Count];
+                        }
+                        container[i][x] = dt.Rows[x][i].ToString();
+                    }
+                }
+                columns = getTableColumns(entry.Key, false);
+                for (int i = 0; i < columns.Length; i++)
+                {
+                    string name = entry.Key + '.' + columns[i];
+                    if(container[i]==null)
+                    {
+                        container[i] = new string[0];
+                    }
+                    res.Add(name, container[i]);
+                }
+                info.ColumnsSelected[entry.Key] = columns;
+            }
+            info.Records = res;
+        }
+
         // This method gets the data of the columns from the database
         private void findRecords()
         {
             Dictionary<string, string[]> res = new Dictionary<string, string[]>();
             foreach (KeyValuePair<string, string[]> entry in getColumns(false))
             {
-                string columnsNames = ArrayToString(entry.Value);
+                string columnsNames = ArrayToString(entry.Value, true);
 
                 DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT " + columnsNames + " FROM " + getTableSchemaName(entry.Key), con), "records");
                 DataTable dt = ds.Tables["records"];
@@ -434,6 +488,10 @@ namespace TFG
                     selectPksTables(data);
                     updatePrimaryKeys();
                     break;
+                case "remove_duplicates":
+                    //selectPksTables(data);
+                    //updatePrimaryKeys();
+                    break;
                 case "improve_datatypes":
                     selectDatatypes(data);
                     updateDatatypes();
@@ -524,7 +582,7 @@ namespace TFG
                     constraint_name += "_";
                     constraint_name += column;
                 }
-                Broker.Instance().Run(new SqlCommand("ALTER TABLE " + getTableSchemaName(entry) + " ADD CONSTRAINT " + constraint_name + " PRIMARY KEY (" + ArrayToString(tabledata.TableSuggestedPks[entry]) + ")", con), "addPK");
+                Broker.Instance().Run(new SqlCommand("ALTER TABLE " + getTableSchemaName(entry) + " ADD CONSTRAINT " + constraint_name + " PRIMARY KEY (" + ArrayToString(tabledata.TableSuggestedPks[entry], true) + ")", con), "addPK");
                 tabledata.TablePks[entry] = tabledata.TableSuggestedPks[entry];
             }
         }
@@ -987,7 +1045,7 @@ namespace TFG
 
             foreach (string table in tables)
             {
-                if (ArrayToString(tabledata.TablePks[table]) != ArrayToString(tabledata.TableSuggestedPks[table]))
+                if (ArrayToString(tabledata.TablePks[table], true) != ArrayToString(tabledata.TableSuggestedPks[table], true))
                 {
                     pks.Add(table, tabledata.TablePks[table]);
                     suggestedPks.Add(table, tabledata.TableSuggestedPks[table]);
@@ -1069,20 +1127,34 @@ namespace TFG
         }
 
         //
-        private string ArrayToString(object[] array)
+        private string ArrayToString(object[] array, bool brackets)
         {
             string res = "";
             for (int i = 0; i < array.Length; i++)
             {
                 if (i == 0)
                 {
-                    res = '[' + array[i].ToString() + ']';
+                    if(brackets)
+                    {
+                        res = '[' +array[i].ToString() + ']';
+                    }
+                    else
+                    {
+                        res = array[i].ToString();
+                    }
+                    
                 }
                 else
                 {
-                    res += '[';
+                    if (brackets)
+                    {
+                        res += '[';
+                    }
                     res += array[i].ToString();
-                    res += ']';
+                    if (brackets)
+                    {
+                        res += ']';
+                    }
                 }
                 if (i != array.Length - 1)
                 {
