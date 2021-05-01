@@ -312,13 +312,14 @@ namespace TFG
             foreach (KeyValuePair<string, string[]> entry in info.ColumnsSelected)
             {
                 string[] columns = getTableColumns(entry.Key, false);
+                columns = ArrayToString(columns, true).Split(',');
                 columns = columns.Select(x => "a." + x).ToArray();
-                string[] SELcolumns = entry.Value.Select(x => "b." + x).ToArray();
-                string joins="";
-                for(int i=0; i<entry.Value.Length;i++)
+                string[] SELcolumns = ArrayToString(entry.Value, true).Split(',').Select(x => "b." + x).ToArray();
+                string joins = "";
+                for (int i = 0; i < entry.Value.Length; i++)
                 {
                     int index = Array.IndexOf(getTableColumns(entry.Key, false), entry.Value[i]);
-                    if (i==0)
+                    if (i == 0)
                     {
                         joins = columns[index] + " = " + SELcolumns[i];
                     }
@@ -349,7 +350,7 @@ namespace TFG
                 for (int i = 0; i < columns.Length; i++)
                 {
                     string name = entry.Key + '.' + columns[i];
-                    if(container[i]==null)
+                    if (container[i] == null)
                     {
                         container[i] = new string[0];
                     }
@@ -489,8 +490,8 @@ namespace TFG
                     updatePrimaryKeys();
                     break;
                 case "remove_duplicates":
-                    //selectPksTables(data);
-                    //updatePrimaryKeys();
+                    selectDuplicates(data);
+                    deleteDuplicates();
                     break;
                 case "improve_datatypes":
                     selectDatatypes(data);
@@ -585,6 +586,39 @@ namespace TFG
                 Broker.Instance().Run(new SqlCommand("ALTER TABLE " + getTableSchemaName(entry) + " ADD CONSTRAINT " + constraint_name + " PRIMARY KEY (" + ArrayToString(tabledata.TableSuggestedPks[entry], true) + ")", con), "addPK");
                 tabledata.TablePks[entry] = tabledata.TableSuggestedPks[entry];
             }
+        }
+
+        // This method updates the database with the corresponding changes for functionality remove_duplicates
+        private void deleteDuplicates()
+        {
+            foreach (KeyValuePair<string, string[]> entry in info.ColumnsSelected)
+            {
+                string[] pks = tabledata.TablePks[entry.Key];
+                if (pks.Length != 0)
+                {
+                    string name1 = entry.Key + '.' + pks[0];
+                    for (int j = 0; j < info.Records[name1].Length; j++)
+                    {
+                        string pkfile= "";
+
+                        for (int i = 0; i < pks.Length; i++)
+                        {
+                            string name = entry.Key + '.' + pks[i];
+                            if (i == 0)
+                            {
+                                pkfile = pks[i] + " = " + info.Records[name][j];
+                            }
+                            else
+                            {
+                                pkfile += " AND " + pks[i] + " = " + info.Records[name][j];
+                            }
+                        }
+
+                        Broker.Instance().Run(new SqlCommand("DELETE FROM " + getTableSchemaName(entry.Key) + " WHERE " + pkfile, con), "removeDuplicates");
+                    }
+                }
+            }
+            findRecords();
         }
 
         // This method updates the database with the corresponding changes for functionality improve_datatypes
@@ -784,7 +818,7 @@ namespace TFG
                             }
                             else
                             {
-                                if (max.Length==0 || long.Parse(max) < 128)
+                                if (max.Length == 0 || long.Parse(max) < 128)
                                 {
                                     result = "tinyint";
                                 }
@@ -1056,7 +1090,45 @@ namespace TFG
             info.TableSuggestedPks = suggestedPks;
         }
 
-        // This method saves the selection of the tables selected for the primary_keys functionality
+        // This method saves the selection of the records selected for the remove_duplicates functionality
+        private void selectDuplicates(string data)
+        {
+            data = data.Replace("CheckBox", "");
+            Dictionary<string, string[]> parsedData = parseColumnSelection(data);
+            Dictionary<string, string[]> res = new Dictionary<string, string[]>();
+
+            foreach (KeyValuePair<string, string[]> entry in parsedData)
+            {
+                res.Add(entry.Key, info.ColumnsSelected[entry.Key]);
+
+                for (int i = 0; i < entry.Value.Length; i++)
+                {
+                    entry.Value[i] = entry.Value[i].Replace(entry.Key, "");
+                }
+                int[] records = entry.Value.Select(int.Parse).ToArray();
+                for (int k = 0; k < res[entry.Key].Length; k++)
+                {
+                    string[] aux = new string[records.Length];
+                    int index = 0;
+                    string name = entry.Key + '.' + res[entry.Key][k];
+
+                    for (int j = 0; j < info.Records[name].Length; j++)
+                    {
+                        if (records.Contains(j))
+                        {
+                            aux[index] = info.Records[name][j];
+                            index++;
+                        }
+                    }
+                    info.Records[name] = aux;
+                }
+            }
+
+            info.ColumnsSelected = res;
+
+        }
+
+        // This method saves the selection of the datatypes selected for the improve_datatypes functionality
         private void selectDatatypes(string data)
         {
             string[] aux = data.Split(',');
@@ -1134,15 +1206,15 @@ namespace TFG
             {
                 if (i == 0)
                 {
-                    if(brackets)
+                    if (brackets)
                     {
-                        res = '[' +array[i].ToString() + ']';
+                        res = '[' + array[i].ToString() + ']';
                     }
                     else
                     {
                         res = array[i].ToString();
                     }
-                    
+
                 }
                 else
                 {

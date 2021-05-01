@@ -74,7 +74,9 @@
         {
             string divName = entry.Key + "Div";
             string[][] container = new string[entry.Value.Length][];
-            for(int i=0; i < entry.Value.Length; i++)
+            string CheckBox = entry.Key + "CheckBox";
+
+            for (int i=0; i < entry.Value.Length; i++)
             {
                 string name = entry.Key + '.' + entry.Value[i];
                 container[i] = Model.Records[name];
@@ -94,9 +96,9 @@
                     <tbody>
                         @for (int j = 0; j < container[0].Length; j++)
                         {
-                            //string idname = @entry.Value[i] + @j + "Record";
+                            string idname = @entry.Key + @j + "Record";
                             <tr>
-                                <th scope="row"><input type="checkbox" id="" name="" data-parent="" onclick="checkParent('', '')" /></th>
+                                <th scope="row"><input type="checkbox" id="@idname" name="@idname" data-parent="@CheckBox" onclick="checkParent('@CheckBox', '@idname')" /></th>
                                 @for (int k = 0; k < entry.Value.Length; k++)
                                 {
                                     <td>@container[k][j]</td>

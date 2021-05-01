@@ -117,7 +117,7 @@ function confirm(functionality) {
         var selected;
         var aux;
 
-        if (functionality == "create_masks") {
+        if (functionality == "create_masks" || functionality == "remove_duplicates" ) {
 
             document.querySelectorAll('input[type=checkbox][id$=Record]').forEach(
                 function (item) {
@@ -174,7 +174,13 @@ function updateSelectionText(name) {
             document.getElementById('selection-text').innerHTML = getColumns() + ' columns selected from ' + getTables() + ' different tables.'
         }
     } else {
-        document.getElementById('selection-text').innerHTML = getRecords() + ' records selected from ' + getColumns() + ' different columns and ' + getTables() + ' different tables.'
+        text = getRecords() + ' records selected from ';
+        if (getColumns() != 0)
+        {
+            text += getColumns() + ' different columns and ';
+        }
+        text += getTables() + ' different tables.';
+        document.getElementById('selection-text').innerHTML = text;
     }
 }
 
