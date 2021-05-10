@@ -476,6 +476,81 @@ namespace TFG
             return aux;
         }
 
+        private void findConstraints()
+        {
+            List<Models.Constraint> res = new List<Models.Constraint>();
+
+            string path = Path.Combine(Directory.GetCurrentDirectory(), @"Scripts\findForeign.sql");
+            string sql = System.IO.File.ReadAllText(path);
+            DataSet ds = Broker.Instance().Run(new SqlCommand(sql, con), "findConstraints");
+            DataTable dt = ds.Tables["findConstraints"];
+            for(int i=0; i<dt.Rows.Count; i++)
+            {
+                string name = (string)dt.Rows[i][1];
+                string table = (string)dt.Rows[i][0];
+                string table2 = (string)dt.Rows[i][2];
+                Models.Constraint aux = new Models.Constraint(name, table, table2);
+                res.Add(aux);
+            }
+
+            path = Path.Combine(Directory.GetCurrentDirectory(), @"Scripts\findPrimary.sql");
+            sql = System.IO.File.ReadAllText(path);
+            ds = Broker.Instance().Run(new SqlCommand(sql, con), "findConstraints");
+            dt = ds.Tables["findConstraints"];
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                string name = (string)dt.Rows[i][1];
+                string table = (string)dt.Rows[i][0];
+                Models.Constraint aux = new Models.Constraint(name, table);
+                res.Add(aux);
+            }
+
+            path = Path.Combine(Directory.GetCurrentDirectory(), @"Scripts\findComputed.sql");
+            sql = System.IO.File.ReadAllText(path);
+            ds = Broker.Instance().Run(new SqlCommand(sql, con), "findConstraints");
+            dt = ds.Tables["findConstraints"];
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                string column = (string)dt.Rows[i][1];
+                string table = (string)dt.Rows[i][0];
+                string definition = (string)dt.Rows[i][2];
+                Models.Constraint aux = new Models.Constraint(column, table, definition, column);
+                res.Add(aux);
+            }
+
+            tabledata.constraints = res.ToArray();
+        }
+
+        private void deleteConstraints(string table)
+        {
+            foreach (Models.Constraint c in tabledata.constraints.Where(s => s.type!= "COMPUTED COLUMN" && (s.table == table || s.table2 == table)))
+            {
+                Broker.Instance().Run(new SqlCommand("ALTER TABLE " + c.table + " DROP CONSTRAINT " + c.name, con), "findConstraints");
+            }
+            foreach (Models.Constraint c in tabledata.constraints.Where(s => s.type == "COMPUTED COLUMN" && s.table == table))
+            {
+                Broker.Instance().Run(new SqlCommand("ALTER TABLE " + c.table + " DROP COLUMN " + c.column, con), "findConstraints");
+            }
+        }
+
+        private void replaceConstraints(string table)
+        {
+            foreach (Models.Constraint c in tabledata.constraints.Where(s => s.type == "COMPUTED COLUMN" && s.table == table))
+            {
+                Broker.Instance().Run(new SqlCommand("ALTER TABLE " + c.table + " ADD " + c.column + " AS " + c.definition, con), "findConstraints");
+            }
+            foreach (Models.Constraint c in tabledata.constraints.Where(s => s.type == "PRIMARY KEY" && s.table == table))
+            {
+                Broker.Instance().Run(new SqlCommand("ALTER TABLE " + c.table + " ADD CONSTRAINT " + c.name + " PRIMARY KEY(" + c.column + ")", con), "findConstraints");
+            }
+            foreach (Models.Constraint c in tabledata.constraints.Where(s => s.type == "FOREIGN KEY" && (s.table == table || s.table2 == table)))
+            {
+                Broker.Instance().Run(new SqlCommand("ALTER TABLE " + c.table + " ADD CONSTRAINT " + c.name + " FOREIGN KEY(" + c.column
+                    + ") REFERENCES " + c.table2 + " (" + c.column + ") ON DELETE CASCADE ON UPDATE CASCADE", con), "findConstraints");
+            }
+        }
+
+
         // This method updates the database with the corresponding changes
         public void update(string data)
         {
@@ -596,6 +671,7 @@ namespace TFG
                 string[] pks = tabledata.TablePks[entry.Key];
                 if (pks.Length != 0)
                 {
+                    deleteConstraints(getTableSchemaName(entry.Key));
                     string name1 = entry.Key + '.' + pks[0];
                     for (int j = 0; j < info.Records[name1].Length; j++)
                     {
@@ -616,6 +692,7 @@ namespace TFG
 
                         Broker.Instance().Run(new SqlCommand("DELETE FROM " + getTableSchemaName(entry.Key) + " WHERE " + pkfile, con), "removeDuplicates");
                     }
+                    replaceConstraints(getTableSchemaName(entry.Key));
                 }
             }
             findRecords();
@@ -626,13 +703,16 @@ namespace TFG
         {
             foreach (KeyValuePair<string, string[]> entry in info.ColumnsSelected)
             {
+                deleteConstraints(getTableSchemaName(entry.Key));
                 for (int i = 0; i < entry.Value.Length; i++)
                 {
                     string name = entry.Key + '.' + entry.Value[i];
                     Broker.Instance().Run(new SqlCommand("ALTER TABLE " + getTableSchemaName(entry.Key) + " ALTER COLUMN " + entry.Value[i] + " " + info.ColumnsSuggestedDatatypes[name] + " NOT NULL", con), "datatypeChange");
                     tabledata.ColumnsDatatypes[name] = tabledata.ColumnsSuggestedDatatypes[name];
                 }
+                replaceConstraints(getTableSchemaName(entry.Key));
             }
+            findDatatypes(); // remove later
         }
 
         // This method is used to retrieve the already computed available masks for a column
@@ -748,6 +828,7 @@ namespace TFG
             findSuggestedDatatypes();
             findAvailableMasks();
             findPks();
+            findConstraints();
         }
 
         // This method gathers the schema names of the tables from the database
@@ -808,27 +889,28 @@ namespace TFG
                     if (tabledata.Records.ContainsKey(name) && tabledata.Records[name] != null)
                     {
                         string[] record = tabledata.Records[name];
-                        string max = record.OrderByDescending(s => s.Length).First();
                         bool number = record.All(r => r.All(char.IsDigit));
                         if (number)
                         {
+                            string[] smth = record.Where(s => s != "").ToArray();
+                            string max = "";
+                            if (smth.Length > 0)
+                            {
+                                max = smth.OrderByDescending(s => long.Parse(s)).First();
+                            }
                             if (record.All(r => (r == "0" || r == "1")))
                             {
                                 result = "bit";
                             }
                             else
                             {
-                                if (max.Length == 0 || long.Parse(max) < 128)
+                                if (max.Length == 0 || long.Parse(max) < 255)
                                 {
                                     result = "tinyint";
                                 }
                                 else if (long.Parse(max) < 32768)
                                 {
                                     result = "smallint";
-                                }
-                                else if (long.Parse(max) < 8388608)
-                                {
-                                    result = "mediumint";
                                 }
                                 else if (long.Parse(max) < 2147483648)
                                 {
@@ -853,7 +935,13 @@ namespace TFG
                             }
                             else
                             {
-                                result = "nvarchar(" + max.Length + ')';
+                                string max = record.OrderByDescending(s => s.Length).First();
+                                int value = max.Length;
+                                while(value % 10 != 0)
+                                {
+                                    value++;
+                                }
+                                result = "nvarchar(" + value + ')';
                             }
                         }
                     }
@@ -868,10 +956,18 @@ namespace TFG
         // This method retrieves the datatypes information of the selected columns
         public void getDatatypes()
         {
-
             Dictionary<string, string> res = new Dictionary<string, string>();
             Dictionary<string, string> res_sug = new Dictionary<string, string>();
 
+            foreach (KeyValuePair<string, string[]> entry in info.ColumnsSelected)
+            {
+                Models.Constraint[] c = tabledata.constraints.Where(s => s.type == "COMPUTED COLUMN" && s.table == getTableSchemaName(entry.Key)).ToArray();
+                if (c.Length > 0)
+                {
+                    string[] aux = c.Select(c => c.column).ToArray();
+                    info.ColumnsSelected[entry.Key] = entry.Value.Where(c => !aux.Contains(c)).ToArray();
+                }
+            }
             foreach (KeyValuePair<string, string[]> entry in info.ColumnsSelected)
             {
                 for (int i = 0; i < entry.Value.Length; i++)

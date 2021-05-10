@@ -54,6 +54,7 @@ namespace TFG.Models
         // Creating some structures to ensure code reusability and prevent code duplication and if it's run on columns (true) or entry.Values (false)
         public Dictionary<string, string> Functionalities_text { get; set; }
         public Dictionary<string, bool> Functionalities_need_columns { get; set; }
+        public Constraint[] constraints { get; set; }
 
     }
 }
