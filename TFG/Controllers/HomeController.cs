@@ -378,6 +378,9 @@ namespace TFG.Controllers
                         case "primary_keys":
                             daos[id].getPks();
                             break;
+                        case "remove_duplicates":
+                            daos[id].getDuplicates();
+                            break;
                         default:
                             // "improve_datatypes"
                             daos[id].getDatatypes();
@@ -448,6 +451,9 @@ namespace TFG.Controllers
                         break;
                     case "primary_keys":
                         daos[id].getPks();
+                        break;
+                    case "remove_duplicates":
+                        daos[id].getDuplicates();
                         break;
                     default:
                         // "improve_datatypes"

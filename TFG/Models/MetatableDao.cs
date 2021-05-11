@@ -306,13 +306,68 @@ namespace TFG
             info.Records.Add(record, tabledata.Records[record]);
         }
 
+        public void getDuplicates()
+        {
+            Dictionary<string, string[]> res = new Dictionary<string, string[]>();
+            foreach (KeyValuePair<string, string[]> entry in info.ColumnsSelected)
+            {
+                string[] columns = getTableColumns(entry.Key, false);
+                columns = ArrayToString(columns, true).Split(',');
+                columns = columns.Select(x => "a." + x).ToArray();
+                string[] SELcolumns = ArrayToString(entry.Value, true).Split(',').Select(x => "b." + x).ToArray();
+                string joins = "";
+                for (int i = 0; i < entry.Value.Length; i++)
+                {
+                    int index = Array.IndexOf(getTableColumns(entry.Key, false), entry.Value[i]);
+                    if (i == 0)
+                    {
+                        joins = columns[index] + " = " + SELcolumns[i];
+                    }
+                    else
+                    {
+                        joins += " AND " + columns[index] + " = " + SELcolumns[i];
+                    }
+                }
+                DataSet ds = Broker.Instance().Run(
+                    new SqlCommand("SELECT " + ArrayToString(columns, false) + " FROM " + getTableSchemaName(entry.Key)
+                    + " a JOIN ( SELECT " + ArrayToString(entry.Value, true) + " FROM " + getTableSchemaName(entry.Key)
+                    + " GROUP BY " + ArrayToString(entry.Value, true) + " HAVING COUNT(*)>1) b ON " + joins
+                    + " ORDER BY " + ArrayToString(entry.Value, true), con), "duplicates");
+                DataTable dt = ds.Tables["duplicates"];
+                string[][] container = new string[columns.Length][];
+                for (int x = 0; x < dt.Rows.Count; x++)
+                {
+                    for (int i = 0; i < columns.Length; i++)
+                    {
+                        if (x == 0)
+                        {
+                            container[i] = new string[dt.Rows.Count];
+                        }
+                        container[i][x] = dt.Rows[x][i].ToString();
+                    }
+                }
+                columns = getTableColumns(entry.Key, false);
+                for (int i = 0; i < columns.Length; i++)
+                {
+                    string name = entry.Key + '.' + columns[i];
+                    if (container[i] == null)
+                    {
+                        container[i] = new string[0];
+                    }
+                    res.Add(name, container[i]);
+                }
+                info.ColumnsSelected[entry.Key] = columns;
+            }
+            info.Records = res;
+        }
+
         // This method gets the data of the columns from the database
         private void findRecords()
         {
             Dictionary<string, string[]> res = new Dictionary<string, string[]>();
             foreach (KeyValuePair<string, string[]> entry in getColumns(false))
             {
-                string columnsNames = ArrayToString(entry.Value);
+                string columnsNames = ArrayToString(entry.Value, true);
 
                 DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT " + columnsNames + " FROM " + getTableSchemaName(entry.Key), con), "records");
                 DataTable dt = ds.Tables["records"];
@@ -421,6 +476,103 @@ namespace TFG
             return aux;
         }
 
+        private void findConstraints()
+        {
+            List<Models.Constraint> res = new List<Models.Constraint>();
+
+            string path = Path.Combine(Directory.GetCurrentDirectory(), @"Scripts\findForeign.sql");
+            string sql = System.IO.File.ReadAllText(path);
+            DataSet ds = Broker.Instance().Run(new SqlCommand(sql, con), "findConstraints");
+            DataTable dt = ds.Tables["findConstraints"];
+            for(int i=0; i<dt.Rows.Count; i++)
+            {
+                string name = (string)dt.Rows[i][1];
+                string table = (string)dt.Rows[i][0];
+                string table2 = (string)dt.Rows[i][2];
+                Models.Constraint aux = new Models.Constraint(name, table, table2, "FOREIGN KEY");
+                res.Add(aux);
+            }
+
+            path = Path.Combine(Directory.GetCurrentDirectory(), @"Scripts\findPrimary.sql");
+            sql = System.IO.File.ReadAllText(path);
+            ds = Broker.Instance().Run(new SqlCommand(sql, con), "findConstraints");
+            dt = ds.Tables["findConstraints"];
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                string name = (string)dt.Rows[i][1];
+                string table = (string)dt.Rows[i][0];
+                Models.Constraint aux = new Models.Constraint(name, table, "PRIMARY KEY");
+                res.Add(aux);
+            }
+
+            path = Path.Combine(Directory.GetCurrentDirectory(), @"Scripts\findComputed.sql");
+            sql = System.IO.File.ReadAllText(path);
+            ds = Broker.Instance().Run(new SqlCommand(sql, con), "findConstraints");
+            dt = ds.Tables["findConstraints"];
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                string column = (string)dt.Rows[i][1];
+                string table = (string)dt.Rows[i][0];
+                string definition = (string)dt.Rows[i][2];
+                Models.Constraint aux = new Models.Constraint(column, table, definition, column);
+                res.Add(aux);
+            }
+
+            path = Path.Combine(Directory.GetCurrentDirectory(), @"Scripts\findIndexes.sql");
+            sql = System.IO.File.ReadAllText(path);
+            ds = Broker.Instance().Run(new SqlCommand(sql, con), "findConstraints");
+            dt = ds.Tables["findConstraints"];
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                string name = (string)dt.Rows[i][1];
+                string table = (string)dt.Rows[i][0];
+                string column = name.Split('_', 3)[2];
+                Models.Constraint aux = new Models.Constraint(name, table, column, "INDEX");
+                res.Add(aux);
+            }
+
+            tabledata.constraints = res.ToArray();
+        }
+
+        private void deleteConstraints(string table)
+        {
+            foreach (Models.Constraint c in tabledata.constraints.Where(s => s.type!= "COMPUTED COLUMN" && s.type != "INDEX" && (s.table == table || s.table2 == table)))
+            {
+                Broker.Instance().Run(new SqlCommand("ALTER TABLE " + c.table + " DROP CONSTRAINT " + c.name, con), "findConstraints");
+            }
+            foreach (Models.Constraint c in tabledata.constraints.Where(s => s.type == "COMPUTED COLUMN" && s.table == table))
+            {
+                Broker.Instance().Run(new SqlCommand("ALTER TABLE " + c.table + " DROP COLUMN " + c.column, con), "findConstraints");
+            }
+            foreach (Models.Constraint c in tabledata.constraints.Where(s => s.type == "INDEX" && s.table == table))
+            {
+                Broker.Instance().Run(new SqlCommand("DROP INDEX " + c.name + " ON " + c.table, con), "findConstraints");
+            }
+        }
+
+        private void replaceConstraints(string table)
+        {
+            foreach (Models.Constraint c in tabledata.constraints.Where(s => s.type == "COMPUTED COLUMN" && s.table == table))
+            {
+                Broker.Instance().Run(new SqlCommand("ALTER TABLE " + c.table + " ADD " + c.column + " AS " + c.definition, con), "findConstraints");
+            }
+            foreach (Models.Constraint c in tabledata.constraints.Where(s => s.type == "PRIMARY KEY" && s.table == table))
+            {
+                Broker.Instance().Run(new SqlCommand("ALTER TABLE " + c.table + " ADD CONSTRAINT " + c.name + " PRIMARY KEY(" + c.column + ")", con), "findConstraints");
+            }
+            foreach (Models.Constraint c in tabledata.constraints.Where(s => s.type == "FOREIGN KEY" && (s.table == table || s.table2 == table)))
+            {
+                Broker.Instance().Run(new SqlCommand("ALTER TABLE " + c.table + " ADD CONSTRAINT " + c.name + " FOREIGN KEY(" + c.column
+                    + ") REFERENCES " + c.table2 + " (" + c.column + ") ON DELETE CASCADE ON UPDATE CASCADE", con), "findConstraints");
+            }
+            foreach (Models.Constraint c in tabledata.constraints.Where(s => s.type == "INDEX" && s.table == table))
+            {
+                string aux = ArrayToString(c.column.Split('_'),true);
+                Broker.Instance().Run(new SqlCommand("CREATE INDEX " + c.name + " ON " + c.table + " (" + aux + ")", con), "findConstraints");
+            }
+        }
+
+
         // This method updates the database with the corresponding changes
         public void update(string data)
         {
@@ -433,6 +585,10 @@ namespace TFG
                 case "primary_keys":
                     selectPksTables(data);
                     updatePrimaryKeys();
+                    break;
+                case "remove_duplicates":
+                    selectDuplicates(data);
+                    deleteDuplicates();
                     break;
                 case "improve_datatypes":
                     selectDatatypes(data);
@@ -524,9 +680,44 @@ namespace TFG
                     constraint_name += "_";
                     constraint_name += column;
                 }
-                Broker.Instance().Run(new SqlCommand("ALTER TABLE " + getTableSchemaName(entry) + " ADD CONSTRAINT " + constraint_name + " PRIMARY KEY (" + ArrayToString(tabledata.TableSuggestedPks[entry]) + ")", con), "addPK");
+                Broker.Instance().Run(new SqlCommand("ALTER TABLE " + getTableSchemaName(entry) + " ADD CONSTRAINT " + constraint_name + " PRIMARY KEY (" + ArrayToString(tabledata.TableSuggestedPks[entry], true) + ")", con), "addPK");
                 tabledata.TablePks[entry] = tabledata.TableSuggestedPks[entry];
             }
+        }
+
+        // This method updates the database with the corresponding changes for functionality remove_duplicates
+        private void deleteDuplicates()
+        {
+            foreach (KeyValuePair<string, string[]> entry in info.ColumnsSelected)
+            {
+                string[] pks = tabledata.TablePks[entry.Key];
+                if (pks.Length != 0)
+                {
+                    deleteConstraints(getTableSchemaName(entry.Key));
+                    string name1 = entry.Key + '.' + pks[0];
+                    for (int j = 0; j < info.Records[name1].Length; j++)
+                    {
+                        string pkfile= "";
+
+                        for (int i = 0; i < pks.Length; i++)
+                        {
+                            string name = entry.Key + '.' + pks[i];
+                            if (i == 0)
+                            {
+                                pkfile = pks[i] + " = " + info.Records[name][j];
+                            }
+                            else
+                            {
+                                pkfile += " AND " + pks[i] + " = " + info.Records[name][j];
+                            }
+                        }
+
+                        Broker.Instance().Run(new SqlCommand("DELETE FROM " + getTableSchemaName(entry.Key) + " WHERE " + pkfile, con), "removeDuplicates");
+                    }
+                    replaceConstraints(getTableSchemaName(entry.Key));
+                }
+            }
+            findRecords();
         }
 
         // This method updates the database with the corresponding changes for functionality improve_datatypes
@@ -534,12 +725,14 @@ namespace TFG
         {
             foreach (KeyValuePair<string, string[]> entry in info.ColumnsSelected)
             {
+                deleteConstraints(getTableSchemaName(entry.Key));
                 for (int i = 0; i < entry.Value.Length; i++)
                 {
                     string name = entry.Key + '.' + entry.Value[i];
                     Broker.Instance().Run(new SqlCommand("ALTER TABLE " + getTableSchemaName(entry.Key) + " ALTER COLUMN " + entry.Value[i] + " " + info.ColumnsSuggestedDatatypes[name] + " NOT NULL", con), "datatypeChange");
                     tabledata.ColumnsDatatypes[name] = tabledata.ColumnsSuggestedDatatypes[name];
                 }
+                replaceConstraints(getTableSchemaName(entry.Key));
             }
         }
 
@@ -656,6 +849,7 @@ namespace TFG
             findSuggestedDatatypes();
             findAvailableMasks();
             findPks();
+            findConstraints();
         }
 
         // This method gathers the schema names of the tables from the database
@@ -691,10 +885,15 @@ namespace TFG
                 for (int i = 0; i < entry.Value.Length; i++)
                 {
                     string name = entry.Key + '.' + entry.Value[i];
-                    DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE COLUMN_NAME = '" + entry.Value[i] + "'", con), "type");
+                    DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT DATA_TYPE, character_maximum_length FROM INFORMATION_SCHEMA.COLUMNS WHERE COLUMN_NAME = '" + entry.Value[i] + "'", con), "type");
                     DataTable dt = ds.Tables["type"];
                     DataRow row = dt.Rows[0];
-                    res.Add(name, (string)row[0]);
+                    string value = (string)row[0];
+                    if(value.Contains("char"))
+                    {
+                        value += '(' + row[1].ToString() + ')';
+                    }
+                    res.Add(name, value);
                 }
             }
 
@@ -716,27 +915,28 @@ namespace TFG
                     if (tabledata.Records.ContainsKey(name) && tabledata.Records[name] != null)
                     {
                         string[] record = tabledata.Records[name];
-                        string max = record.OrderByDescending(s => s.Length).First();
                         bool number = record.All(r => r.All(char.IsDigit));
                         if (number)
                         {
+                            string[] smth = record.Where(s => s != "").ToArray();
+                            string max = "";
+                            if (smth.Length > 0)
+                            {
+                                max = smth.OrderByDescending(s => long.Parse(s)).First();
+                            }
                             if (record.All(r => (r == "0" || r == "1")))
                             {
                                 result = "bit";
                             }
                             else
                             {
-                                if (max.Length==0 || long.Parse(max) < 128)
+                                if (max.Length == 0 || long.Parse(max) < 255)
                                 {
                                     result = "tinyint";
                                 }
                                 else if (long.Parse(max) < 32768)
                                 {
                                     result = "smallint";
-                                }
-                                else if (long.Parse(max) < 8388608)
-                                {
-                                    result = "mediumint";
                                 }
                                 else if (long.Parse(max) < 2147483648)
                                 {
@@ -761,7 +961,13 @@ namespace TFG
                             }
                             else
                             {
-                                result = "nvarchar(" + max.Length + ')';
+                                string max = record.OrderByDescending(s => s.Length).First();
+                                int value = max.Length;
+                                while(value % 5 != 0)
+                                {
+                                    value++;
+                                }
+                                result = "nvarchar(" + value + ')';
                             }
                         }
                     }
@@ -776,10 +982,18 @@ namespace TFG
         // This method retrieves the datatypes information of the selected columns
         public void getDatatypes()
         {
-
             Dictionary<string, string> res = new Dictionary<string, string>();
             Dictionary<string, string> res_sug = new Dictionary<string, string>();
 
+            foreach (KeyValuePair<string, string[]> entry in info.ColumnsSelected)
+            {
+                Models.Constraint[] c = tabledata.constraints.Where(s => s.type == "COMPUTED COLUMN" && s.table == getTableSchemaName(entry.Key)).ToArray();
+                if (c.Length > 0)
+                {
+                    string[] aux = c.Select(c => c.column).ToArray();
+                    info.ColumnsSelected[entry.Key] = entry.Value.Where(c => !aux.Contains(c)).ToArray();
+                }
+            }
             foreach (KeyValuePair<string, string[]> entry in info.ColumnsSelected)
             {
                 for (int i = 0; i < entry.Value.Length; i++)
@@ -987,7 +1201,7 @@ namespace TFG
 
             foreach (string table in tables)
             {
-                if (ArrayToString(tabledata.TablePks[table]) != ArrayToString(tabledata.TableSuggestedPks[table]))
+                if (ArrayToString(tabledata.TablePks[table], true) != ArrayToString(tabledata.TableSuggestedPks[table], true))
                 {
                     pks.Add(table, tabledata.TablePks[table]);
                     suggestedPks.Add(table, tabledata.TableSuggestedPks[table]);
@@ -998,7 +1212,45 @@ namespace TFG
             info.TableSuggestedPks = suggestedPks;
         }
 
-        // This method saves the selection of the tables selected for the primary_keys functionality
+        // This method saves the selection of the records selected for the remove_duplicates functionality
+        private void selectDuplicates(string data)
+        {
+            data = data.Replace("CheckBox", "");
+            Dictionary<string, string[]> parsedData = parseColumnSelection(data);
+            Dictionary<string, string[]> res = new Dictionary<string, string[]>();
+
+            foreach (KeyValuePair<string, string[]> entry in parsedData)
+            {
+                res.Add(entry.Key, info.ColumnsSelected[entry.Key]);
+
+                for (int i = 0; i < entry.Value.Length; i++)
+                {
+                    entry.Value[i] = entry.Value[i].Replace(entry.Key, "");
+                }
+                int[] records = entry.Value.Select(int.Parse).ToArray();
+                for (int k = 0; k < res[entry.Key].Length; k++)
+                {
+                    string[] aux = new string[records.Length];
+                    int index = 0;
+                    string name = entry.Key + '.' + res[entry.Key][k];
+
+                    for (int j = 0; j < info.Records[name].Length; j++)
+                    {
+                        if (records.Contains(j))
+                        {
+                            aux[index] = info.Records[name][j];
+                            index++;
+                        }
+                    }
+                    info.Records[name] = aux;
+                }
+            }
+
+            info.ColumnsSelected = res;
+
+        }
+
+        // This method saves the selection of the datatypes selected for the improve_datatypes functionality
         private void selectDatatypes(string data)
         {
             string[] aux = data.Split(',');
@@ -1069,20 +1321,34 @@ namespace TFG
         }
 
         //
-        private string ArrayToString(object[] array)
+        private string ArrayToString(object[] array, bool brackets)
         {
             string res = "";
             for (int i = 0; i < array.Length; i++)
             {
                 if (i == 0)
                 {
-                    res = '[' + array[i].ToString() + ']';
+                    if (brackets)
+                    {
+                        res = '[' + array[i].ToString() + ']';
+                    }
+                    else
+                    {
+                        res = array[i].ToString();
+                    }
+
                 }
                 else
                 {
-                    res += '[';
+                    if (brackets)
+                    {
+                        res += '[';
+                    }
                     res += array[i].ToString();
-                    res += ']';
+                    if (brackets)
+                    {
+                        res += ']';
+                    }
                 }
                 if (i != array.Length - 1)
                 {
