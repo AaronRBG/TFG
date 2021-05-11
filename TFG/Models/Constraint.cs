@@ -7,30 +7,40 @@ namespace TFG.Models
     {
         public Constraint() { }
 
-        public Constraint(string name, string table)
+        public Constraint(string name, string table, string col_type)
         {
             this.name = name;
             this.table = table;
-            this.column = name.Split('_')[name.Split('_').Length - 1];
-            this.type = "PRIMARY KEY";
+            if (col_type == "FOREIGN KEY" || col_type == "PRIMARY KEY" || col_type == "INDEX")
+            {
+                this.type = col_type;
+                if (col_type != "INDEX")
+                {
+                    this.column = name.Split('_')[name.Split('_').Length - 1];
+                }
+            }
+            else
+            {
+                this.type = "COMPUTED COLUMN";
+                this.column = col_type;
+            }
+
         }
 
-        public Constraint(string name, string table, string table2)
+        public Constraint(string name, string table, string def_tab, string col_type) : this(name, table, col_type)
         {
-            this.name = name;
-            this.table = table;
-            this.table2 = table2;
-            this.column = name.Split('_')[name.Split('_').Length - 1];
-            this.type = "FOREIGN KEY";
-        }
-
-        public Constraint(string name, string table, string definition, string column)
-        {
-            this.name = name;
-            this.table = table;
-            this.definition = definition;
-            this.column = column;
-            this.type = "COMPUTED COLUMN";
+            if (col_type == "FOREIGN KEY")
+            {
+                this.table2 = def_tab;
+            }
+            else if (col_type == "INDEX")
+            {
+                this.column = def_tab;
+            }
+            else
+            {
+                this.definition = def_tab;
+            }
         }
 
         public string name { get; set; }

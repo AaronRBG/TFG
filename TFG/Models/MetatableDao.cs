@@ -489,7 +489,7 @@ namespace TFG
                 string name = (string)dt.Rows[i][1];
                 string table = (string)dt.Rows[i][0];
                 string table2 = (string)dt.Rows[i][2];
-                Models.Constraint aux = new Models.Constraint(name, table, table2);
+                Models.Constraint aux = new Models.Constraint(name, table, table2, "FOREIGN KEY");
                 res.Add(aux);
             }
 
@@ -501,7 +501,7 @@ namespace TFG
             {
                 string name = (string)dt.Rows[i][1];
                 string table = (string)dt.Rows[i][0];
-                Models.Constraint aux = new Models.Constraint(name, table);
+                Models.Constraint aux = new Models.Constraint(name, table, "PRIMARY KEY");
                 res.Add(aux);
             }
 
@@ -518,18 +518,35 @@ namespace TFG
                 res.Add(aux);
             }
 
+            path = Path.Combine(Directory.GetCurrentDirectory(), @"Scripts\findIndexes.sql");
+            sql = System.IO.File.ReadAllText(path);
+            ds = Broker.Instance().Run(new SqlCommand(sql, con), "findConstraints");
+            dt = ds.Tables["findConstraints"];
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                string name = (string)dt.Rows[i][1];
+                string table = (string)dt.Rows[i][0];
+                string column = name.Split('_', 3)[2];
+                Models.Constraint aux = new Models.Constraint(name, table, column, "INDEX");
+                res.Add(aux);
+            }
+
             tabledata.constraints = res.ToArray();
         }
 
         private void deleteConstraints(string table)
         {
-            foreach (Models.Constraint c in tabledata.constraints.Where(s => s.type!= "COMPUTED COLUMN" && (s.table == table || s.table2 == table)))
+            foreach (Models.Constraint c in tabledata.constraints.Where(s => s.type!= "COMPUTED COLUMN" && s.type != "INDEX" && (s.table == table || s.table2 == table)))
             {
                 Broker.Instance().Run(new SqlCommand("ALTER TABLE " + c.table + " DROP CONSTRAINT " + c.name, con), "findConstraints");
             }
             foreach (Models.Constraint c in tabledata.constraints.Where(s => s.type == "COMPUTED COLUMN" && s.table == table))
             {
                 Broker.Instance().Run(new SqlCommand("ALTER TABLE " + c.table + " DROP COLUMN " + c.column, con), "findConstraints");
+            }
+            foreach (Models.Constraint c in tabledata.constraints.Where(s => s.type == "INDEX" && s.table == table))
+            {
+                Broker.Instance().Run(new SqlCommand("DROP INDEX " + c.name + " ON " + c.table, con), "findConstraints");
             }
         }
 
@@ -547,6 +564,11 @@ namespace TFG
             {
                 Broker.Instance().Run(new SqlCommand("ALTER TABLE " + c.table + " ADD CONSTRAINT " + c.name + " FOREIGN KEY(" + c.column
                     + ") REFERENCES " + c.table2 + " (" + c.column + ") ON DELETE CASCADE ON UPDATE CASCADE", con), "findConstraints");
+            }
+            foreach (Models.Constraint c in tabledata.constraints.Where(s => s.type == "INDEX" && s.table == table))
+            {
+                string aux = ArrayToString(c.column.Split('_'),true);
+                Broker.Instance().Run(new SqlCommand("CREATE INDEX " + c.name + " ON " + c.table + " (" + aux + ")", con), "findConstraints");
             }
         }
 
@@ -712,7 +734,6 @@ namespace TFG
                 }
                 replaceConstraints(getTableSchemaName(entry.Key));
             }
-            findDatatypes(); // remove later
         }
 
         // This method is used to retrieve the already computed available masks for a column
