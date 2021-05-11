@@ -885,10 +885,15 @@ namespace TFG
                 for (int i = 0; i < entry.Value.Length; i++)
                 {
                     string name = entry.Key + '.' + entry.Value[i];
-                    DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE COLUMN_NAME = '" + entry.Value[i] + "'", con), "type");
+                    DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT DATA_TYPE, character_maximum_length FROM INFORMATION_SCHEMA.COLUMNS WHERE COLUMN_NAME = '" + entry.Value[i] + "'", con), "type");
                     DataTable dt = ds.Tables["type"];
                     DataRow row = dt.Rows[0];
-                    res.Add(name, (string)row[0]);
+                    string value = (string)row[0];
+                    if(value.Contains("char"))
+                    {
+                        value += '(' + row[1].ToString() + ')';
+                    }
+                    res.Add(name, value);
                 }
             }
 
@@ -958,7 +963,7 @@ namespace TFG
                             {
                                 string max = record.OrderByDescending(s => s.Length).First();
                                 int value = max.Length;
-                                while(value % 10 != 0)
+                                while(value % 5 != 0)
                                 {
                                     value++;
                                 }
