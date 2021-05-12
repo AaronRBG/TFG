@@ -381,6 +381,9 @@ namespace TFG.Controllers
                         case "remove_duplicates":
                             daos[id].getDuplicates();
                             break;
+                        case "missing_values":
+                            daos[id].getMissingValues();
+                            break;
                         default:
                             // "improve_datatypes"
                             daos[id].getDatatypes();
@@ -454,6 +457,9 @@ namespace TFG.Controllers
                         break;
                     case "remove_duplicates":
                         daos[id].getDuplicates();
+                        break;
+                    case "missing_values":
+                        daos[id].getMissingValues();
                         break;
                     default:
                         // "improve_datatypes"

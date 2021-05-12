@@ -117,7 +117,7 @@ function confirm(functionality) {
         var selected;
         var aux;
 
-        if (functionality == "create_masks" || functionality == "remove_duplicates" ) {
+        if (functionality == "create_masks" || functionality == "remove_duplicates" || functionality == "missing_valuesupdateRows" || functionality == "missing_valuesdeleteRows") {
 
             document.querySelectorAll('input[type=checkbox][id$=Record]').forEach(
                 function (item) {
@@ -145,7 +145,7 @@ function confirm(functionality) {
                 });
         }
 
-        if (functionality == "improve_datatypes") {
+        if (functionality == "improve_datatypes" || functionality == "missing_valuesdeleteColumns") {
             document.querySelectorAll('input[type=checkbox]:not([id$=CheckBox])').forEach(
                 function (item) {
                     if (item.checked) {

@@ -50,65 +50,70 @@
         <br />
         @foreach (KeyValuePair<string, string[]> entry in Model.ColumnsSelected)
         {
-            string collapse = "#collapse" + entry.Key;
-            string CheckBox = entry.Key + "CheckBox";
-            string divName = entry.Key + "Div";
+            if (Model.Records.ContainsKey(entry.Key + '.' + entry.Value[0]))
+            {
+                string collapse = "#collapse" + entry.Key;
+                string CheckBox = entry.Key + "CheckBox";
+                string divName = entry.Key + "Div";
 
-            <div class="card">
-                <div class="card-header nav_color_1" id="@entry.Key">
-                    <h5>
-                        <input type="checkbox" id="@CheckBox" name="@entry.Key" onclick="checkChilds('@CheckBox')" />
-                        <button class="btn btn-link" onclick="openTab(event, '@divName', false)" data-toggle="collapse" data-target="@collapse" aria-expanded="true" aria-controls="collapseOne">
-                            @entry.Key
-                        </button>
-                    </h5>
+                <div class="card">
+                    <div class="card-header nav_color_1" id="@entry.Key">
+                        <h5>
+                            <input type="checkbox" id="@CheckBox" name="@entry.Key" onclick="checkChilds('@CheckBox')" />
+                            <button class="btn btn-link" onclick="openTab(event, '@divName', false)" data-toggle="collapse" data-target="@collapse" aria-expanded="true" aria-controls="collapseOne">
+                                @entry.Key
+                            </button>
+                        </h5>
+                    </div>
                 </div>
-            </div>
+            }
         }
     </div>
     <div id="Tab-contents" class="overflow-auto">
         <div id="default" class="tabcontent">
-            <h2 style="padding-top:35vh;">No column selected, select one from the dropdown on the left</h2>
+            <h2 style="padding-top:35vh;">No table selected, select one from the dropdown on the left</h2>
         </div>
         @foreach (KeyValuePair<string, string[]> entry in Model.ColumnsSelected)
         {
-            string divName = entry.Key + "Div";
-            string[][] container = new string[entry.Value.Length][];
-            string CheckBox = entry.Key + "CheckBox";
-
-            for (int i=0; i < entry.Value.Length; i++)
+            if (Model.Records.ContainsKey(entry.Key + '.' + entry.Value[0]))
             {
-                string name = entry.Key + '.' + entry.Value[i];
-                container[i] = Model.Records[name];
-            }
+                string divName = entry.Key + "Div";
+                string[][] container = new string[entry.Value.Length][];
+                string CheckBox = entry.Key + "CheckBox";
 
-            <div id="@divName" class="tabcontent" style="display: none;">
-                <table class="table table-striped overflow-auto">
-                    <thead class="thead-dark">
-                        <tr>
-                            <th scope="col">Selections</th>
-                            @for (int k = 0; k < entry.Value.Length; k++)
-                            {
-                                <th scope="col">@entry.Value[k]</th>
-                            }
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @for (int j = 0; j < container[0].Length; j++)
-                        {
-                            string idname = @entry.Key + @j + "Record";
+                for (int i = 0; i < entry.Value.Length; i++)
+                {
+                    string name = entry.Key + '.' + entry.Value[i];
+                    container[i] = Model.Records[name];
+                }
+
+                <div id="@divName" class="tabcontent" style="display: none;">
+                    <table class="table table-striped overflow-auto">
+                        <thead class="thead-dark">
                             <tr>
-                                <th scope="row"><input type="checkbox" id="@idname" name="@idname" data-parent="@CheckBox" onclick="checkParent('@CheckBox', '@idname')" /></th>
+                                <th scope="col">Selections</th>
                                 @for (int k = 0; k < entry.Value.Length; k++)
                                 {
-                                    <td>@container[k][j]</td>
+                                    <th scope="col">@entry.Value[k]</th>
                                 }
                             </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-
+                        </thead>
+                        <tbody>
+                            @for (int j = 0; j < container[0].Length; j++)
+                            {
+                                string idname = @entry.Key + @j + "Record";
+                                <tr>
+                                    <th scope="row"><input type="checkbox" id="@idname" name="@idname" data-parent="@CheckBox" onclick="checkParent('@CheckBox', '@idname')" /></th>
+                                    @for (int k = 0; k < entry.Value.Length; k++)
+                                    {
+                                        <td>@container[k][j]</td>
+                                    }
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
         }
     </div>
 </div>
