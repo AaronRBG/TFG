@@ -364,7 +364,7 @@ namespace TFG
             info.Records = res;
         }
 
-        // This method finds the missing values from the selected columns and returns them
+        // This method finds the missing values from the selected columns and saves them
         public void getMissingValues()
         {
             Dictionary<string, string[]> res = new Dictionary<string, string[]>();
@@ -405,7 +405,7 @@ namespace TFG
                 }
                 string[] other = new string[columns.Length + entry.Value.Length];
                 Array.Copy(columns, 0, other, 0, columns.Length);
-                string[] aux = entry.Value.Select(s => s+"Missing").ToArray();
+                string[] aux = entry.Value.Select(s => s + "Missing").ToArray();
                 Array.Copy(aux, 0, other, columns.Length, aux.Length);
                 info.ColumnsSelected[entry.Key] = other;
             }
@@ -629,7 +629,7 @@ namespace TFG
         {
             switch (info.Functionality)
             {
-                case "data_masking":
+                case "create_masks":
                     selectMaskedRecords(data);
                     updateDataMasking();
                     break;
@@ -646,8 +646,7 @@ namespace TFG
                     updateDatatypes();
                     break;
                 case "missing_values":
-                    selectMissingValues(data);
-                    updateMissingValues();
+                    updateMissingValues(selectMissingValues(data));
                     break;
             }
         }
@@ -792,19 +791,82 @@ namespace TFG
         }
 
         // This method updates the database with the corresponding changes for functionality missing_values
-        private void updateMissingValues()
+        private void updateMissingValues(string mode)
         {
-            /*foreach (KeyValuePair<string, string[]> entry in info.ColumnsSelected)
+            foreach (KeyValuePair<string, string[]> entry in info.ColumnsSelected)
             {
                 deleteConstraints(getTableSchemaName(entry.Key));
-                for (int i = 0; i < entry.Value.Length; i++)
+                string query = "";
+                string pkfile = "";
+                string[] pks = tabledata.TablePks[entry.Key];
+                switch (mode)
                 {
-                    string name = entry.Key + '.' + entry.Value[i];
-                    Broker.Instance().Run(new SqlCommand("ALTER TABLE " + getTableSchemaName(entry.Key) + " ALTER COLUMN " + entry.Value[i] + " " + info.ColumnsSuggestedDatatypes[name] + " NOT NULL", con), "datatypeChange");
-                    tabledata.ColumnsDatatypes[name] = tabledata.ColumnsSuggestedDatatypes[name];
+                    case "deleteColumns":
+                        query = "ALTER TABLE " + getTableSchemaName(entry.Key) + " DROP COLUMN " + entry.Value[0];
+                        for (int i = 1; i < entry.Value.Length; i++)
+                        {
+                            query += "," + entry.Value[i];
+                        }
+                        Broker.Instance().Run(new SqlCommand(query, con), "missingValues");
+                        break;
+                    case "updateRows":
+                        string updatefile = "";
+                        string name = entry.Key + '.' + entry.Value[0];
+                        for (int j = 0; j < info.Records[name].Length; j++)
+                        {
+                            for (int k = 0; k < pks.Length; k++)
+                            {
+                                string pkname = entry.Key + '.' + pks[k];
+                                if (k == 0)
+                                {
+                                    pkfile = pks[k] + " = " + info.Records[pkname][j];
+                                }
+                                else
+                                {
+                                    pkfile += " AND " + pks[k] + " = " + info.Records[pkname][j];
+                                }
+                            }
+                            for (int k = 0; k < entry.Value.Length; k++)
+                            {
+                                name = entry.Key + '.' + entry.Value[k];
+                                if (info.ColumnsSelected[entry.Key].Contains(@entry.Value[k] + "Missing"))
+                                {
+                                    if (k == 0 || updatefile == "")
+                                    {
+                                        updatefile = entry.Value[k] + " = " + info.Records[name][j];
+                                    }
+                                    else
+                                    {
+                                        updatefile += " AND " + entry.Value[k] + " = " + info.Records[name][j];
+                                    }
+
+                                }
+                            }
+                            Broker.Instance().Run(new SqlCommand("UPDATE " + getTableSchemaName(entry.Key) + " SET " + updatefile + " WHERE " + pkfile, con), "missingValues");
+                        }
+                        break;
+                    case "deleteRows":
+                        name = entry.Key + '.' + entry.Value[0];
+                        for (int j = 0; j < info.Records[name].Length; j++)
+                        {
+                            for (int k = 0; k < pks.Length; k++)
+                            {
+                                string pkname = entry.Key + '.' + pks[k];
+                                if (k == 0)
+                                {
+                                    pkfile = pks[k] + " = " + info.Records[pkname][j];
+                                }
+                                else
+                                {
+                                    pkfile += " AND " + pks[k] + " = " + info.Records[pkname][j];
+                                }
+                            }
+                            Broker.Instance().Run(new SqlCommand("DELETE FROM " + getTableSchemaName(entry.Key) + " WHERE " + pkfile, con), "missingValues");
+                        }
+                        break;
                 }
                 replaceConstraints(getTableSchemaName(entry.Key));
-            }*/
+            }
         }
 
         // This method is used to retrieve the already computed available masks for a column
@@ -1367,49 +1429,56 @@ namespace TFG
             info.ColumnsSuggestedDatatypes = suggestedDatatypes;
         }
         // This method saves the selection of the datatypes selected for the missing_values functionality
-        private void selectMissingValues(string data)
+        private string selectMissingValues(string data)
         {
-            string[] aux = data.Split(',');
-            string[] columns = new string[aux.Length - 1];
-            Array.Copy(aux, 1, columns, 0, aux.Length - 1);
-            Dictionary<string, string> datatypes = new Dictionary<string, string>();
-            Dictionary<string, string> suggestedDatatypes = new Dictionary<string, string>();
-            Dictionary<string, string[]> selected = new Dictionary<string, string[]>();
-            string table = "";
-            int index = 0;
+            Dictionary<string, string[]> res = parseColumnSelection(data);
+            string mode = data.Split('/')[0];
 
-            foreach (string column in columns)
+            if (mode != "deleteColumns")
             {
-                string[] name = column.Split('.');
-                if (table == "" || table != name[0])
+                foreach (KeyValuePair<string, string[]> record in tabledata.Records)
                 {
-                    if (table != "")
+                    foreach (KeyValuePair<string, string[]> entry in res)
                     {
-                        string[] other = new string[index];
-                        Array.Copy(aux, 0, other, 0, index);
-                        selected.Add(table, other);
-                    }
-                    table = name[0];
-                    index = 0;
-                    aux = new string[columns.Length];
-                }
+                        if (record.Key.Contains(entry.Key))
+                        {
+                            string[] aux = new string[entry.Value.Length];
+                            string[] indexes = entry.Value;
+                            string[] columns = new string[1];
+                            string[] columnsValues = new string[1];
+                            if (mode == "updateRows")
+                            {
+                                indexes = entry.Value.Select(s => s.Split('_')[0]).ToArray();
+                                columns = entry.Value.Select(s => s.Split('_')[1]).Select(s => s.Split('=')[0]).ToArray();
+                                columnsValues = entry.Value.Select(s => s.Split('_')[1]).Select(s => s.Split('=')[0]).ToArray();
+                            }
+                            int counter = 0;
+                            for (int i = 0; i < record.Value.Length; i++)
+                            {
+                                if (indexes.Contains(i.ToString()))
+                                {
+                                    if (mode == "updateRows" && columns.Contains(record.Value[i]))
+                                    {
+                                        aux[counter] = columnsValues[Array.IndexOf(columns, record.Value[i])];
+                                    }
+                                    else
+                                    {
+                                        aux[counter] = record.Value[i];
+                                    }
+                                    counter++;
+                                }
+                            }
 
-                if (tabledata.ColumnsDatatypes[column] != tabledata.ColumnsSuggestedDatatypes[column])
-                {
-                    aux[index] = name[1];
-                    index++;
-                    datatypes.Add(column, tabledata.ColumnsDatatypes[column]);
-                    suggestedDatatypes.Add(column, tabledata.ColumnsSuggestedDatatypes[column]);
+                            info.Records[record.Key] = aux;
+                        }
+                    }
                 }
             }
-
-            string[] other2 = new string[index];
-            Array.Copy(aux, 0, other2, 0, index);
-            selected.Add(table, other2);
-
-            info.ColumnsSelected = selected;
-            info.ColumnsDatatypes = datatypes;
-            info.ColumnsSuggestedDatatypes = suggestedDatatypes;
+            else
+            {
+                info.ColumnsSelected = res;
+            }
+            return mode;
         }
 
         // This method parses a string into a dictionary

@@ -45,7 +45,7 @@
             <span>Data Masking Report</span>
         </h3>
     </div>
-    <div id="accordion" class="overflow-auto left-half" style="width:20vw;">
+    <div id="accordion" class="overflow-auto left-half" style="width:17vw;">
         <span class="font-weight-bold">Tables:</span>
         <br />
         @foreach (KeyValuePair<string, string[]> entry in Model.ColumnsSelected)
@@ -59,7 +59,7 @@
                 <div class="card">
                     <div class="card-header nav_color_1" id="@entry.Key">
                         <h5>
-                            <input type="checkbox" id="@CheckBox" name="@entry.Key" onclick="checkChilds('@CheckBox')" />
+                            <input type="checkbox" id="@CheckBox" name="@entry.Key" onclick="checkChilds('@CheckBox')" style="display: none;" />
                             <button class="btn btn-link" onclick="openTab(event, '@divName', false)" data-toggle="collapse" data-target="@collapse" aria-expanded="true" aria-controls="collapseOne">
                                 @entry.Key
                             </button>
@@ -99,13 +99,25 @@
                                 {
                                     if (!entry.Value[k].Contains("Missing"))
                                     {
-                                    <th scope="col">
+
                                         @if (Model.ColumnsSelected[entry.Key].Contains(@entry.Value[k] + "Missing"))
                                         {
-                                            <input type="checkbox" id="@entry.Value[k]" name="@entry.Value[k]" data-parent="@CheckBox" onclick="checkParent('@CheckBox', '@entry.Value[k]')" />
+                                            <th scope="col"><input type="checkbox" id="@entry.Value[k]" name="@entry.Value[k]" data-parent="@CheckBox" onclick="checkParent('@CheckBox', '@entry.Value[k]')" /></th>
                                         }
-                                        @entry.Value[k]
-                                    </th>
+                                        else
+                                        {
+                                            <th scope="col"></th>
+                                        }
+                                    }
+                                }
+                            </tr>
+                            <tr>
+                                <th scope="col"></th>
+                                @for (int k = 0; k < entry.Value.Length; k++)
+                                {
+                                    if (!entry.Value[k].Contains("Missing"))
+                                    {
+                                        <th scope="col">@entry.Value[k]</th>
                                     }
                                 }
                             </tr>
@@ -120,7 +132,15 @@
                                     {
                                         if (!entry.Value[k].Contains("Missing"))
                                         {
-                                        <td>@container[k][j]</td>
+                                            if (@container[k][j] == "")
+                                            {
+                                                string idRecord = idname + entry.Value[k];
+                                                <td><input type="text" class="form-control" id="@idRecord"></td>
+                                            }
+                                            else
+                                            {
+                                                <td>@container[k][j]</td>
+                                            }
                                         }
                                     }
                                 </tr>
@@ -134,12 +154,21 @@
 </div>
 <!-- This part is perform whole actions like selecting everything or nothing and running the functionality with the selected items -->
 <div id="controls">
-    <div class="btn-group" role="group" style="padding-top: 20vh;">
+    <div class="btn-group-vertical" role="group" style="padding-top: 20vh;">
         <button type="button" onclick="selectAll()" class="btn btn-outline-primary">Select All</button>
+        <button type="button" onclick="selectColumns()" class="btn btn-outline-dark">Select Table Columns</button>
+        <button type="button" onclick="unselectColumns()" class="btn btn-outline-primary">Unselect Table Columns</button>
+        <button type="button" onclick="selectRecords()" class="btn btn-outline-dark">Select Table Records</button>
+        <button type="button" onclick="unselectRecords()" class="btn btn-outline-primary">Unselect Table Records</button>
         <button type="button" onclick="selectNone()" class="btn btn-outline-dark">Select None</button>
     </div>
     <br />
-    <span id="selection-text">None selected</span>
+    <span id="records-selected" class="selection-text"></span>
+    <br />
+    <span id="columns-selected" class="selection-text">None selected</span>
+    <br />
+    <span id="tables-selected" class="selection-text"></span>
+    <br />
     <div id="controls-inside">
         <div id="controls-inside" class="btn-group-vertical btn-group-toggle" data-toggle="buttons">
             <button type="button" onclick='confirm("@Model.Functionality"+"updateRows")' class="btn btn-outline-primary">Update selected rows</button>
@@ -154,3 +183,4 @@
             <button type="button" onclick="exportTableToCSV('@filename')" class="btn btn-outline-primary"><span class='download_icon'></span></button>
         </div>
     </div>
+</div>

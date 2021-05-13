@@ -46,7 +46,7 @@
             <span>Data Masking Report</span>
         </h3>
     </div>
-    <div id="accordion" class="overflow-auto left-half" style="width:20vw;">
+    <div id="accordion" class="overflow-auto left-half" style="width:17vw;">
         <span class="font-weight-bold">Tables:</span>
         <br />
         @foreach (KeyValuePair<string, string[]> entry in Model.ColumnsSelected)
@@ -57,7 +57,7 @@
             <div class="card">
                 <div class="card-header nav_color_1" id="@entry.Key">
                     <h5>
-                        <input type="checkbox" id="@CheckBox" name="@entry.Key" onclick="checkChilds('@CheckBox')" />
+                        <input type="checkbox" id="@CheckBox" name="@entry.Key" onclick="checkChilds('@CheckBox')" style="display: none;" />
                         <button class="btn btn-link" data-toggle="collapse" data-target="@collapse" aria-expanded="true" aria-controls="collapseOne">
                             @entry.Key
                         </button>
@@ -72,7 +72,7 @@
                         {
                             string name = @entry.Key + '.' + @entry.Value[i];
                             string divName = name + "Div";
-                            <input type="checkbox" id="@name" onclick="checkBoth('@CheckBox', '@name')" data-parent="@CheckBox" /> <button class="btn btn-link" onclick="openTab(event, '@divName', false)">@entry.Value[i]</button>
+                            <input type="checkbox" id="@name" name="@name" onclick="checkBoth('@CheckBox', '@name')" data-parent="@CheckBox" style="display: none;" /> <button class="btn btn-link" onclick="openTab(event, '@divName', false)">@entry.Value[i]</button>
                             <br />
                         }
                     </div>
@@ -144,12 +144,19 @@
 </div>
 <!-- This part is perform whole actions like selecting everything or nothing and running the functionality with the selected items -->
 <div id="controls">
-    <div class="btn-group" role="group" style="padding-top: 20vh;">
+    <div class="btn-group-vertical" role="group" style="padding-top: 20vh;">
         <button type="button" onclick="selectAll()" class="btn btn-outline-primary">Select All</button>
+        <button type="button" onclick="selectRecords(true)" class="btn btn-outline-dark">Select Table Records</button>
+        <button type="button" onclick="unselectRecords(true)" class="btn btn-outline-primary">Unselect Table Records</button>
         <button type="button" onclick="selectNone()" class="btn btn-outline-dark">Select None</button>
     </div>
     <br />
-    <span id="selection-text">None selected</span>
+    <span id="records-selected" class="selection-text"></span>
+    <br />
+    <span id="columns-selected" class="selection-text">None selected</span>
+    <br />
+    <span id="tables-selected" class="selection-text"></span>
+    <br />
     <div id="controls-inside">
         <button type="button" onclick='confirm("@Model.Functionality")' class="btn btn-outline-primary">Confirm and run</button>
     </div>

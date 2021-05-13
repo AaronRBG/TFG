@@ -45,7 +45,7 @@
             <span>Improve Datatypes Report</span>
         </h3>
     </div>
-    <div id="accordion" class="overflow-auto left-half" style="width:20vw;">
+    <div id="accordion" class="overflow-auto left-half" style="width:17vw;">
         <span class="font-weight-bold">Tables:</span>
         <br />
         @foreach (KeyValuePair<string, string[]> entry in Model.ColumnsSelected)
@@ -109,12 +109,19 @@
 </div>
 <!-- This part is perform whole actions like selecting everything or nothing and running the functionality with the selected items -->
 <div id="controls">
-    <div class="btn-group" role="group" style="padding-top: 20vh;">
+    <div class="btn-group-vertical" role="group" style="padding-top: 20vh;">
         <button type="button" onclick="selectAll()" class="btn btn-outline-primary">Select All</button>
+        <button type="button" onclick="selectColumns()" class="btn btn-outline-dark">Select Table Columns</button>
+        <button type="button" onclick="unselectColumns()" class="btn btn-outline-primary">Unselect Table Columns</button>
         <button type="button" onclick="selectNone()" class="btn btn-outline-dark">Select None</button>
     </div>
     <br />
-    <span id="selection-text">None selected</span>
+    <span id="records-selected" class="selection-text"></span>
+    <br />
+    <span id="columns-selected" class="selection-text">None selected</span>
+    <br />
+    <span id="tables-selected" class="selection-text"></span>
+    <br />
     <div id="controls-inside">
         <button type="button" onclick='confirm("@Model.Functionality")' class="btn btn-outline-primary">Confirm and run</button>
     </div>

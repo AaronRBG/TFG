@@ -47,6 +47,7 @@ namespace TFG.Models
         public Dictionary<string, string[]> TableSuggestedPks { get; set; }
         public Dictionary<string, string[]> TablesColumns { get; set; }
         public Dictionary<string, string[]> Records { get; set; }
+        public Dictionary<string, string[]> MissingValues { get; set; }
         public Dictionary<string, string> ColumnsDatatypes { get; set; }
         public Dictionary<string, string> ColumnsSuggestedDatatypes { get; set; }
         public Dictionary<string, string> TablesSchemaNames { get; set; }

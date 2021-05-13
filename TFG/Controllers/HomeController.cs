@@ -508,7 +508,7 @@ namespace TFG.Controllers
             }
         }
 
-        // this method is only used to confirm the changes to the database
+        // this method is used to get the records of a specific column
         [HttpPost]
         public ActionResult GetRecord(string record, string functionalitySelected, string accordionInfo, string data2)
         {
