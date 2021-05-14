@@ -382,7 +382,7 @@ namespace TFG.Controllers
                             daos[id].getDuplicates();
                             break;
                         case "missing_values":
-                            daos[id].getMissingValues();
+                            daos[id].findMissingValues();
                             break;
                         default:
                             // "improve_datatypes"
@@ -459,7 +459,7 @@ namespace TFG.Controllers
                         daos[id].getDuplicates();
                         break;
                     case "missing_values":
-                        daos[id].getMissingValues();
+                        daos[id].findMissingValues();
                         break;
                     default:
                         // "improve_datatypes"
@@ -531,7 +531,22 @@ namespace TFG.Controllers
             }
         }
 
-
+        // this method is used to get the records of a specific column
+        [HttpPost]
+        public ActionResult GetMissingValue(string missingValue, string functionalitySelected)
+        {
+            string id = HttpContext.Session.GetString("id");
+            if (HttpContext.Session.Id == id)
+            {
+                daos[id].info.ColumnAccordion = missingValue;
+                daos[id].getMissingValue(missingValue);
+                return View(functionalitySelected, daos[id].info);
+            }
+            else
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
+        }
 
         // This method saves the masks selected masks from the dropdowns in the corresponding Model variable
         public void saveMaskTypes(string data, bool deleteSelection)

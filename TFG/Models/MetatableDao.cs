@@ -364,9 +364,20 @@ namespace TFG
             info.Records = res;
         }
 
+        // This method retrieves the already found missing values from the selected columns
+        public void getMissingValue(string missingValue)
+        {
+            string table = missingValue.Split('.')[0];
+            string[] columns = getTableColumns(table, false);
+            for (int i = 0; i < columns.Length; i++)
+            {
+                string name = table + '.' + columns[i];
+                info.Records.Add(name, tabledata.MissingValues[name]);
+            }
+        }
 
         // This method finds the missing values from the selected columns and saves them
-        public void getMissingValues()
+        public void findMissingValues()
         {
             Dictionary<string, string[]> res = new Dictionary<string, string[]>();
             foreach (KeyValuePair<string, string[]> entry in info.ColumnsSelected)
@@ -402,6 +413,9 @@ namespace TFG
                     if (container[i] != null)
                     {
                         res.Add(name, container[i]);
+                    } else
+                    {
+                        res.Add(name, new string[0]);
                     }
                 }
                 string[] other = new string[columns.Length + entry.Value.Length];
@@ -410,7 +424,7 @@ namespace TFG
                 Array.Copy(aux, 0, other, columns.Length, aux.Length);
                 info.ColumnsSelected[entry.Key] = other;
             }
-            info.Records = res;
+            tabledata.MissingValues = res;
         }
 
         // This method gets the data of the columns from the database

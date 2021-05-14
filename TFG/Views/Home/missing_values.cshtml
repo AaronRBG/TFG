@@ -9,7 +9,12 @@
     <input type="text" id="functionalitySelected1" class="functionalitySelected" name="functionalitySelected" />
     <input id="hidden-btn1" class="hidden-btn" type="submit" style="display: none;" />
 }
-
+@using (Html.BeginForm("GetMissingValue", "Home"))
+{
+    <input type="text" id="missingValue" class="functionalitySelected" name="missingValue" />
+    <input type="text" id="functionalitySelected7" class="functionalitySelected" name="functionalitySelected" />
+    <input id="hidden-btn7" class="hidden-btn" type="submit" style="display: none;" />
+}
 @using (Html.BeginForm("GoBackToPage", "Home"))
 {
     <input type="text" id="functionalitySelected3" class="functionalitySelected" name="functionalitySelected" />
@@ -51,28 +56,42 @@
         <br />
         @foreach (KeyValuePair<string, string[]> entry in Model.ColumnsSelected)
         {
-            if (Model.Records.ContainsKey(entry.Key + '.' + entry.Value[0]))
-            {
-                string collapse = "#collapse" + entry.Key;
-                string CheckBox = entry.Key + "CheckBox";
-                string divName = entry.Key + "Div";
+            string collapse = "#collapse" + entry.Key;
+            string CheckBox = entry.Key + "CheckBox";
+            string divName = entry.Key + "Div";
 
-                <div class="card">
-                    <div class="card-header nav_color_1" id="@entry.Key">
-                        <h5>
-                            <input type="checkbox" id="@CheckBox" name="@entry.Key" style="display: none;" />
+            <div class="card">
+                <div class="card-header nav_color_1" id="@entry.Key">
+                    <h5>
+                        <input type="checkbox" id="@CheckBox" name="@entry.Key" style="display: none;" />
+                        @if (Model.Records.ContainsKey(entry.Key + '.' + entry.Value[0]))
+                        {
                             <button class="btn btn-link" onclick="openTab(event, '@divName', false)" data-toggle="collapse" data-target="@collapse" aria-expanded="true" aria-controls="collapseOne">
                                 @entry.Key
                             </button>
-                        </h5>
-                    </div>
+                        }
+                        else
+                        {
+                            <button class="btn btn-link" onclick="checkMissingValue(event, '@entry.Key', '@Model.Functionality')" data-toggle="collapse" data-target="@collapse" aria-expanded="true" aria-controls="collapseOne">
+                                @entry.Key
+                            </button>
+                        }
+                        <br />
+                    </h5>
                 </div>
-            }
+            </div>
         }
     </div>
     <div id="Tab-contents" class="overflow-auto">
+        @{
+            string defaultDisplay = "none";
+            if (Model.ColumnAccordion == null)
+            {
+                defaultDisplay = "block";
+            }
+        }
         <div id="default" class="tabcontent">
-            <h2 style="padding-top:35vh;">No table selected, select one from the dropdown on the left</h2>
+            <h2 style="display: @defaultDisplay;padding-top:35vh;">No table selected, select one from the dropdown on the left</h2>
         </div>
         @foreach (KeyValuePair<string, string[]> entry in Model.ColumnsSelected)
         {
@@ -81,74 +100,84 @@
                 string divName = entry.Key + "Div";
                 string[][] container = new string[entry.Value.Length][];
                 string CheckBox = entry.Key + "CheckBox";
+                string name = "";
 
                 for (int i = 0; i < entry.Value.Length; i++)
                 {
                     if (!entry.Value[i].Contains("Missing"))
                     {
-                        string name = entry.Key + '.' + entry.Value[i];
+                        name = entry.Key + '.' + entry.Value[i];
                         container[i] = Model.Records[name];
                     }
                 }
 
-                <div id="@divName" class="tabcontent" style="display: none;">
-                    <table class="table table-striped overflow-auto">
-                        <thead class="thead-dark">
-                            <tr>
-                                <th scope="col">Selections</th>
-                                @for (int k = 0; k < entry.Value.Length; k++)
-                                {
-                                    if (!entry.Value[k].Contains("Missing"))
-                                    {
-                                        @if (Model.ColumnsSelected[entry.Key].Contains(@entry.Value[k] + "Missing"))
-                                        {
-                                            string name = entry.Key+'.'+entry.Value[k];
-                                            <th scope="col"><input type="checkbox" id="@name" name="@name" data-parent="@CheckBox" onclick="checkParent('@CheckBox', '@name')" /></th>
-                                        }
-                                        else
-                                        {
-                                            <th scope="col"></th>
-                                        }
-                                    }
-                                }
-                            </tr>
-                            <tr>
-                                <th scope="col"></th>
-                                @for (int k = 0; k < entry.Value.Length; k++)
-                                {
-                                    if (!entry.Value[k].Contains("Missing"))
-                                    {
-                                        <th scope="col">@entry.Value[k]</th>
-                                    }
-                                }
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @for (int j = 0; j < container[0].Length; j++)
-                            {
-                                string idname = @entry.Key + @j + "Record";
+                string display = "none";
+                if (Model.Records.ContainsKey(name))
+                {
+                    if (name.Split('.')[0] == Model.ColumnAccordion.Split('.')[0])
+                    {
+                        display = "block";
+                    }
+
+                    <div id="@divName" class="tabcontent" style="display: @display;">
+                        <table class="table table-striped overflow-auto">
+                            <thead class="thead-dark">
                                 <tr>
-                                    <th scope="row"><input type="checkbox" id="@idname" name="@idname" data-parent="@CheckBox" onclick="checkParent('@CheckBox', '@idname')" /></th>
+                                    <th scope="col">Selections</th>
                                     @for (int k = 0; k < entry.Value.Length; k++)
                                     {
                                         if (!entry.Value[k].Contains("Missing"))
                                         {
-                                            if (@container[k][j] == "")
+                                            @if (Model.ColumnsSelected[entry.Key].Contains(@entry.Value[k] + "Missing"))
                                             {
-                                                string idRecord = idname + entry.Value[k];
-                                                <td><input type="text" class="form-control" id="@idRecord"></td>
+                                                name = entry.Key + '.' + entry.Value[k];
+                                                <th scope="col"><input type="checkbox" id="@name" name="@name" data-parent="@CheckBox" onclick="checkParent('@CheckBox', '@name')" /></th>
                                             }
                                             else
                                             {
-                                                <td>@container[k][j]</td>
+                                                <th scope="col"></th>
                                             }
                                         }
                                     }
                                 </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
+                                <tr>
+                                    <th scope="col"></th>
+                                    @for (int k = 0; k < entry.Value.Length; k++)
+                                    {
+                                        if (!entry.Value[k].Contains("Missing"))
+                                        {
+                                            <th scope="col">@entry.Value[k]</th>
+                                        }
+                                    }
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (int j = 0; j < container[0].Length; j++)
+                                {
+                                    string idname = @entry.Key + @j + "Record";
+                                    <tr>
+                                        <th scope="row"><input type="checkbox" id="@idname" name="@idname" data-parent="@CheckBox" onclick="checkParent('@CheckBox', '@idname')" /></th>
+                                        @for (int k = 0; k < entry.Value.Length; k++)
+                                        {
+                                            if (!entry.Value[k].Contains("Missing"))
+                                            {
+                                                if (@container[k][j] == "")
+                                                {
+                                                    string idRecord = idname + entry.Value[k];
+                                                    <td><input type="text" class="form-control" id="@idRecord"></td>
+                                                }
+                                                else
+                                                {
+                                                    <td>@container[k][j]</td>
+                                                }
+                                            }
+                                        }
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
             }
         }
     </div>

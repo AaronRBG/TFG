@@ -496,7 +496,13 @@ function checkRecord(event, name, functionality) {
 
 }
 
+function checkMissingValue(event, name, functionality) {
 
+    document.getElementById("missingValue").value = name;
+    document.getElementById("functionalitySelected7").value = functionality;
+    $("#hidden-btn7").click();
+
+}
 
 // This function controls the vertical tabs in some views like reports
 function openTab(event, name, create) {
