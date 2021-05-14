@@ -141,7 +141,16 @@ function confirm(functionality) {
                         } else {
                             temp = aux.split('.')[1];
                         }
-                        selected += (item.id.replace(temp, '').replace('Record', ''));;
+                        selected += (item.id.replace(temp, '').replace('Record', ''));
+
+                        if (functionality == "missing_valuesupdateRows") {
+                            item.parentElement.parentElement.childNodes.forEach(function (inputNode) {
+                                var input = inputNode.childNodes[0];
+                                if (input != undefined && input.className == 'form-control' && input.value != '') {
+                                    selected += '_' + input.id.split("Record")[1] + '=' + input.value;
+                                }
+                            })
+                        }
                     }
                 });
         }
@@ -157,6 +166,9 @@ function confirm(functionality) {
         }
 
         if (functionality == "improve_datatypes" || functionality == "missing_valuesdeleteColumns") {
+            if (functionality == "missing_valuesdeleteColumns") {
+                selected += '/undefined';
+            }
             document.querySelectorAll('input[type=checkbox]:not([id$=CheckBox]):not([id$=Record])').forEach(
                 function (item) {
                     if (item.checked) {
@@ -220,7 +232,6 @@ function checkChilds(CheckBoxparent) {
 // if it is checked it checks the table checkbox of table it belong to
 // then checks that if all columns checkbox of a table are not checked it unchecks the table checkbox and updates the output text
 function checkParent(CheckBoxparent, child) {
-    /*
     var boo = document.getElementById(child).checked;
     if (boo) {
         document.getElementById(CheckBoxparent).checked = boo;
@@ -237,7 +248,6 @@ function checkParent(CheckBoxparent, child) {
     }
     updateSelectionText();
     checkParent(document.getElementById(CheckBoxparent).attributes["data-parent"].value, CheckBoxparent);
-    */
 }
 
 // this method is used for checkboxes who have both parent checkboxes and child checkboxes
@@ -295,7 +305,7 @@ function unselectColumns() {
             }
         });
     boo = true;
-    document.querySelectorAll('input[type=checkbox][id*=' + aux.replace('CheckBox', '') + ']:not([id$=CheckBox])').forEach(
+    document.querySelectorAll('input[type=checkbox][name*="' + aux.replace('CheckBox', '') + '."]:not([id$=CheckBox])').forEach(
         function (item) {
             if (item.checked) {
                 boo = false;
@@ -364,11 +374,7 @@ function unselectRecords(fromColumn) {
             }
         });
     boo = true;
-    if (fromColumn) {
-        if (getColumns > 1) {   // que sea mas de una columna pero de la tabla que corresponde
-            boo = false
-        }
-    } else {
+    if (!fromColumn) {
         document.querySelectorAll('input[type=checkbox][name*="' + aux.replace('CheckBox', '') + '"]:not([id$=CheckBox])').forEach(
             function (item) {
                 if (item.checked) {
@@ -391,7 +397,7 @@ function unselectRecords(fromColumn) {
                 item.checked = false;
             }
         });
-    if (fromColumn) {
+    if (fromColumn && getTableColumns(aux.split('.')[0]) == 0) {
         par = 'id=' + element.attributes["data-parent"].textContent;
         document.querySelectorAll('input[type=checkbox][' + par + ']').forEach(
             function (item) {
@@ -428,6 +434,18 @@ function getTables() {
 function getColumns() {
     checked = 0;
     document.querySelectorAll('input[type=checkbox]:not([id$=CheckBox]):not([id$=Record])').forEach(
+        function (item) {
+            if (item.checked) {
+                checked++;
+            }
+        });
+    return checked;
+}
+
+// this method parameter returns the number of column checkboxes that are checked and belong to the given table
+function getTableColumns(table) {
+    checked = 0;
+    document.querySelectorAll('input[type=checkbox][name*="' + table + '."]:not([id$=CheckBox]):not([id$=Record])').forEach(
         function (item) {
             if (item.checked) {
                 checked++;

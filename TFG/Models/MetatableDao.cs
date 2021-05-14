@@ -795,7 +795,7 @@ namespace TFG
         {
             foreach (KeyValuePair<string, string[]> entry in info.ColumnsSelected)
             {
-                deleteConstraints(getTableSchemaName(entry.Key));
+                //deleteConstraints(getTableSchemaName(entry.Key));
                 string query = "";
                 string pkfile = "";
                 string[] pks = tabledata.TablePks[entry.Key];
@@ -1432,25 +1432,32 @@ namespace TFG
         private string selectMissingValues(string data)
         {
             Dictionary<string, string[]> res = parseColumnSelection(data);
+            Dictionary<string, string[]> newRecords = new Dictionary<string, string[]>();
+            Dictionary<string, string[]> newColumns = new Dictionary<string, string[]>();
             string mode = data.Split('/')[0];
 
             if (mode != "deleteColumns")
             {
-                foreach (KeyValuePair<string, string[]> record in tabledata.Records)
+                foreach (KeyValuePair<string, string[]> entry in res)
                 {
-                    foreach (KeyValuePair<string, string[]> entry in res)
+                    foreach (KeyValuePair<string, string[]> record in tabledata.Records)
                     {
-                        if (record.Key.Contains(entry.Key))
+                        if (record.Key.Contains(entry.Key + '.'))
                         {
-                            string[] aux = new string[entry.Value.Length];
-                            string[] indexes = entry.Value;
+                            string[] input = entry.Value;
+                            if (mode == "updateRows")
+                            {
+                                input = entry.Value.Where(s => s.Contains('_')).ToArray();
+                            }
+                            string[] aux = new string[input.Length];
+                            string[] indexes = input;
                             string[] columns = new string[1];
                             string[] columnsValues = new string[1];
                             if (mode == "updateRows")
                             {
-                                indexes = entry.Value.Select(s => s.Split('_')[0]).ToArray();
-                                columns = entry.Value.Select(s => s.Split('_')[1]).Select(s => s.Split('=')[0]).ToArray();
-                                columnsValues = entry.Value.Select(s => s.Split('_')[1]).Select(s => s.Split('=')[0]).ToArray();
+                                indexes = input.Select(s => s.Split('_')[0]).ToArray();
+                                columns = input.Select(s => s.Split('_')[1]).Select(s => s.Split('=')[0]).ToArray();
+                                columnsValues = input.Select(s => s.Split('_')[1]).Select(s => s.Split('=')[1]).ToArray();
                             }
                             int counter = 0;
                             for (int i = 0; i < record.Value.Length; i++)
@@ -1468,15 +1475,45 @@ namespace TFG
                                     counter++;
                                 }
                             }
-
-                            info.Records[record.Key] = aux;
+                            newRecords.Add(record.Key, aux);
                         }
                     }
+                    newColumns.Add(entry.Key, info.ColumnsSelected[entry.Key]);
                 }
+                info.ColumnsSelected = newColumns;
+                info.Records = newRecords;
             }
             else
             {
+                string[] splitted = data.Split(',');
+                string[] columns = new string[splitted.Length - 1];
+                Array.Copy(splitted, 1, columns, 0, splitted.Length - 1);
+                res = new Dictionary<string, string[]>();
+                string table = "";
+                int index = 0;
+                foreach (string column in columns)
+                {
+                    string[] name = column.Split('.');
+                    if (table == "" || table != name[0])
+                    {
+                        if (table != "")
+                        {
+                            string[] other = new string[index];
+                            Array.Copy(splitted, 0, other, 0, index);
+                            res.Add(table, other);
+                        }
+                        table = name[0];
+                        index = 0;
+                        splitted = new string[columns.Length];
+                    }
+                    splitted[index] = name[1];
+                    index++;
+                }
+                string[] other2 = new string[index];
+                Array.Copy(splitted, 0, other2, 0, index);
+                res.Add(table, other2);
                 info.ColumnsSelected = res;
+                info.Records = null;
             }
             return mode;
         }

@@ -99,10 +99,10 @@
                                 {
                                     if (!entry.Value[k].Contains("Missing"))
                                     {
-
                                         @if (Model.ColumnsSelected[entry.Key].Contains(@entry.Value[k] + "Missing"))
                                         {
-                                            <th scope="col"><input type="checkbox" id="@entry.Value[k]" name="@entry.Value[k]" data-parent="@CheckBox" onclick="checkParent('@CheckBox', '@entry.Value[k]')" /></th>
+                                            string name = entry.Key+'.'+entry.Value[k];
+                                            <th scope="col"><input type="checkbox" id="@name" name="@name" data-parent="@CheckBox" onclick="checkParent('@CheckBox', '@name')" /></th>
                                         }
                                         else
                                         {
