@@ -82,7 +82,12 @@
         <button type="button" onclick="selectNone()" class="btn btn-outline-dark">Select None</button>
     </div>
     <br />
-    <span id="selection-text">None selected</span>
+    <span id="records-selected" class="selection-text"></span>
+    <br />
+    <span id="columns-selected" class="selection-text">None selected</span>
+    <br />
+    <span id="tables-selected" class="selection-text"></span>
+    <br />
     <div id="controls-inside">
         <button type="button" onclick='goToPage("@Model.Functionality", true)' class="btn btn-outline-primary">Confirm and run</button>
     </div>

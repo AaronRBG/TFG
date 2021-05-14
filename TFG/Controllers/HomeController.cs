@@ -381,6 +381,9 @@ namespace TFG.Controllers
                         case "remove_duplicates":
                             daos[id].getDuplicates();
                             break;
+                        case "missing_values":
+                            daos[id].findMissingValues();
+                            break;
                         default:
                             // "improve_datatypes"
                             daos[id].getDatatypes();
@@ -455,6 +458,9 @@ namespace TFG.Controllers
                     case "remove_duplicates":
                         daos[id].getDuplicates();
                         break;
+                    case "missing_values":
+                        daos[id].findMissingValues();
+                        break;
                     default:
                         // "improve_datatypes"
                         daos[id].getDatatypes();
@@ -502,7 +508,7 @@ namespace TFG.Controllers
             }
         }
 
-        // this method is only used to confirm the changes to the database
+        // this method is used to get the records of a specific column
         [HttpPost]
         public ActionResult GetRecord(string record, string functionalitySelected, string accordionInfo, string data2)
         {
@@ -517,6 +523,23 @@ namespace TFG.Controllers
                     saveMaskTypes(data2, false);
                 }
                 daos[id].getRecord(record);
+                return View(functionalitySelected, daos[id].info);
+            }
+            else
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
+        }
+
+        // this method is used to get the records of a specific column
+        [HttpPost]
+        public ActionResult GetMissingValue(string missingValue, string functionalitySelected)
+        {
+            string id = HttpContext.Session.GetString("id");
+            if (HttpContext.Session.Id == id)
+            {
+                daos[id].info.ColumnAccordion = missingValue;
+                daos[id].getMissingValue(missingValue);
                 return View(functionalitySelected, daos[id].info);
             }
             else

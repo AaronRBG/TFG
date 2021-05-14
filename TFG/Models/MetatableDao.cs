@@ -306,6 +306,7 @@ namespace TFG
             info.Records.Add(record, tabledata.Records[record]);
         }
 
+        // This method finds the duplicated data from the selected columns and returns it
         public void getDuplicates()
         {
             Dictionary<string, string[]> res = new Dictionary<string, string[]>();
@@ -335,30 +336,95 @@ namespace TFG
                     + " ORDER BY " + ArrayToString(entry.Value, true), con), "duplicates");
                 DataTable dt = ds.Tables["duplicates"];
                 string[][] container = new string[columns.Length][];
-                for (int x = 0; x < dt.Rows.Count; x++)
+                if (dt != null)
                 {
-                    for (int i = 0; i < columns.Length; i++)
+                    for (int x = 0; x < dt.Rows.Count; x++)
                     {
-                        if (x == 0)
+                        for (int i = 0; i < columns.Length; i++)
                         {
-                            container[i] = new string[dt.Rows.Count];
+                            if (x == 0)
+                            {
+                                container[i] = new string[dt.Rows.Count];
+                            }
+                            container[i][x] = dt.Rows[x][i].ToString();
                         }
-                        container[i][x] = dt.Rows[x][i].ToString();
                     }
                 }
                 columns = getTableColumns(entry.Key, false);
                 for (int i = 0; i < columns.Length; i++)
                 {
                     string name = entry.Key + '.' + columns[i];
-                    if (container[i] == null)
+                    if (container[i] != null)
                     {
-                        container[i] = new string[0];
+                        res.Add(name, container[i]);
                     }
-                    res.Add(name, container[i]);
                 }
                 info.ColumnsSelected[entry.Key] = columns;
             }
             info.Records = res;
+        }
+
+        // This method retrieves the already found missing values from the selected columns
+        public void getMissingValue(string missingValue)
+        {
+            string table = missingValue.Split('.')[0];
+            string[] columns = getTableColumns(table, false);
+            for (int i = 0; i < columns.Length; i++)
+            {
+                string name = table + '.' + columns[i];
+                info.Records.Add(name, tabledata.MissingValues[name]);
+            }
+        }
+
+        // This method finds the missing values from the selected columns and saves them
+        public void findMissingValues()
+        {
+            Dictionary<string, string[]> res = new Dictionary<string, string[]>();
+            foreach (KeyValuePair<string, string[]> entry in info.ColumnsSelected)
+            {
+                string[] columns = getTableColumns(entry.Key, false);
+                string joins = entry.Value[0] + " IS NULL";
+                for (int i = 1; i < entry.Value.Length; i++)
+                {
+                    joins += " OR " + entry.Value[i] + " IS NULL";
+                }
+                DataSet ds = Broker.Instance().Run(
+                    new SqlCommand("SELECT " + ArrayToString(columns, false) + " FROM " + getTableSchemaName(entry.Key)
+                    + " WHERE " + joins, con), "missing");
+                DataTable dt = ds.Tables["missing"];
+                string[][] container = new string[columns.Length][];
+                if (dt != null)
+                {
+                    for (int x = 0; x < dt.Rows.Count; x++)
+                    {
+                        for (int i = 0; i < columns.Length; i++)
+                        {
+                            if (x == 0)
+                            {
+                                container[i] = new string[dt.Rows.Count];
+                            }
+                            container[i][x] = dt.Rows[x][i].ToString();
+                        }
+                    }
+                }
+                for (int i = 0; i < columns.Length; i++)
+                {
+                    string name = entry.Key + '.' + columns[i];
+                    if (container[i] != null)
+                    {
+                        res.Add(name, container[i]);
+                    } else
+                    {
+                        res.Add(name, new string[0]);
+                    }
+                }
+                string[] other = new string[columns.Length + entry.Value.Length];
+                Array.Copy(columns, 0, other, 0, columns.Length);
+                string[] aux = entry.Value.Select(s => s + "Missing").ToArray();
+                Array.Copy(aux, 0, other, columns.Length, aux.Length);
+                info.ColumnsSelected[entry.Key] = other;
+            }
+            tabledata.MissingValues = res;
         }
 
         // This method gets the data of the columns from the database
@@ -484,7 +550,7 @@ namespace TFG
             string sql = System.IO.File.ReadAllText(path);
             DataSet ds = Broker.Instance().Run(new SqlCommand(sql, con), "findConstraints");
             DataTable dt = ds.Tables["findConstraints"];
-            for(int i=0; i<dt.Rows.Count; i++)
+            for (int i = 0; i < dt.Rows.Count; i++)
             {
                 string name = (string)dt.Rows[i][1];
                 string table = (string)dt.Rows[i][0];
@@ -536,7 +602,7 @@ namespace TFG
 
         private void deleteConstraints(string table)
         {
-            foreach (Models.Constraint c in tabledata.constraints.Where(s => s.type!= "COMPUTED COLUMN" && s.type != "INDEX" && (s.table == table || s.table2 == table)))
+            foreach (Models.Constraint c in tabledata.constraints.Where(s => s.type != "COMPUTED COLUMN" && s.type != "INDEX" && (s.table == table || s.table2 == table)))
             {
                 Broker.Instance().Run(new SqlCommand("ALTER TABLE " + c.table + " DROP CONSTRAINT " + c.name, con), "findConstraints");
             }
@@ -567,7 +633,7 @@ namespace TFG
             }
             foreach (Models.Constraint c in tabledata.constraints.Where(s => s.type == "INDEX" && s.table == table))
             {
-                string aux = ArrayToString(c.column.Split('_'),true);
+                string aux = ArrayToString(c.column.Split('_'), true);
                 Broker.Instance().Run(new SqlCommand("CREATE INDEX " + c.name + " ON " + c.table + " (" + aux + ")", con), "findConstraints");
             }
         }
@@ -578,7 +644,7 @@ namespace TFG
         {
             switch (info.Functionality)
             {
-                case "data_masking":
+                case "create_masks":
                     selectMaskedRecords(data);
                     updateDataMasking();
                     break;
@@ -593,6 +659,9 @@ namespace TFG
                 case "improve_datatypes":
                     selectDatatypes(data);
                     updateDatatypes();
+                    break;
+                case "missing_values":
+                    updateMissingValues(selectMissingValues(data));
                     break;
             }
         }
@@ -697,7 +766,7 @@ namespace TFG
                     string name1 = entry.Key + '.' + pks[0];
                     for (int j = 0; j < info.Records[name1].Length; j++)
                     {
-                        string pkfile= "";
+                        string pkfile = "";
 
                         for (int i = 0; i < pks.Length; i++)
                         {
@@ -731,6 +800,103 @@ namespace TFG
                     string name = entry.Key + '.' + entry.Value[i];
                     Broker.Instance().Run(new SqlCommand("ALTER TABLE " + getTableSchemaName(entry.Key) + " ALTER COLUMN " + entry.Value[i] + " " + info.ColumnsSuggestedDatatypes[name] + " NOT NULL", con), "datatypeChange");
                     tabledata.ColumnsDatatypes[name] = tabledata.ColumnsSuggestedDatatypes[name];
+                }
+                replaceConstraints(getTableSchemaName(entry.Key));
+            }
+        }
+
+        // This method updates the database with the corresponding changes for functionality missing_values
+        private void updateMissingValues(string mode)
+        {
+            foreach (KeyValuePair<string, string[]> entry in info.ColumnsSelected)
+            {
+                deleteConstraints(getTableSchemaName(entry.Key));
+                string query = "";
+                string pkfile = "";
+                string[] pks = tabledata.TablePks[entry.Key];
+                switch (mode)
+                {
+                    case "deleteColumns":
+                        query = "ALTER TABLE " + getTableSchemaName(entry.Key) + " DROP COLUMN " + entry.Value[0];
+                        for (int i = 1; i < entry.Value.Length; i++)
+                        {
+                            query += "," + entry.Value[i];
+                        }
+                        Broker.Instance().Run(new SqlCommand(query, con), "missingValues");
+                        break;
+                    case "updateRows":
+                        string updatefile = "";
+                        string name = entry.Key + '.' + entry.Value[0];
+                        for (int j = 0; j < info.Records[name].Length; j++)
+                        {
+                            for (int k = 0; k < pks.Length; k++)
+                            {
+                                string pkname = entry.Key + '.' + pks[k];
+                                if (k == 0)
+                                {
+                                    pkfile = pks[k] + " = " + info.Records[pkname][j];
+                                }
+                                else
+                                {
+                                    pkfile += " AND " + pks[k] + " = " + info.Records[pkname][j];
+                                }
+                            }
+                            for (int k = 0; k < entry.Value.Length; k++)
+                            {
+                                name = entry.Key + '.' + entry.Value[k];
+                                if (info.ColumnsSelected[entry.Key].Contains(@entry.Value[k] + "Missing"))
+                                {
+                                    if (k == 0 || updatefile == "")
+                                    {
+                                        updatefile = entry.Value[k] + " = ";
+                                        if (!int.TryParse(info.Records[name][j], out _))
+                                        {
+                                            updatefile += "'";
+                                        }
+                                        updatefile += info.Records[name][j];
+                                        if (!int.TryParse(info.Records[name][j], out _))
+                                        {
+                                            updatefile += "'";
+                                        }
+                                    }
+                                    else
+                                    {
+                                        updatefile += " AND " + entry.Value[k] + " = ";
+                                        if (!int.TryParse(info.Records[name][j], out _))
+                                        {
+                                            updatefile += "'";
+                                        }
+                                        updatefile += info.Records[name][j];
+                                        if (!int.TryParse(info.Records[name][j], out _))
+                                        {
+                                            updatefile += "'";
+                                        }
+                                    }
+
+                                }
+                            }
+                            Broker.Instance().Run(new SqlCommand("UPDATE " + getTableSchemaName(entry.Key) + " SET " + updatefile + " WHERE " + pkfile, con), "missingValues");
+                        }
+                        break;
+                    case "deleteRows":
+                        name = entry.Key + '.' + entry.Value[0];
+                        for (int j = 0; j < info.Records[name].Length; j++)
+                        {
+                            for (int k = 0; k < pks.Length; k++)
+                            {
+                                string pkname = entry.Key + '.' + pks[k];
+                                if (k == 0)
+                                {
+                                    pkfile = pks[k] + " = " + info.Records[pkname][j];
+                                }
+                                else
+                                {
+                                    pkfile += " AND " + pks[k] + " = " + info.Records[pkname][j];
+                                }
+                            }
+                            Broker.Instance().Run(new SqlCommand("DELETE FROM " + getTableSchemaName(entry.Key) + " WHERE " + pkfile, con), "missingValues");
+                        }
+                        break;
                 }
                 replaceConstraints(getTableSchemaName(entry.Key));
             }
@@ -889,7 +1055,7 @@ namespace TFG
                     DataTable dt = ds.Tables["type"];
                     DataRow row = dt.Rows[0];
                     string value = (string)row[0];
-                    if(value.Contains("char"))
+                    if (value.Contains("char"))
                     {
                         value += '(' + row[1].ToString() + ')';
                     }
@@ -963,7 +1129,7 @@ namespace TFG
                             {
                                 string max = record.OrderByDescending(s => s.Length).First();
                                 int value = max.Length;
-                                while(value % 5 != 0)
+                                while (value % 5 != 0)
                                 {
                                     value++;
                                 }
@@ -1294,6 +1460,105 @@ namespace TFG
             info.ColumnsSelected = selected;
             info.ColumnsDatatypes = datatypes;
             info.ColumnsSuggestedDatatypes = suggestedDatatypes;
+        }
+        // This method saves the selection of the datatypes selected for the missing_values functionality
+        private string selectMissingValues(string data)
+        {
+            Dictionary<string, string[]> res = parseColumnSelection(data);
+            Dictionary<string, string[]> newRecords = new Dictionary<string, string[]>();
+            Dictionary<string, string[]> newColumns = new Dictionary<string, string[]>();
+            string mode = data.Split('/')[0];
+
+            if (mode != "deleteColumns")
+            {
+                foreach (KeyValuePair<string, string[]> entry in res)
+                {
+                    foreach (KeyValuePair<string, string[]> record in tabledata.Records)
+                    {
+                        if (record.Key.Contains(entry.Key + '.'))
+                        {
+                            string[] input = entry.Value;
+                            if (mode == "updateRows")
+                            {
+                                input = entry.Value.Where(s => s.Contains('_')).ToArray();
+                            }
+                            string[] aux = new string[input.Length];
+                            string[] indexes = input;
+                            string[][] columns = new string[indexes.Length][];
+                            string[][] columnsValues = new string[indexes.Length][];
+                            if (mode == "updateRows")
+                            {
+                                indexes = input.Select(s => s.Split('_')[0]).ToArray();
+                                for (int x = 0; x < indexes.Length; x++)
+                                {
+                                    string[] aux2;
+                                    aux2 = input[x].Replace(indexes[x] + '_', "").Split('_');
+                                    columns[x] = new string[aux2.Length];
+                                    columnsValues[x] = new string[aux2.Length];
+                                    for (int y = 0; y < aux2.Length; y++)
+                                    {
+                                        columns[x][y] = aux2[y].Split('=')[0];
+                                        columnsValues[x][y] = aux2[y].Split('=')[1];
+                                    }
+                                }
+                            }
+                            int counter = 0;
+                            for (int i = 0; i < record.Value.Length; i++)
+                            {
+                                if (indexes.Contains(i.ToString()))
+                                {
+                                    if (mode == "updateRows" && columns[i].Contains(record.Key.Split('.')[1]))
+                                    {
+                                        aux[counter] = columnsValues[i][Array.IndexOf(columns[i], record.Key.Split('.')[1])];
+                                    }
+                                    else
+                                    {
+                                        aux[counter] = record.Value[i];
+                                    }
+                                    counter++;
+                                }
+                            }
+                            newRecords.Add(record.Key, aux);
+                        }
+                    }
+                    newColumns.Add(entry.Key, info.ColumnsSelected[entry.Key]);
+                }
+                info.ColumnsSelected = newColumns;
+                info.Records = newRecords;
+            }
+            else
+            {
+                string[] splitted = data.Split(',');
+                string[] columns = new string[splitted.Length - 1];
+                Array.Copy(splitted, 1, columns, 0, splitted.Length - 1);
+                res = new Dictionary<string, string[]>();
+                string table = "";
+                int index = 0;
+                foreach (string column in columns)
+                {
+                    string[] name = column.Split('.');
+                    if (table == "" || table != name[0])
+                    {
+                        if (table != "")
+                        {
+                            string[] other = new string[index];
+                            Array.Copy(splitted, 0, other, 0, index);
+                            res.Add(table, other);
+                        }
+                        table = name[0];
+                        index = 0;
+                        splitted = new string[columns.Length];
+                    }
+                    splitted[index] = name[1];
+                    index++;
+                }
+                string[] other2 = new string[index];
+                Array.Copy(splitted, 0, other2, 0, index);
+                res.Add(table, other2);
+                info.ColumnsSelected = res;
+                info.Records = null;
+            }
+            return mode;
         }
 
         // This method parses a string into a dictionary
