@@ -364,6 +364,7 @@ namespace TFG
             info.Records = res;
         }
 
+
         // This method finds the missing values from the selected columns and saves them
         public void getMissingValues()
         {
@@ -795,7 +796,7 @@ namespace TFG
         {
             foreach (KeyValuePair<string, string[]> entry in info.ColumnsSelected)
             {
-                //deleteConstraints(getTableSchemaName(entry.Key));
+                deleteConstraints(getTableSchemaName(entry.Key));
                 string query = "";
                 string pkfile = "";
                 string[] pks = tabledata.TablePks[entry.Key];
@@ -833,11 +834,29 @@ namespace TFG
                                 {
                                     if (k == 0 || updatefile == "")
                                     {
-                                        updatefile = entry.Value[k] + " = " + info.Records[name][j];
+                                        updatefile = entry.Value[k] + " = ";
+                                        if (!int.TryParse(info.Records[name][j], out _))
+                                        {
+                                            updatefile += "'";
+                                        }
+                                        updatefile += info.Records[name][j];
+                                        if (!int.TryParse(info.Records[name][j], out _))
+                                        {
+                                            updatefile += "'";
+                                        }
                                     }
                                     else
                                     {
-                                        updatefile += " AND " + entry.Value[k] + " = " + info.Records[name][j];
+                                        updatefile += " AND " + entry.Value[k] + " = ";
+                                        if (!int.TryParse(info.Records[name][j], out _))
+                                        {
+                                            updatefile += "'";
+                                        }
+                                        updatefile += info.Records[name][j];
+                                        if (!int.TryParse(info.Records[name][j], out _))
+                                        {
+                                            updatefile += "'";
+                                        }
                                     }
 
                                 }
@@ -1451,22 +1470,32 @@ namespace TFG
                             }
                             string[] aux = new string[input.Length];
                             string[] indexes = input;
-                            string[] columns = new string[1];
-                            string[] columnsValues = new string[1];
+                            string[][] columns = new string[indexes.Length][];
+                            string[][] columnsValues = new string[indexes.Length][];
                             if (mode == "updateRows")
                             {
                                 indexes = input.Select(s => s.Split('_')[0]).ToArray();
-                                columns = input.Select(s => s.Split('_')[1]).Select(s => s.Split('=')[0]).ToArray();
-                                columnsValues = input.Select(s => s.Split('_')[1]).Select(s => s.Split('=')[1]).ToArray();
+                                for (int x = 0; x < indexes.Length; x++)
+                                {
+                                    string[] aux2;
+                                    aux2 = input[x].Replace(indexes[x] + '_', "").Split('_');
+                                    columns[x] = new string[aux2.Length];
+                                    columnsValues[x] = new string[aux2.Length];
+                                    for (int y = 0; y < aux2.Length; y++)
+                                    {
+                                        columns[x][y] = aux2[y].Split('=')[0];
+                                        columnsValues[x][y] = aux2[y].Split('=')[1];
+                                    }
+                                }
                             }
                             int counter = 0;
                             for (int i = 0; i < record.Value.Length; i++)
                             {
                                 if (indexes.Contains(i.ToString()))
                                 {
-                                    if (mode == "updateRows" && columns.Contains(record.Value[i]))
+                                    if (mode == "updateRows" && columns[i].Contains(record.Key.Split('.')[1]))
                                     {
-                                        aux[counter] = columnsValues[Array.IndexOf(columns, record.Value[i])];
+                                        aux[counter] = columnsValues[i][Array.IndexOf(columns[i], record.Key.Split('.')[1])];
                                     }
                                     else
                                     {

@@ -57,7 +57,7 @@
             <div class="card">
                 <div class="card-header nav_color_1" id="@entry.Key">
                     <h5>
-                        <input type="checkbox" id="@CheckBox" name="@entry.Key" onclick="checkChilds('@CheckBox')" style="display: none;" />
+                        <input type="checkbox" id="@CheckBox" name="@entry.Key" style="display: none;" />
                         <button class="btn btn-link" data-toggle="collapse" data-target="@collapse" aria-expanded="true" aria-controls="collapseOne">
                             @entry.Key
                         </button>
@@ -72,7 +72,7 @@
                         {
                             string name = @entry.Key + '.' + @entry.Value[i];
                             string divName = name + "Div";
-                            <input type="checkbox" id="@name" name="@name" onclick="checkBoth('@CheckBox', '@name')" data-parent="@CheckBox" style="display: none;" /> <button class="btn btn-link" onclick="openTab(event, '@divName', false)">@entry.Value[i]</button>
+                            <input type="checkbox" id="@name" name="@name" onclick="checkParent('@CheckBox', '@name')" data-parent="@CheckBox" style="display: none;" /> <button class="btn btn-link" onclick="openTab(event, '@divName', false)">@entry.Value[i]</button>
                             <br />
                         }
                     </div>

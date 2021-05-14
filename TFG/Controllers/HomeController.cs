@@ -531,6 +531,8 @@ namespace TFG.Controllers
             }
         }
 
+
+
         // This method saves the masks selected masks from the dropdowns in the corresponding Model variable
         public void saveMaskTypes(string data, bool deleteSelection)
         {

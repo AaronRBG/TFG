@@ -9,6 +9,7 @@
     <input type="text" id="functionalitySelected1" class="functionalitySelected" name="functionalitySelected" />
     <input id="hidden-btn1" class="hidden-btn" type="submit" style="display: none;" />
 }
+
 @using (Html.BeginForm("GoBackToPage", "Home"))
 {
     <input type="text" id="functionalitySelected3" class="functionalitySelected" name="functionalitySelected" />
@@ -59,7 +60,7 @@
                 <div class="card">
                     <div class="card-header nav_color_1" id="@entry.Key">
                         <h5>
-                            <input type="checkbox" id="@CheckBox" name="@entry.Key" onclick="checkChilds('@CheckBox')" style="display: none;" />
+                            <input type="checkbox" id="@CheckBox" name="@entry.Key" style="display: none;" />
                             <button class="btn btn-link" onclick="openTab(event, '@divName', false)" data-toggle="collapse" data-target="@collapse" aria-expanded="true" aria-controls="collapseOne">
                                 @entry.Key
                             </button>

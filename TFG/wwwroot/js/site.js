@@ -215,7 +215,6 @@ function updateSelectionText(name) {
 // first checks if that checkbox is checked
 // then applies that value to all columns checkbox of that table and updates the output text
 function checkChilds(CheckBoxparent) {
-    /*
     var boo = document.getElementById(CheckBoxparent).checked;
     document.querySelectorAll('[ data-parent=' + '"' + CheckBoxparent + '"' + ']').forEach(
         function (item) {
@@ -223,7 +222,6 @@ function checkChilds(CheckBoxparent) {
             checkChilds(item.id);
         });
     updateSelectionText();
-    */
 }
 
 // this method parameter is the id of the table checkbox and the id of the column checkbox clicked
@@ -497,6 +495,8 @@ function checkRecord(event, name, functionality) {
     $("#hidden-btn6").click();
 
 }
+
+
 
 // This function controls the vertical tabs in some views like reports
 function openTab(event, name, create) {
