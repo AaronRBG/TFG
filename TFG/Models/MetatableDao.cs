@@ -665,8 +665,8 @@ namespace TFG
                     updateMissingValues(selectMissingValues(data));
                     break;
                 case "improve_indexes":
-                    //selectIndexes(data);
-                    //updateIndexes();
+                    selectIndexes(data);
+                    updateIndexes();
                     break;
             }
         }
@@ -905,6 +905,19 @@ namespace TFG
                 }
                 replaceConstraints(getTableSchemaName(entry.Key));
             }
+        }
+
+        // This method updates the database with the corresponding changes for functionality missing_values
+        private void updateIndexes()
+        {
+            foreach (KeyValuePair<string, string[]> entry in info.Records)
+            {
+                for (int i = 0; i < entry.Value.Length; i++)
+                {
+                    Broker.Instance().Run(new SqlCommand(entry.Value[i], con), "updateIndexes");
+                }
+            }
+            findIndexes();
         }
 
         // This method is used to retrieve the already computed available masks for a column
@@ -1621,6 +1634,22 @@ namespace TFG
                 info.Records = null;
             }
             return mode;
+        }
+        // This method saves the selection of the indexes selected for the improve_indexes functionality
+        private void selectIndexes(string data)
+        {
+            Dictionary<string, string[]> aux = parseColumnSelection(data);
+            Dictionary<string, string[]> res = new Dictionary<string, string[]>();
+            foreach (KeyValuePair<string, string[]> entry in aux)
+            {
+                res[entry.Key] = new string[entry.Value.Length];
+                for (int i = 0; i < entry.Value.Length; i++)
+                {
+                    res[entry.Key][i] = tabledata.Indexes[entry.Key][i];
+                }
+            }
+            info.TablesSelected = res.Keys.ToArray();
+            info.Records = res;
         }
 
         // This method parses a string into a dictionary

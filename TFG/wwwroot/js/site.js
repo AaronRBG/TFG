@@ -155,6 +155,24 @@ function confirm(functionality) {
                 });
         }
 
+        if (functionality == "improve_indexes") {
+            var aux;
+            document.querySelectorAll('input[type=checkbox][id$=Record]').forEach(
+                function (item) {
+                    if (item.checked) {
+                        var table = item.name.split('.')[0];
+                        var number = item.name.replace("Record", "").split('.')[1];
+                        if (aux != table) {
+                            selected += "/";
+                            selected += table;
+                            aux = table;
+                        }
+                        selected += ',';
+                        selected += number;
+                    }
+                });
+        }
+
         if (functionality == "primary_keys") {
             document.querySelectorAll('input[type=checkbox][id$=CheckBox]').forEach(
                 function (item) {
@@ -206,7 +224,9 @@ function updateSelectionText(name) {
         if (getColumns() != 0) {
             document.getElementById('columns-selected').innerHTML = 'from ' + getColumns() + ' different columns';
         }
-        document.getElementById('tables-selected').innerHTML = 'and ' + getTables() + ' different tables.';
+        if (getTables() != 0) {
+            document.getElementById('tables-selected').innerHTML = 'and ' + getTables() + ' different tables.';
+        }
     }
 }
 
