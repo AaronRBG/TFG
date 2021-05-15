@@ -413,7 +413,8 @@ namespace TFG
                     if (container[i] != null)
                     {
                         res.Add(name, container[i]);
-                    } else
+                    }
+                    else
                     {
                         res.Add(name, new string[0]);
                     }
@@ -663,6 +664,10 @@ namespace TFG
                 case "missing_values":
                     updateMissingValues(selectMissingValues(data));
                     break;
+                case "improve_indexes":
+                    selectIndexes(data);
+                    updateIndexes();
+                    break;
             }
         }
 
@@ -902,6 +907,19 @@ namespace TFG
             }
         }
 
+        // This method updates the database with the corresponding changes for functionality missing_values
+        private void updateIndexes()
+        {
+            foreach (KeyValuePair<string, string[]> entry in info.Records)
+            {
+                for (int i = 0; i < entry.Value.Length; i++)
+                {
+                    Broker.Instance().Run(new SqlCommand(entry.Value[i], con), "updateIndexes");
+                }
+            }
+            findIndexes();
+        }
+
         // This method is used to retrieve the already computed available masks for a column
         public void getAvailableMasks()
         {
@@ -1016,6 +1034,7 @@ namespace TFG
             findAvailableMasks();
             findPks();
             findConstraints();
+            findIndexes();
         }
 
         // This method gathers the schema names of the tables from the database
@@ -1039,6 +1058,47 @@ namespace TFG
         private string getTableSchemaName(string table)
         {
             return tabledata.TablesSchemaNames[table];
+        }
+
+        // This method gathers the missing and unused indexes of the tables and columns from the database
+        private void findIndexes()
+        {
+            Dictionary<string, string[]> res = new Dictionary<string, string[]>();
+            Dictionary<string, List<string>> aux = new Dictionary<string, List<string>>();
+
+            string path = Path.Combine(Directory.GetCurrentDirectory(), @"Scripts\findUnusedIndexes.sql");
+            string sql = System.IO.File.ReadAllText(path);
+            DataSet ds = Broker.Instance().Run(new SqlCommand(sql, con), "findUnusedIndexes");
+            DataTable dt = ds.Tables["findUnusedIndexes"];
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                string table = (string)dt.Rows[i][0];
+                string index = (string)dt.Rows[i][1];
+                if (!aux.ContainsKey(table))
+                {
+                    aux[table] = new List<string>();
+                }
+                aux[table].Add(index);
+            }
+            path = Path.Combine(Directory.GetCurrentDirectory(), @"Scripts\findMissingIndexes.sql");
+            sql = System.IO.File.ReadAllText(path);
+            ds = Broker.Instance().Run(new SqlCommand(sql, con), "findMissingIndexes");
+            dt = ds.Tables["findMissingIndexes"];
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                string table = ((string)dt.Rows[i][0]).Split('.')[1].Replace("[", "").Replace("]", "");
+                string index = (string)dt.Rows[i][1];
+                if (!aux.ContainsKey(table))
+                {
+                    aux[table] = new List<string>();
+                }
+                aux[table].Add(index);
+            }
+            foreach (KeyValuePair<string, List<string>> entry in aux)
+            {
+                res.Add(entry.Key, entry.Value.ToArray());
+            }
+            tabledata.Indexes = res;
         }
 
         // This method gathers the datatypes of the columns from the database
@@ -1143,6 +1203,21 @@ namespace TFG
             }
 
             tabledata.ColumnsSuggestedDatatypes = res;
+        }
+
+        // This method retrieves the datatypes information of the selected columns
+        public void getIndexes()
+        {
+            Dictionary<string, string[]> res = new Dictionary<string, string[]>();
+
+            foreach (string entry in info.TablesSelected)
+            {
+                if (tabledata.Indexes.ContainsKey(entry))
+                {
+                    res.Add(entry, tabledata.Indexes[entry]);
+                }
+            }
+            info.Records = res;
         }
 
         // This method retrieves the datatypes information of the selected columns
@@ -1559,6 +1634,22 @@ namespace TFG
                 info.Records = null;
             }
             return mode;
+        }
+        // This method saves the selection of the indexes selected for the improve_indexes functionality
+        private void selectIndexes(string data)
+        {
+            Dictionary<string, string[]> aux = parseColumnSelection(data);
+            Dictionary<string, string[]> res = new Dictionary<string, string[]>();
+            foreach (KeyValuePair<string, string[]> entry in aux)
+            {
+                res[entry.Key] = new string[entry.Value.Length];
+                for (int i = 0; i < entry.Value.Length; i++)
+                {
+                    res[entry.Key][i] = tabledata.Indexes[entry.Key][i];
+                }
+            }
+            info.TablesSelected = res.Keys.ToArray();
+            info.Records = res;
         }
 
         // This method parses a string into a dictionary
