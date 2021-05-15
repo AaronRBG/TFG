@@ -384,6 +384,9 @@ namespace TFG.Controllers
                         case "missing_values":
                             daos[id].findMissingValues();
                             break;
+                        case "improve_indexes":
+                            daos[id].getIndexes();
+                            break;
                         default:
                             // "improve_datatypes"
                             daos[id].getDatatypes();
@@ -460,6 +463,9 @@ namespace TFG.Controllers
                         break;
                     case "missing_values":
                         daos[id].findMissingValues();
+                        break;
+                    case "improve_indexes":
+                        daos[id].getIndexes();
                         break;
                     default:
                         // "improve_datatypes"

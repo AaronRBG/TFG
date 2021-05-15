@@ -1,4 +1,5 @@
-﻿SELECT 'DROP INDEX '+i.name+' ON '+DB_NAME()+'.dbo.'+object_name(i.object_id)
+﻿SELECT object_name(i.object_id) AS ObjectName,
+'DROP INDEX '+i.name+' ON '+DB_NAME()+'.dbo.'+object_name(i.object_id)
 FROM sys.indexes i 
 INNER JOIN sys.objects o ON o.object_id = i.object_id
 LEFT JOIN sys.dm_db_index_usage_stats s 
