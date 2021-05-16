@@ -387,9 +387,11 @@ namespace TFG.Controllers
                         case "improve_indexes":
                             daos[id].getIndexes();
                             break;
-                        default:
-                            // "improve_datatypes"
+                        case "improve_datatypes":
                             daos[id].getDatatypes();
+                            break;
+                        default:
+                            // some functionalities do not need preparation
                             break;
                     }
                 }
@@ -467,9 +469,11 @@ namespace TFG.Controllers
                     case "improve_indexes":
                         daos[id].getIndexes();
                         break;
-                    default:
-                        // "improve_datatypes"
+                    case "improve_datatypes":
                         daos[id].getDatatypes();
+                        break;
+                    default:
+                        // some functionalities do not need preparation
                         break;
                 }
                 return RedirectToAction(functionalitySelected, daos[id].info);
