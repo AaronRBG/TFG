@@ -33,8 +33,8 @@ namespace TFG.Models
             Functionalities_need_columns.Add("primary_keys", false);
             Functionalities_text.Add("foreign_keys", "Add/Improve Foreign Keys");
             Functionalities_need_columns.Add("foreign_keys", false);
-            Functionalities_text.Add("entry.Value_defragmentation", "Table Defragmentation");
-            Functionalities_need_columns.Add("entry.Value_defragmentation", false);
+            Functionalities_text.Add("table_defragmentation", "Table Defragmentation");
+            Functionalities_need_columns.Add("table_defragmentation", false);
             Functionalities_text.Add("improve_indexes", "Index Cleaning & Generation");
             Functionalities_need_columns.Add("improve_indexes", false);
         }

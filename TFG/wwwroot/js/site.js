@@ -173,7 +173,7 @@ function confirm(functionality) {
                 });
         }
 
-        if (functionality == "primary_keys") {
+        if (functionality == "primary_keys" || functionality == "table_defragmentation") {
             document.querySelectorAll('input[type=checkbox][id$=CheckBox]').forEach(
                 function (item) {
                     if (item.checked) {

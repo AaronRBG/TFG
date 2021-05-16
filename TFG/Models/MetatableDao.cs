@@ -668,6 +668,9 @@ namespace TFG
                     selectIndexes(data);
                     updateIndexes();
                     break;
+                case "table_defragmentation":
+                    updateTableDefrag(data);
+                    break;
             }
         }
 
@@ -918,6 +921,20 @@ namespace TFG
                 }
             }
             findIndexes();
+        }
+
+        // This method updates the database with the corresponding changes for functionality table_defragmentation
+        private void updateTableDefrag(string data)
+        {
+            string[] aux = data.Split(',');
+            string[] tables = new string[aux.Length - 1];
+            Array.Copy(aux, 1, tables, 0, aux.Length - 1);
+            info.TablesSelected = tables;
+
+            foreach (string table in info.TablesSelected)
+            {
+                Broker.Instance().Run(new SqlCommand("DBCC DBREINDEX('" + getTableSchemaName(table) + "') WITH NO_INFOMSGS", con), "updateTableDefrag");
+            }
         }
 
         // This method is used to retrieve the already computed available masks for a column
