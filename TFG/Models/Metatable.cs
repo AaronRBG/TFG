@@ -18,7 +18,7 @@ namespace TFG.Models
             Functionalities_text.Add("create_masks", "Data Masking");
             Functionalities_need_columns.Add("create_masks", true);
             Functionalities_text.Add("data_unification", "Data Unification");
-            Functionalities_need_columns.Add("data_unification", true);
+            Functionalities_need_columns.Add("data_unification", false);
             Functionalities_text.Add("remove_duplicates", "Remove Duplicates");
             Functionalities_need_columns.Add("remove_duplicates", true);
             Functionalities_text.Add("create_constraints", "Constraints");
@@ -47,6 +47,7 @@ namespace TFG.Models
         public Dictionary<string, string[]> TableSuggestedPks { get; set; }
         public Dictionary<string, string[]> TablesColumns { get; set; }
         public Dictionary<string, string[]> Records { get; set; }
+        public Dictionary<string, string[]> Unification { get; set; }
         public Dictionary<string, string[]> Indexes { get; set; }
         public Dictionary<string, string[]> MissingValues { get; set; }
         public Dictionary<string, string> ColumnsDatatypes { get; set; }
