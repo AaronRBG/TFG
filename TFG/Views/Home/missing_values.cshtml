@@ -66,7 +66,7 @@
                         <input type="checkbox" id="@CheckBox" name="@entry.Key" style="display: none;" />
                         @if (Model.Records.ContainsKey(entry.Key + '.' + entry.Value[0]))
                         {
-                            <button class="btn btn-link" onclick="openTab(event, '@divName', false)" data-toggle="collapse" data-target="@collapse" aria-expanded="true" aria-controls="collapseOne">
+                            <button class="btn btn-link" onclick="openTab(event, '@divName')" data-toggle="collapse" data-target="@collapse" aria-expanded="true" aria-controls="collapseOne">
                                 @entry.Key
                             </button>
                         }

@@ -48,73 +48,71 @@
     <div id="accordion" class="overflow-auto left-half" style="width:17vw;">
         <span class="font-weight-bold">Tables:</span>
         <br />
-        @foreach (string table in Model.TablesSelected)
+        @foreach (KeyValuePair<string, string[]> entry in Model.ColumnsSelected)
         {
-            if (Model.Records.ContainsKey(table))
-            {
-                string collapse = "#collapse" + table;
-                string CheckBox = table + "CheckBox";
-                string divName = table + "Div";
+            string collapse = "#collapse" + entry.Key;
+            string CheckBox = entry.Key + "CheckBox";
 
-                <div class="card">
-                    <div class="card-header nav_color_1" id="@table">
-                        <h5>
-                            <input type="checkbox" id="@CheckBox" name="@table" style="display: none;" />
-                            <button class="btn btn-link" onclick="openTab(event, '@divName', false)" data-toggle="collapse" data-target="@collapse" aria-expanded="true" aria-controls="collapseOne">
-                                @table
-                            </button>
-                        </h5>
+            <div class="card">
+                <div class="card-header nav_color_1" id="@entry.Key">
+                    <h5>
+                        <input type="checkbox" id="@CheckBox" name="@entry.Key" style="display: none;" />
+                        <button class="btn btn-link" data-toggle="collapse" data-target="@collapse" aria-expanded="true" aria-controls="collapseOne">
+                            @entry.Key
+                        </button>
+                    </h5>
+                </div>
+                <div id="@collapse.Substring(1)" class="collapse hide" aria-labelledby="@entry.Key" data-parent="#accordion">
+                    <div class="card-body nav_color_2">
+                        <span style="color: white;">@entry.Key columns: </span>
+                        <br />
+                        @for (int i = 0; i < entry.Value.Length; i++)
+                        {
+                            string name = @entry.Key + '.' + @entry.Value[i];
+                            string divName = name + "Div";
+                            <input type="checkbox" id="@name" name="@name" onclick="checkParent('@CheckBox', '@name')" data-parent="@CheckBox" style="display: none;" /> <button class="btn btn-link" onclick="openTab(event, '@divName')">@entry.Value[i]</button>
+                            <br />
+                        }
                     </div>
                 </div>
-            }
+            </div>
         }
     </div>
     <div id="Tab-contents" class="overflow-auto">
         <div id="default" class="tabcontent">
-            <h2 style="padding-top:35vh;">No table selected, select one from the dropdown on the left</h2>
+            <h2 style="padding-top:35vh;">No column selected, select one from the dropdown on the left</h2>
         </div>
-        @foreach (string table in Model.TablesSelected)
+        @foreach (KeyValuePair<string, string[]> entry in Model.ColumnsSelected)
         {
-            if (Model.Records.ContainsKey(table))
+            for (int i = 0; i < entry.Value.Length; i++)
             {
-                string divName = table + "Div";
-                string[] records = Model.Records[table];
-                string CheckBox = table + "CheckBox";
+                string CheckBox = entry.Key + "CheckBox";
+                string name = entry.Key + '.' + entry.Value[i];
+                string divName = name + "Div";
+                string[] records = Model.Records[name];
 
                 <div id="@divName" class="tabcontent" style="display: none;">
                     <table class="table table-striped overflow-auto">
                         <thead class="thead-dark">
                             <tr>
                                 <th scope="col">Selections</th>
-                                @for (int k = 0; k < Model.ColumnsSelected[table].Length; k++)
-                                {
-                                    <th scope="col">@Model.ColumnsSelected[table][k]</th>
-                                }
+                                <th scope="col">@entry.Value[i]</th>
                             </tr>
                         </thead>
                         <tbody>
                             @for (int j = 0; j < records.Length; j++)
                             {
-                                string idname = @table + @j + "Record";
+                                string idname = name + '_' + @j + "Record";
                                 <tr>
                                     @if (j % 2 == 0)
                                     {
-                                        <th scope="row"><input type="checkbox" id="@idname" name="@idname" data-parent="@CheckBox" onclick="checkParent('@CheckBox', '@idname')" /></th>
+                                        <th scope="row"><input type="checkbox" id="@idname" name="@idname" data-parent="@CheckBox" onclick="uncheck('@idname');checkParent('@CheckBox', '@idname')" /></th>
+                                        <td>@records[j]</td>
                                     }
                                     else
                                     {
-                                        <th scope="row" style="border-bottom: 1px solid;"><input type="checkbox" id="@idname" name="@idname" data-parent="@CheckBox" onclick="checkParent('@CheckBox', '@idname')" /></th>
-                                    }
-                                    @for (int k = 0; k < Model.ColumnsSelected[table].Length; k++)
-                                    {
-                                        if (j % 2 == 0)
-                                        {
-                                            <td>@records[j].Split(',')[k]</td>
-                                        }
-                                        else
-                                        {
-                                            <td style="border-bottom: 1px solid;">@records[j].Split(',')[k]</td>
-                                        }
+                                        <th scope="row" style="border-bottom: 1px solid;"><input type="checkbox" id="@idname" name="@idname" data-parent="@CheckBox" onclick="uncheck('@idname');checkParent('@CheckBox', '@idname')" /></th>
+                                        <td style="border-bottom: 1px solid;">@records[j]</td>
                                     }
                                 </tr>
                             }
@@ -128,10 +126,9 @@
 <!-- This part is perform whole actions like selecting everything or nothing and running the functionality with the selected items -->
 <div id="controls">
     <div class="btn-group-vertical" role="group" style="padding-top: 20vh;">
-        <button type="button" onclick="selectAll()" class="btn btn-outline-primary">Select All</button>
-        <button type="button" onclick="selectRecords()" class="btn btn-outline-dark">Select Table Records</button>
-        <button type="button" onclick="unselectRecords()" class="btn btn-outline-primary">Unselect Table Records</button>
-        <button type="button" onclick="selectNone()" class="btn btn-outline-dark">Select None</button>
+        <button type="button" onclick="selectHalfRecords(false)" class="btn btn-outline-primary">Select Odd Records</button>
+        <button type="button" onclick="selectHalfRecords(true)" class="btn btn-outline-dark">Select Even Records</button>
+        <button type="button" onclick="selectNone()" class="btn btn-outline-primary">Select None</button>
     </div>
     <br />
     <span id="records-selected" class="selection-text"></span>

@@ -672,8 +672,7 @@ namespace TFG
                     updateTableDefrag(data);
                     break;
                 case "data_unification":
-                    /*selectUnification(data);
-                    updateUnification();*/
+                    updateUnification(data);
                     break;
             }
         }
@@ -941,6 +940,53 @@ namespace TFG
             }
         }
 
+        // This method updates the database with the corresponding changes for functionality data_unification
+        private void updateUnification(string data)
+        {
+            Dictionary<string, int[]> input = new Dictionary<string, int[]>();
+            foreach (string a in data.Split('/'))
+            {
+                string table = a.Split(',', 2)[0];
+                string aux = "";
+                string[] records = a.Split(',', 2)[1].Split('_');
+                List<int> values = new List<int>();
+                for (int i = 0; i < records.Length; i += 2)
+                {
+                    string column = records[i];
+                    string name = table + '.' + aux;
+                    int record = Int32.Parse(records[i + 1]);
+                    if (aux != "" && aux != column)
+                    {
+                        input.Add(name, values.ToArray());
+                        values = new List<int>();
+                    }
+                    values.Add(record);
+                    if(i == records.Length-1)
+                    {
+                        input.Add(name, values.ToArray());
+                    }
+                }
+            }
+
+            foreach (KeyValuePair<string, int[]> entry in input)
+            {
+                string table = getTableSchemaName(entry.Key.Split('.')[0]);
+                string column = entry.Key.Split('.')[1];
+                for (int i = 0; i < entry.Value.Length; i++) {
+                    string newValue = info.Records[entry.Key][entry.Value[i]];
+                    string oldValue;
+                    if (entry.Value[i] % 2 == 0)
+                    {
+                        oldValue = info.Records[entry.Key][entry.Value[i] + 1];
+                    } else
+                    {
+                        oldValue = info.Records[entry.Key][entry.Value[i] - 1];
+                    }
+                    Broker.Instance().Run(new SqlCommand("UPDATE " + table + " SET " + column + " = " + newValue + " WHERE " + column + " = " + oldValue, con), "updateUnification");
+                }
+            }
+        }
+
         // This method is used to retrieve the already computed available masks for a column
         public void getAvailableMasks()
         {
@@ -1127,46 +1173,49 @@ namespace TFG
         private void findUnification()
         {
             Dictionary<string, string[]> res = new Dictionary<string, string[]>();
-            const int MAX_N_CHARS = 25;
+            const int MAX_N_CHARS = 10;
+            List<string> all_pks = new List<string>();
+            foreach (KeyValuePair<string, string[]> entry in tabledata.TablePks)
+            {
+                foreach (string pk in entry.Value)
+                {
+                    all_pks.Add(pk);
+                }
+            }
 
             foreach (KeyValuePair<string, string[]> entry in tabledata.TablesColumns)
             {
                 string[] columns = getTableColumns(entry.Key, false);
-                if (tabledata.Records.ContainsKey(entry.Key + '.' + columns[0]) && tabledata.Records[entry.Key + '.' + columns[0]] != null)
+                for (int j = 1; j < columns.Length; j++)
                 {
-                    string[] records = tabledata.Records[entry.Key + '.' + columns[0]];
-                    for (int i = 0; i < records.Length; i++)
+                    string name = entry.Key + '.' + columns[j];
+                    if (!columns[j].Contains("Number") && !entry.Key.Contains("Password") && getDatatype(name).Contains("nvarchar") && !all_pks.Contains(columns[j]) && tabledata.Records.ContainsKey(name) && tabledata.Records[name] != null)
                     {
-                        records[i] = tabledata.Records[entry.Key + '.' + columns[0]][i];
-                        for (int j = 1; j < columns.Length; j++)
+                        string[] records = tabledata.Records[name];
+                        List<string> aux = new List<string>();
+                        records = records.Where(r => r.Length <= MAX_N_CHARS).Distinct().ToArray();
+                        if (records != null && records.Length > 0)
                         {
-                            string name = entry.Key + '.' + columns[j];
-                            records[i] += "," + tabledata.Records[name][i];
-                        }
-                    }
-                    List<string> aux = new List<string>();
-                    records = records.Where(r => r.Length <= MAX_N_CHARS).ToArray();
-                    if (records != null && records.Length > 0)
-                    {
-                        Parallel.ForEach(records, a =>
-                        {
-                            for (int k = records.ToList().IndexOf(a) + 1; k < records.Length; k++)
+                            Parallel.ForEach(records, a =>
                             {
-                                string b = records[k];
-                                if (a != b && StringSimilar(a, b))
+                                for (int k = records.ToList().IndexOf(a) + 1; k < records.Length; k++)
                                 {
-                                    lock (aux)
+                                    string b = records[k];
+                                    if (a != b && StringSimilar(a, b))
                                     {
-                                        aux.Add(a);
-                                        aux.Add(b);
+                                        lock (aux)
+                                        {
+                                            aux.Add(a);
+                                            aux.Add(b);
+                                        }
                                     }
                                 }
+                            });
+                            if (aux != null && aux.Count > 0)
+                            {
+                                res.Add(name, aux.ToArray());
                             }
-                        });
-                    }
-                    if (aux != null && aux.Count > 0)
-                    {
-                        res.Add(entry.Key, aux.ToArray());
+                        }
                     }
                 }
             }
@@ -1326,17 +1375,25 @@ namespace TFG
             Dictionary<string, string[]> res = new Dictionary<string, string[]>();
             Dictionary<string, string[]> res2 = new Dictionary<string, string[]>();
 
-            foreach (string table in info.TablesSelected)
+            foreach (KeyValuePair<string, string[]> entry in info.ColumnsSelected)
             {
-                if (tabledata.Unification.ContainsKey(table))
+                List<string> aux = new List<string>();
+                for (int i = 0; i < entry.Value.Length; i++)
                 {
-                    res.Add(table, tabledata.Unification[table]);
-                    res2.Add(table, getTableColumns(table, false));
+                    string name = entry.Key + '.' + entry.Value[i];
+                    if (tabledata.Unification.ContainsKey(name))
+                    {
+                        res.Add(name, tabledata.Unification[name]);
+                        aux.Add(entry.Value[i]);
+                    }
+                }
+                if (aux.Count > 0)
+                {
+                    res2.Add(entry.Key, aux.ToArray());
                 }
             }
             info.Records = res;
             info.ColumnsSelected = res2;
-            info.TablesSelected = res.Keys.ToArray();
         }
 
         // This method gathers the datatype of a column from the database

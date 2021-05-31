@@ -18,7 +18,7 @@ namespace TFG.Models
             Functionalities_text.Add("create_masks", "Data Masking");
             Functionalities_need_columns.Add("create_masks", true);
             Functionalities_text.Add("data_unification", "Data Unification");
-            Functionalities_need_columns.Add("data_unification", false);
+            Functionalities_need_columns.Add("data_unification", true);
             Functionalities_text.Add("remove_duplicates", "Remove Duplicates");
             Functionalities_need_columns.Add("remove_duplicates", true);
             Functionalities_text.Add("create_constraints", "Constraints");
