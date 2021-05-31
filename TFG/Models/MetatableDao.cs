@@ -1056,7 +1056,7 @@ namespace TFG
             findPks();
             findConstraints();
             findIndexes();
-            //findUnification();
+            findUnification();
         }
 
         // This method gathers the schema names of the tables from the database
@@ -1127,21 +1127,47 @@ namespace TFG
         private void findUnification()
         {
             Dictionary<string, string[]> res = new Dictionary<string, string[]>();
+            const int MAX_N_CHARS = 25;
 
             foreach (KeyValuePair<string, string[]> entry in tabledata.TablesColumns)
             {
-                for (int i = 0; i < entry.Value.Length; i++)
+                string[] columns = getTableColumns(entry.Key, false);
+                if (tabledata.Records.ContainsKey(entry.Key + '.' + columns[0]) && tabledata.Records[entry.Key + '.' + columns[0]] != null)
                 {
-                    string name = entry.Key + '.' + entry.Value[i];
-                    DataSet ds = Broker.Instance().Run(new SqlCommand("", con), "findUnification");     // right now empty
-                    DataTable dt = ds.Tables["findUnification"];
-                    string[] aux = new string[dt.Rows.Count];
-                    for (int j = 0; j < dt.Rows.Count; j++)
+                    string[] records = tabledata.Records[entry.Key + '.' + columns[0]];
+                    for (int i = 0; i < records.Length; i++)
                     {
-                        aux[j] = (string)dt.Rows[j][0];
+                        records[i] = tabledata.Records[entry.Key + '.' + columns[0]][i];
+                        for (int j = 1; j < columns.Length; j++)
+                        {
+                            string name = entry.Key + '.' + columns[j];
+                            records[i] += "," + tabledata.Records[name][i];
+                        }
                     }
-
-                    res.Add(name, aux);
+                    List<string> aux = new List<string>();
+                    records = records.Where(r => r.Length <= MAX_N_CHARS).ToArray();
+                    if (records != null && records.Length > 0)
+                    {
+                        Parallel.ForEach(records, a =>
+                        {
+                            for (int k = records.ToList().IndexOf(a) + 1; k < records.Length; k++)
+                            {
+                                string b = records[k];
+                                if (a != b && StringSimilar(a, b))
+                                {
+                                    lock (aux)
+                                    {
+                                        aux.Add(a);
+                                        aux.Add(b);
+                                    }
+                                }
+                            }
+                        });
+                    }
+                    if (aux != null && aux.Count > 0)
+                    {
+                        res.Add(entry.Key, aux.ToArray());
+                    }
                 }
             }
             tabledata.Unification = res;
@@ -1302,48 +1328,15 @@ namespace TFG
 
             foreach (string table in info.TablesSelected)
             {
-                string[] columns = getTableColumns(table, false);
-                if (tabledata.Records.ContainsKey(table + '.' + columns[0]) && tabledata.Records[table + '.' + columns[0]] != null)
+                if (tabledata.Unification.ContainsKey(table))
                 {
-                    string[] records = tabledata.Records[table + '.' + columns[0]];
-                    for (int i = 0; i < records.Length; i++)
-                    {
-                        records[i] = tabledata.Records[table + '.' + columns[0]][i];
-                        for (int j = 1; j < columns.Length; j++)
-                        {
-                            string name = table + '.' + columns[j];
-                            records[i] += "," + tabledata.Records[name][i];
-                        }
-                    }
-                    List<string> aux = new List<string>();
-                    records = records.Where(r => r.Length <= 25).ToArray();
-                    if (records != null)
-                    {
-                        Parallel.ForEach(records, a =>
-                        {
-                            for (int k = records.ToList().IndexOf(a) + 1; k < records.Length; k++)
-                            {
-                                string b = records[k];
-                                if (a != b && StringSimilar(a, b))
-                                {
-                                    lock (aux)
-                                    {
-                                        aux.Add(a);
-                                        aux.Add(b);
-                                    }
-                                }
-                            }
-                        });
-                    }
-                    if (aux != null)
-                    {
-                        res.Add(table, aux.ToArray());
-                        res2.Add(table, columns);
-                    }
+                    res.Add(table, tabledata.Unification[table]);
+                    res2.Add(table, getTableColumns(table, false));
                 }
             }
             info.Records = res;
             info.ColumnsSelected = res2;
+            info.TablesSelected = res.Keys.ToArray();
         }
 
         // This method gathers the datatype of a column from the database
@@ -1814,6 +1807,7 @@ namespace TFG
 
         private static bool StringSimilar(string a, string b)
         {
+            const double LIMIT = 0.89;
             if ((a.Length == 0) || (b.Length == 0))
             {
                 return false;
@@ -1822,7 +1816,7 @@ namespace TFG
             b = b.Replace(",", "");
             double maxLen = a.Length > b.Length ? a.Length : b.Length;
             int minLen = a.Length < b.Length ? a.Length : b.Length;
-            if (minLen / maxLen < 0.89)
+            if (minLen / maxLen < LIMIT)
                 return false;
             int same = 0;
             Parallel.For(0, minLen, (i) =>
@@ -1832,7 +1826,7 @@ namespace TFG
                     same++;
                 }
             });
-            if (same > minLen * 0.89)
+            if (same > minLen * LIMIT)
                 return true;
             return false;
         }

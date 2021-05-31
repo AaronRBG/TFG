@@ -96,13 +96,27 @@
                             @for (int j = 0; j < records.Length; j++)
                             {
                                 string idname = @table + @j + "Record";
-                            <tr>
-                                <th scope="row"><input type="checkbox" id="@idname" name="@idname" data-parent="@CheckBox" onclick="checkParent('@CheckBox', '@idname')" /></th>
-                                @for (int k = 0; k < Model.ColumnsSelected[table].Length; k++)
-                                {
-                                    <td>@records[j].Split(',')[k]</td>
-                                }
-                            </tr>
+                                <tr>
+                                    @if (j % 2 == 0)
+                                    {
+                                        <th scope="row"><input type="checkbox" id="@idname" name="@idname" data-parent="@CheckBox" onclick="checkParent('@CheckBox', '@idname')" /></th>
+                                    }
+                                    else
+                                    {
+                                        <th scope="row" style="border-bottom: 1px solid;"><input type="checkbox" id="@idname" name="@idname" data-parent="@CheckBox" onclick="checkParent('@CheckBox', '@idname')" /></th>
+                                    }
+                                    @for (int k = 0; k < Model.ColumnsSelected[table].Length; k++)
+                                    {
+                                        if (j % 2 == 0)
+                                        {
+                                            <td>@records[j].Split(',')[k]</td>
+                                        }
+                                        else
+                                        {
+                                            <td style="border-bottom: 1px solid;">@records[j].Split(',')[k]</td>
+                                        }
+                                    }
+                                </tr>
                             }
                         </tbody>
                     </table>
