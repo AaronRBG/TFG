@@ -104,6 +104,20 @@ namespace TFG
             tabledata.TableSuggestedPks = suggested_pks;
         }
 
+        // This method applies runs queries to calculate the best suitable fks for the given tables
+        public void getFks()
+        {
+            getForeignKeys();
+            getSuggestedFks();
+        }
+
+        // This method applies runs queries to calculate the best suitable fks for the given tables
+        private void findFks()
+        {
+            tabledata.TableFks = tabledata.constraints.Where(c => c.type == "FOREIGN KEY").ToArray();
+            tabledata.TableSuggestedFks = findSuggestedFks();
+        }
+
         // This method is used to retrieve the primary keys from tabledata to info
         public void getPrimaryKeys(bool getSpacial)
         {
@@ -124,6 +138,12 @@ namespace TFG
                 }
             }
             info.TablePks = pks;
+        }
+
+        // This method is used to retrieve the foreign keys from tabledata to info
+        public void getForeignKeys()
+        {
+            info.TableFks = tabledata.TableFks.Where(f => info.TablesSelected.Contains(f.table) || info.TablesSelected.Contains(f.table2)).ToArray();
         }
 
         // This method retrieves the primary key(s) of a table (all or only the non spacial ones)
@@ -155,7 +175,7 @@ namespace TFG
             return res;
         }
 
-        // This method is used to retrieve the suggested keys from tabledata to info
+        // This method is used to retrieve the suggested primary keys from tabledata to info
         public void getSuggestedKeys()
         {
             Dictionary<string, string[]> suggested_pks = new Dictionary<string, string[]>();
@@ -166,8 +186,13 @@ namespace TFG
             }
             info.TableSuggestedPks = suggested_pks;
         }
+        // This method is used to retrieve the suggested foreign keys from tabledata to info
+        public void getSuggestedFks()
+        {
+            info.TableSuggestedFks = tabledata.TableSuggestedFks.Where(f => info.TablesSelected.Contains(f.table) || info.TablesSelected.Contains(f.table2)).ToArray();
+        }
 
-        // This method applies the selected masks to the records and saves the results in the corresponding Model variable
+        // This method applies finds a suitable value for the primary key of a table
         private string[] findSuggestedPks(string table)
         {
             string res = "";
@@ -229,6 +254,73 @@ namespace TFG
             string[] suggested = res.Split(',');
             Array.Sort(suggested);
             return suggested;
+        }
+
+        // This method applies finds suitables values for the foreign keys of the database tables
+        private Models.Constraint[] findSuggestedFks()
+        {
+            /*
+            string res = "";
+            bool found = false;
+            int count = 0;
+            int distinct = 0, total = 0;
+
+            string[] columns = getTableColumns(table, true);
+            string[] IDcolumns = new string[columns.Length];
+            for (int i = 0; i < columns.Length; i++)
+            {
+                if (columns[i].Contains("ID"))
+                {
+                    IDcolumns[count] = columns[i];
+                    count++;
+                }
+            }
+            string[] aux = new string[count];
+            Array.Copy(IDcolumns, 0, aux, 0, count);
+            count = 0;
+            string[] combinations = getCombinations(aux);
+            while (!found && count < combinations.Length)
+            {
+                DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT COUNT(*) FROM (SELECT DISTINCT " + combinations[count] + " FROM " + getTableSchemaName(table) + ") AS internalQuery", con), "distinct");
+                distinct = (int)ds.Tables["distinct"].Rows[0][0];
+                ds = Broker.Instance().Run(new SqlCommand("SELECT COUNT(*) FROM (SELECT " + combinations[count] + " FROM " + getTableSchemaName(table) + ") AS internalQuery", con), "total");
+                total = (int)ds.Tables["total"].Rows[0][0];
+                if (distinct == total)
+                {
+                    found = true;
+                    res = combinations[count];
+                }
+                else
+                {
+                    count++;
+                }
+            }
+            if (!found)
+            {
+                count = 0;
+                combinations = getCombinations(columns);
+            }
+            while (!found && count < combinations.Length)
+            {
+                DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT COUNT(*) FROM (SELECT DISTINCT " + combinations[count] + " FROM " + getTableSchemaName(table) + ") AS internalQuery", con), "distinct");
+                distinct = (int)ds.Tables["distinct"].Rows[0][0];
+                ds = Broker.Instance().Run(new SqlCommand("SELECT COUNT(*) FROM (SELECT " + combinations[count] + " FROM " + getTableSchemaName(table) + ") AS internalQuery", con), "total");
+                total = (int)ds.Tables["total"].Rows[0][0];
+                if (distinct == total)
+                {
+                    found = true;
+                    res = combinations[count];
+                }
+                else
+                {
+                    count++;
+                }
+            }
+            string[] suggested = res.Split(',');
+            Array.Sort(suggested);
+            return suggested;
+
+            */
         }
 
         // This method calculates and returns all the possible pk combinations ordered
@@ -1118,6 +1210,7 @@ namespace TFG
             findAvailableMasks();
             findPks();
             findConstraints();
+            findFks();
             findIndexes();
             findUnification();
         }
