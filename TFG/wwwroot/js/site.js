@@ -155,7 +155,7 @@ function confirm(functionality) {
                 });
         }
 
-        if (functionality == "improve_indexes") {
+        if (functionality == "improve_indexes" || functionality == "data_unification") {
             var aux;
             document.querySelectorAll('input[type=checkbox][id$=Record]').forEach(
                 function (item) {
@@ -268,12 +268,16 @@ function checkParent(CheckBoxparent, child) {
     checkParent(document.getElementById(CheckBoxparent).attributes["data-parent"].value, CheckBoxparent);
 }
 
-// this method is used for checkboxes who have both parent checkboxes and child checkboxes
-function checkBoth(CheckBoxparent, current) {
-    /*
-    checkChilds(current);
-    checkParent(CheckBoxparent, current);
-    */
+// this method is used to uncheck alternate checkboxes on data_unification functionality
+function uncheck(idname) {
+    var number = parseInt(idname.replace("Record", "").split('_')[1]);
+    if (number % 2 == 0) {
+        number = number + 1;
+    } else {
+        number = number - 1;
+    }
+    idname = idname.split('_')[0] + '_' + number + "Record";
+    document.getElementById(idname).checked = false;
 }
 
 // this method parameter checks all the checkboxes and updates the output text
@@ -370,9 +374,61 @@ function selectRecords(fromColumn) {
         par = 'id=' + element.attributes["data-parent"].textContent;
         document.querySelectorAll('input[type=checkbox][' + par + ']').forEach(
             function (item) {
-                    item.checked = true;
+                item.checked = true;
             });
     }
+    updateSelectionText();
+}
+
+// this method parameter checks all the even record checkboxes and updates the output text
+function selectHalfRecords(even) {
+    
+    document.querySelectorAll('input[type=checkbox][id$=Record]').forEach(
+        function (item) {
+            if (item.parentElement.parentElement.parentElement.parentElement.parentElement.style.display != "none") {
+                var number = parseInt(item.id.replace("Record", "").split('_')[1]);
+                if (even) {
+                    if (number % 2 == 0) {
+                        item.checked = true;
+                    }
+                    else {
+                        item.checked = false;
+                    }
+                } else {
+                    if (number % 2 != 0) {
+                        item.checked = true;
+                    }
+                    else {
+                        item.checked = false;
+                    }
+                }
+            }
+        });
+    var aux;
+    document.querySelectorAll('div[class=tabcontent]').forEach(
+        function (item) {
+            if (item.style.display != "none") {
+                aux = item.id.replace('Div', '') + 'CheckBox';
+            }
+        });
+    var par;
+    var element;
+
+    aux = aux.replace('CheckBox', '');
+    par = 'name="' + aux + '"';
+
+    document.querySelectorAll('input[type=checkbox][' + par + ']').forEach(
+        function (item) {
+            item.checked = true;
+            element = item;
+        });
+
+    par = 'id=' + element.attributes["data-parent"].textContent;
+    document.querySelectorAll('input[type=checkbox][' + par + ']').forEach(
+        function (item) {
+            item.checked = true;
+        });
+
     updateSelectionText();
 }
 
@@ -525,9 +581,8 @@ function checkMissingValue(event, name, functionality) {
 }
 
 // This function controls the vertical tabs in some views like reports
-function openTab(event, name, create) {
-    // Declare all variables
-    var i, tabcontent, tablinks;
+function openTab(event, name) {
+    var i, tabcontent;
 
     // Get all elements with class="tabcontent" and hide them
     tabcontent = document.getElementsByClassName("tabcontent");
@@ -537,9 +592,6 @@ function openTab(event, name, create) {
 
     // Show the current tab, and add an "active" class to the link that opened the tab
     document.getElementById(name).style.display = "block";
-    if (create) {
-        document.getElementById(name + 'Dropdown').style.display = "inline";
-    }
     event.currentTarget.className += " active";
 }
 // This function more or less lets you download the page in pdf format

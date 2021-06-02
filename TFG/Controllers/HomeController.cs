@@ -390,6 +390,9 @@ namespace TFG.Controllers
                         case "improve_datatypes":
                             daos[id].getDatatypes();
                             break;
+                        case "data_unification":
+                            daos[id].getUnification();
+                            break;
                         default:
                             // some functionalities do not need preparation
                             break;
@@ -471,6 +474,9 @@ namespace TFG.Controllers
                         break;
                     case "improve_datatypes":
                         daos[id].getDatatypes();
+                        break;
+                    case "data_unification":
+                        daos[id].getUnification();
                         break;
                     default:
                         // some functionalities do not need preparation

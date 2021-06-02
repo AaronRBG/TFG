@@ -60,7 +60,7 @@
                     <div class="card-header nav_color_1" id="@entry.Key">
                         <h5>
                             <input type="checkbox" id="@CheckBox" name="@entry.Key" style="display: none;" />
-                            <button class="btn btn-link" onclick="openTab(event, '@divName', false)" data-toggle="collapse" data-target="@collapse" aria-expanded="true" aria-controls="collapseOne">
+                            <button class="btn btn-link" onclick="openTab(event, '@divName')" data-toggle="collapse" data-target="@collapse" aria-expanded="true" aria-controls="collapseOne">
                                 @entry.Key
                             </button>
                         </h5>
@@ -103,10 +103,24 @@
                             {
                                 string idname = @entry.Key + @j + "Record";
                                 <tr>
-                                    <th scope="row"><input type="checkbox" id="@idname" name="@idname" data-parent="@CheckBox" onclick="checkParent('@CheckBox', '@idname')" /></th>
+                                    @if (j % 2 == 0)
+                                    {
+                                        <th scope="row"><input type="checkbox" id="@idname" name="@idname" data-parent="@CheckBox" onclick="checkParent('@CheckBox', '@idname')" /></th>
+                                    }
+                                    else
+                                    {
+                                        <th scope="row" style="border-bottom: 1px solid;"><input type="checkbox" id="@idname" name="@idname" data-parent="@CheckBox" onclick="checkParent('@CheckBox', '@idname')" /></th>
+                                    }
                                     @for (int k = 0; k < entry.Value.Length; k++)
                                     {
-                                        <td>@container[k][j]</td>
+                                        if (j % 2 == 0)
+                                        {
+                                            <td>@container[k][j]</td>
+                                        }
+                                        else
+                                        {
+                                            <td style="border-bottom: 1px solid;">@container[k][j]</td>
+                                        }
                                     }
                                 </tr>
                             }

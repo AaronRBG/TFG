@@ -671,6 +671,9 @@ namespace TFG
                 case "table_defragmentation":
                     updateTableDefrag(data);
                     break;
+                case "data_unification":
+                    updateUnification(data);
+                    break;
             }
         }
 
@@ -937,6 +940,70 @@ namespace TFG
             }
         }
 
+        // This method updates the database with the corresponding changes for functionality data_unification
+        private void updateUnification(string data)
+        {
+            Dictionary<string, int[]> input = new Dictionary<string, int[]>();
+            foreach (string a in data.Split('/'))
+            {
+                if (a != "undefined")
+                {
+                    string table = a.Split(',')[0];
+                    string aux = "";
+                    string[] splitted = a.Split(',');
+                    List<string> recordsList = new List<string>();
+                    for (int j = 1; j < splitted.Length; j++)
+                    {
+                        foreach (string item in splitted[j].Split('_'))
+                        {
+                            recordsList.Add(item);
+                        }
+                    }
+                    string[] records = recordsList.ToArray();
+                    List<int> values = new List<int>();
+                    for (int i = 0; i < records.Length; i += 2)
+                    {
+                        string column = records[i];
+                        string name = table + '.' + aux;
+                        int record = Int32.Parse(records[i + 1]);
+                        if (aux != "" && aux != column)
+                        {
+                            input.Add(name, values.ToArray());
+                            values = new List<int>();
+                        }
+                        aux = column;
+                        values.Add(record);
+                        if (i == records.Length - 2)
+                        {
+                            name = table + '.' + column;
+                            input.Add(name, values.ToArray());
+                        }
+                    }
+
+                }
+            }
+
+            foreach (KeyValuePair<string, int[]> entry in input)
+            {
+                string table = getTableSchemaName(entry.Key.Split('.')[0]);
+                string column = entry.Key.Split('.')[1];
+                for (int i = 0; i < entry.Value.Length; i++)
+                {
+                    string newValue = info.Records[entry.Key][entry.Value[i]];
+                    string oldValue;
+                    if (entry.Value[i] % 2 == 0)
+                    {
+                        oldValue = info.Records[entry.Key][entry.Value[i] + 1];
+                    }
+                    else
+                    {
+                        oldValue = info.Records[entry.Key][entry.Value[i] - 1];
+                    }
+                    Broker.Instance().Run(new SqlCommand("UPDATE " + table + " SET " + column + " = '" + newValue + "' WHERE " + column + " = '" + oldValue + "'", con), "updateUnification");
+                }
+            }
+        }
+
         // This method is used to retrieve the already computed available masks for a column
         public void getAvailableMasks()
         {
@@ -1052,6 +1119,7 @@ namespace TFG
             findPks();
             findConstraints();
             findIndexes();
+            findUnification();
         }
 
         // This method gathers the schema names of the tables from the database
@@ -1118,6 +1186,60 @@ namespace TFG
             tabledata.Indexes = res;
         }
 
+        // This method gathers the probable missinputted values of the tables and columns from the database
+        private void findUnification()
+        {
+            Dictionary<string, string[]> res = new Dictionary<string, string[]>();
+            const int MAX_N_CHARS = 10;
+            const int MIN_N_CHARS = 3;
+            List<string> all_pks = new List<string>();
+            foreach (KeyValuePair<string, string[]> entry in tabledata.TablePks)
+            {
+                foreach (string pk in entry.Value)
+                {
+                    all_pks.Add(pk);
+                }
+            }
+
+            foreach (KeyValuePair<string, string[]> entry in tabledata.TablesColumns)
+            {
+                string[] columns = getTableColumns(entry.Key, false);
+                for (int j = 1; j < columns.Length; j++)
+                {
+                    string name = entry.Key + '.' + columns[j];
+                    if (!columns[j].Contains("Number") && !entry.Key.Contains("Password") && getDatatype(name).Contains("nvarchar") && !all_pks.Contains(columns[j]) && tabledata.Records.ContainsKey(name) && tabledata.Records[name] != null)
+                    {
+                        string[] records = tabledata.Records[name];
+                        List<string> aux = new List<string>();
+                        records = records.Where(r => r.Length <= MAX_N_CHARS).Where(r => r.Length >= MIN_N_CHARS).Distinct().ToArray();
+                        if (records != null && records.Length > 0)
+                        {
+                            Parallel.ForEach(records, a =>
+                            {
+                                for (int k = records.ToList().IndexOf(a) + 1; k < records.Length; k++)
+                                {
+                                    string b = records[k];
+                                    if (a != b && StringSimilar(a, b))
+                                    {
+                                        lock (aux)
+                                        {
+                                            aux.Add(a);
+                                            aux.Add(b);
+                                        }
+                                    }
+                                }
+                            });
+                            if (aux != null && aux.Count > 0)
+                            {
+                                res.Add(name, aux.ToArray());
+                            }
+                        }
+                    }
+                }
+            }
+            tabledata.Unification = res;
+        }
+
         // This method gathers the datatypes of the columns from the database
         private void findDatatypes()
         {
@@ -1128,7 +1250,7 @@ namespace TFG
                 for (int i = 0; i < entry.Value.Length; i++)
                 {
                     string name = entry.Key + '.' + entry.Value[i];
-                    DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT DATA_TYPE, character_maximum_length FROM INFORMATION_SCHEMA.COLUMNS WHERE COLUMN_NAME = '" + entry.Value[i] + "'", con), "type");
+                    DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT DATA_TYPE, character_maximum_length FROM INFORMATION_SCHEMA.COLUMNS WHERE COLUMN_NAME = '" + entry.Value[i] + "' AND TABLE_NAME = '" + entry.Key + "'", con), "type");
                     DataTable dt = ds.Tables["type"];
                     DataRow row = dt.Rows[0];
                     string value = (string)row[0];
@@ -1263,6 +1385,33 @@ namespace TFG
             }
             info.ColumnsDatatypes = res;
             info.ColumnsSuggestedDatatypes = res_sug;
+        }
+
+        // This method retrieves the unification information of the selected columns
+        public void getUnification()
+        {
+            Dictionary<string, string[]> res = new Dictionary<string, string[]>();
+            Dictionary<string, string[]> res2 = new Dictionary<string, string[]>();
+
+            foreach (KeyValuePair<string, string[]> entry in info.ColumnsSelected)
+            {
+                List<string> aux = new List<string>();
+                for (int i = 0; i < entry.Value.Length; i++)
+                {
+                    string name = entry.Key + '.' + entry.Value[i];
+                    if (tabledata.Unification.ContainsKey(name))
+                    {
+                        res.Add(name, tabledata.Unification[name]);
+                        aux.Add(entry.Value[i]);
+                    }
+                }
+                if (aux.Count > 0)
+                {
+                    res2.Add(entry.Key, aux.ToArray());
+                }
+            }
+            info.Records = res;
+            info.ColumnsSelected = res2;
         }
 
         // This method gathers the datatype of a column from the database
@@ -1730,5 +1879,32 @@ namespace TFG
             }
             return res;
         }
+
+        private static bool StringSimilar(string a, string b)
+        {
+            if ((a.Length == 0) || (b.Length == 0))
+            {
+                return false;
+            }
+            a = a.Replace(",", "");
+            b = b.Replace(",", "");
+            double maxLen = a.Length > b.Length ? a.Length : b.Length;
+            int minLen = a.Length < b.Length ? a.Length : b.Length;
+            if (minLen < maxLen - 1)
+                return false;
+            double LIMIT = ((maxLen - 1) / maxLen);
+            int same = 0;
+            Parallel.For(0, minLen, (i) =>
+            {
+                if (a[i] == b[i])
+                {
+                    same++;
+                }
+            });
+            if (same >= maxLen * LIMIT)
+                return true;
+            return false;
+        }
+
     }
 }

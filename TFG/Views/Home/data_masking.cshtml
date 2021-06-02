@@ -72,7 +72,7 @@
                         {
                             string name = @entry.Key + '.' + @entry.Value[i];
                             string divName = name + "Div";
-                            <input type="checkbox" id="@name" name="@name" onclick="checkParent('@CheckBox', '@name')" data-parent="@CheckBox" style="display: none;" /> <button class="btn btn-link" onclick="openTab(event, '@divName', false)">@entry.Value[i]</button>
+                            <input type="checkbox" id="@name" name="@name" onclick="checkParent('@CheckBox', '@name')" data-parent="@CheckBox" style="display: none;" /> <button class="btn btn-link" onclick="openTab(event, '@divName')">@entry.Value[i]</button>
                             <br />
                         }
                     </div>
