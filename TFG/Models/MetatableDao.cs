@@ -946,25 +946,40 @@ namespace TFG
             Dictionary<string, int[]> input = new Dictionary<string, int[]>();
             foreach (string a in data.Split('/'))
             {
-                string table = a.Split(',', 2)[0];
-                string aux = "";
-                string[] records = a.Split(',', 2)[1].Split('_');
-                List<int> values = new List<int>();
-                for (int i = 0; i < records.Length; i += 2)
+                if (a != "undefined")
                 {
-                    string column = records[i];
-                    string name = table + '.' + aux;
-                    int record = Int32.Parse(records[i + 1]);
-                    if (aux != "" && aux != column)
+                    string table = a.Split(',')[0];
+                    string aux = "";
+                    string[] splitted = a.Split(',');
+                    List<string> recordsList = new List<string>();
+                    for (int j = 1; j < splitted.Length; j++)
                     {
-                        input.Add(name, values.ToArray());
-                        values = new List<int>();
+                        foreach (string item in splitted[j].Split('_'))
+                        {
+                            recordsList.Add(item);
+                        }
                     }
-                    values.Add(record);
-                    if(i == records.Length-1)
+                    string[] records = recordsList.ToArray();
+                    List<int> values = new List<int>();
+                    for (int i = 0; i < records.Length; i += 2)
                     {
-                        input.Add(name, values.ToArray());
+                        string column = records[i];
+                        string name = table + '.' + aux;
+                        int record = Int32.Parse(records[i + 1]);
+                        if (aux != "" && aux != column)
+                        {
+                            input.Add(name, values.ToArray());
+                            values = new List<int>();
+                        }
+                        aux = column;
+                        values.Add(record);
+                        if (i == records.Length - 2)
+                        {
+                            name = table + '.' + column;
+                            input.Add(name, values.ToArray());
+                        }
                     }
+
                 }
             }
 
@@ -972,17 +987,19 @@ namespace TFG
             {
                 string table = getTableSchemaName(entry.Key.Split('.')[0]);
                 string column = entry.Key.Split('.')[1];
-                for (int i = 0; i < entry.Value.Length; i++) {
+                for (int i = 0; i < entry.Value.Length; i++)
+                {
                     string newValue = info.Records[entry.Key][entry.Value[i]];
                     string oldValue;
                     if (entry.Value[i] % 2 == 0)
                     {
                         oldValue = info.Records[entry.Key][entry.Value[i] + 1];
-                    } else
+                    }
+                    else
                     {
                         oldValue = info.Records[entry.Key][entry.Value[i] - 1];
                     }
-                    Broker.Instance().Run(new SqlCommand("UPDATE " + table + " SET " + column + " = " + newValue + " WHERE " + column + " = " + oldValue, con), "updateUnification");
+                    Broker.Instance().Run(new SqlCommand("UPDATE " + table + " SET " + column + " = '" + newValue + "' WHERE " + column + " = '" + oldValue + "'", con), "updateUnification");
                 }
             }
         }
@@ -1174,6 +1191,7 @@ namespace TFG
         {
             Dictionary<string, string[]> res = new Dictionary<string, string[]>();
             const int MAX_N_CHARS = 10;
+            const int MIN_N_CHARS = 3;
             List<string> all_pks = new List<string>();
             foreach (KeyValuePair<string, string[]> entry in tabledata.TablePks)
             {
@@ -1193,7 +1211,7 @@ namespace TFG
                     {
                         string[] records = tabledata.Records[name];
                         List<string> aux = new List<string>();
-                        records = records.Where(r => r.Length <= MAX_N_CHARS).Distinct().ToArray();
+                        records = records.Where(r => r.Length <= MAX_N_CHARS).Where(r => r.Length >= MIN_N_CHARS).Distinct().ToArray();
                         if (records != null && records.Length > 0)
                         {
                             Parallel.ForEach(records, a =>
@@ -1232,7 +1250,7 @@ namespace TFG
                 for (int i = 0; i < entry.Value.Length; i++)
                 {
                     string name = entry.Key + '.' + entry.Value[i];
-                    DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT DATA_TYPE, character_maximum_length FROM INFORMATION_SCHEMA.COLUMNS WHERE COLUMN_NAME = '" + entry.Value[i] + "'", con), "type");
+                    DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT DATA_TYPE, character_maximum_length FROM INFORMATION_SCHEMA.COLUMNS WHERE COLUMN_NAME = '" + entry.Value[i] + "' AND TABLE_NAME = '" + entry.Key + "'", con), "type");
                     DataTable dt = ds.Tables["type"];
                     DataRow row = dt.Rows[0];
                     string value = (string)row[0];
@@ -1864,7 +1882,6 @@ namespace TFG
 
         private static bool StringSimilar(string a, string b)
         {
-            const double LIMIT = 0.89;
             if ((a.Length == 0) || (b.Length == 0))
             {
                 return false;
@@ -1873,8 +1890,9 @@ namespace TFG
             b = b.Replace(",", "");
             double maxLen = a.Length > b.Length ? a.Length : b.Length;
             int minLen = a.Length < b.Length ? a.Length : b.Length;
-            if (minLen / maxLen < LIMIT)
+            if (minLen < maxLen - 1)
                 return false;
+            double LIMIT = ((maxLen - 1) / maxLen);
             int same = 0;
             Parallel.For(0, minLen, (i) =>
             {
@@ -1883,7 +1901,7 @@ namespace TFG
                     same++;
                 }
             });
-            if (same > minLen * LIMIT)
+            if (same >= maxLen * LIMIT)
                 return true;
             return false;
         }
