@@ -114,7 +114,13 @@ namespace TFG
         // This method applies runs queries to calculate the best suitable fks for the given tables
         private void findFks()
         {
-            tabledata.TableFks = tabledata.constraints.Where(c => c.type == "FOREIGN KEY").ToArray();
+            Models.Constraint[] aux = tabledata.constraints.Where(c => c.type == "FOREIGN KEY").ToArray();
+            foreach (Models.Constraint c in aux)
+            {
+                c.table = c.table.Replace("[", "").Replace("]", "").Split('.')[1];
+                c.table2 = c.table2.Replace("[", "").Replace("]", "").Split('.')[1];
+            }
+            tabledata.TableFks = aux;
             tabledata.TableSuggestedFks = findSuggestedFks();
         }
 
@@ -259,68 +265,30 @@ namespace TFG
         // This method applies finds suitables values for the foreign keys of the database tables
         private Models.Constraint[] findSuggestedFks()
         {
-            /*
-            string res = "";
-            bool found = false;
-            int count = 0;
-            int distinct = 0, total = 0;
-
-            string[] columns = getTableColumns(table, true);
-            string[] IDcolumns = new string[columns.Length];
-            for (int i = 0; i < columns.Length; i++)
+            List<Models.Constraint> res = new List<Models.Constraint>();
+            string[] tables = tabledata.Tables;
+            for (int i = 0; i < tables.Length; i++)
             {
-                if (columns[i].Contains("ID"))
+                string table = tables[i];
+                for (int j = i + 1; j < tables.Length; j++)
                 {
-                    IDcolumns[count] = columns[i];
-                    count++;
+                    string table2 = tables[j];
+                    if (table != table2)
+                    {
+                        string[] tableColumns = tabledata.TablesColumns[table];
+                        string[] table2Columns = tabledata.TablesColumns[table2];
+                        foreach (string column in tableColumns)
+                        {
+                            if (table2Columns.Contains(column))
+                            {
+                                string name = "FK_" + table + '_' + table2 + '_' + column;
+                                res.Add(new Models.Constraint(name, table, table2, "FOREIGN KEY"));
+                            }
+                        }
+                    }
                 }
             }
-            string[] aux = new string[count];
-            Array.Copy(IDcolumns, 0, aux, 0, count);
-            count = 0;
-            string[] combinations = getCombinations(aux);
-            while (!found && count < combinations.Length)
-            {
-                DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT COUNT(*) FROM (SELECT DISTINCT " + combinations[count] + " FROM " + getTableSchemaName(table) + ") AS internalQuery", con), "distinct");
-                distinct = (int)ds.Tables["distinct"].Rows[0][0];
-                ds = Broker.Instance().Run(new SqlCommand("SELECT COUNT(*) FROM (SELECT " + combinations[count] + " FROM " + getTableSchemaName(table) + ") AS internalQuery", con), "total");
-                total = (int)ds.Tables["total"].Rows[0][0];
-                if (distinct == total)
-                {
-                    found = true;
-                    res = combinations[count];
-                }
-                else
-                {
-                    count++;
-                }
-            }
-            if (!found)
-            {
-                count = 0;
-                combinations = getCombinations(columns);
-            }
-            while (!found && count < combinations.Length)
-            {
-                DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT COUNT(*) FROM (SELECT DISTINCT " + combinations[count] + " FROM " + getTableSchemaName(table) + ") AS internalQuery", con), "distinct");
-                distinct = (int)ds.Tables["distinct"].Rows[0][0];
-                ds = Broker.Instance().Run(new SqlCommand("SELECT COUNT(*) FROM (SELECT " + combinations[count] + " FROM " + getTableSchemaName(table) + ") AS internalQuery", con), "total");
-                total = (int)ds.Tables["total"].Rows[0][0];
-                if (distinct == total)
-                {
-                    found = true;
-                    res = combinations[count];
-                }
-                else
-                {
-                    count++;
-                }
-            }
-            string[] suggested = res.Split(',');
-            Array.Sort(suggested);
-            return suggested;
-
-            */
+            return res.ToArray();
         }
 
         // This method calculates and returns all the possible pk combinations ordered
@@ -744,6 +712,10 @@ namespace TFG
                 case "primary_keys":
                     selectPksTables(data);
                     updatePrimaryKeys();
+                    break;
+                case "foreign_keys":
+                    //selectFksTables(data);
+                    //updateForeignKeys();
                     break;
                 case "remove_duplicates":
                     selectDuplicates(data);

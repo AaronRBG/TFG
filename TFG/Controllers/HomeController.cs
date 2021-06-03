@@ -378,6 +378,9 @@ namespace TFG.Controllers
                         case "primary_keys":
                             daos[id].getPks();
                             break;
+                        case "foreign_keys":
+                            daos[id].getFks();
+                            break;
                         case "remove_duplicates":
                             daos[id].getDuplicates();
                             break;
@@ -462,6 +465,9 @@ namespace TFG.Controllers
                         break;
                     case "primary_keys":
                         daos[id].getPks();
+                        break;
+                    case "foreign_keys":
+                        daos[id].getFks();
                         break;
                     case "remove_duplicates":
                         daos[id].getDuplicates();

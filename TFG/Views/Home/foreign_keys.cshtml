@@ -31,7 +31,7 @@
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a id="selection-a" onclick="goToPage('MainPage', false)" style="color: orange;" MainPage">Home</a></li>
                 <li class="breadcrumb-item"><a id="selection-a" onclick="goToSelection('@Model.Functionality')" style="color: orange;" Selection">Selection</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Foreig Keys Report</li>
+                <li class="breadcrumb-item active" aria-current="page">Foreign Keys Report</li>
             </ol>
         </div>
     </div>
@@ -54,43 +54,52 @@
                 <tr>
                     <th scope="col">Selections</th>
                     <th scope="col">Table name</th>
-                    <th scope="col">Table original pks</th>
-                    <th scope="col">Table suggested pks</th>
+                    <th scope="col">Referenced Table name</th>
+                    <th scope="col">Original column fks</th>
+                    <th scope="col">Suggested column fks</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach (string entry in Model.TablesSelected)
+                @foreach (string table in Model.TablesSelected)
                 {
-                    string pks = "", suggestedPks = "";
-                    string chechBox = entry + "CheckBox";
-
-                    for (int i = 0; i < Model.TablePks[entry].Length; i++)
+                    foreach (string table2 in Model.TablesSelected)
                     {
-                        pks += Model.TablePks[entry][i];
+                        string fks = "", suggestedFks = "";
+                        string name = table + '.' + table2;
+                        string chechBox = name + "CheckBox";
+                        Constraint[] fksArray = Model.TableFks.Where(f => f.table == table && f.table2 == table2).ToArray();
+                        Constraint[] SuggestedFksArray = Model.TableSuggestedFks.Where(f => f.table == table && f.table2 == table2).ToArray();
 
-                        if (i != Model.TablePks[entry].Length - 1)
+                        for (int i = 0; i < fksArray.Length; i++)
                         {
-                            pks += " + ";
+                            fks += fksArray[i].column;
+
+                            if (i != fksArray.Length - 1)
+                            {
+                                fks += " + ";
+                            }
+                        }
+
+                        for (int i = 0; i < SuggestedFksArray.Length; i++)
+                        {
+                            suggestedFks += SuggestedFksArray[i].column;
+
+                            if (i != SuggestedFksArray.Length - 1)
+                            {
+                                suggestedFks += " + ";
+                            }
+                        }
+                        if (fksArray.Length != 0 || SuggestedFksArray.Length != 0)
+                        {
+                            <tr>
+                                <th scope="row"><input type="checkbox" id="@chechBox" name="@name" onclick="updateSelectionText();" /></th>
+                                <td>@table</td>
+                                <td>@table2</td>
+                                <td style="border-left: 1px solid;">@fks</td>
+                                <td>@suggestedFks</td>
+                            </tr>
                         }
                     }
-
-                    for (int i = 0; i < Model.TableSuggestedPks[entry].Length; i++)
-                    {
-                        suggestedPks += Model.TableSuggestedPks[entry][i];
-
-                        if (i != Model.TableSuggestedPks[entry].Length - 1)
-                        {
-                            suggestedPks += " + ";
-                        }
-                    }
-
-                    <tr>
-                        <th scope="row"><input type="checkbox" id="@chechBox" name="@entry" onclick="updateSelectionText();" /></th>
-                        <td>@entry</td>
-                        <td style="border-left: 1px solid;">@pks</td>
-                        <td>@suggestedPks</td>
-
-                    </tr>
                 }
             </tbody>
         </table>
