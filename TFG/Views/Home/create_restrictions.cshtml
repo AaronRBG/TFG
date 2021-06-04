@@ -1,0 +1,220 @@
+﻿@{
+    @using TFG.Models
+    @model TFG.Models.Interchange
+
+    ViewData["Title"] = "Restrictions Report";
+}
+@using (Html.BeginForm("GoToSelection", "Home"))
+{
+    <input type="text" id="functionalitySelected1" class="functionalitySelected" name="functionalitySelected" />
+    <input id="hidden-btn1" class="hidden-btn" type="submit" style="display: none;" />
+}
+@using (Html.BeginForm("GetRecord", "Home"))
+{
+    <input type="text" id="record" class="functionalitySelected" name="record" />
+    <input type="text" id="functionalitySelected6" class="functionalitySelected" name="functionalitySelected" />
+    <input type="text" id="accordionInfo" class="functionalitySelected" name="accordionInfo" />
+    <input type="text" id="data2" class="functionalitySelected" name="data2" />
+    <input id="hidden-btn6" class="hidden-btn" type="submit" style="display: none;" />
+}
+@using (Html.BeginForm("GoToPageAfterCreate", "Home"))
+{
+    <input type="text" id="functionalitySelected4" class="functionalitySelected" name="functionalitySelected" />
+    <input type="text" id="data" class="functionalitySelected" name="data" />
+    <input id="hidden-btn4" class="hidden-btn" type="submit" style="display: none;" />
+}
+@using (Html.BeginForm("GoBackToPage", "Home"))
+{
+    <input type="text" id="functionalitySelected3" class="functionalitySelected" name="functionalitySelected" />
+    <input id="hidden-btn3" class="hidden-btn" type="submit" style="display: none;" />
+}
+<!-- A navegation bar which does not navigate, it only shows the chosen database name along with a button that
+    allows the user to go to the corresponding page to change it, if needed and show the current page (receiving the functionality selected from the controller)-->
+<nav class="navbar nav_color_1">
+    <div id="Top-container">
+        <div id="Top">
+            <span class='database_icon'></span>
+            <span class="top-text">@Model.Database</span>
+            <button type="button" onclick='window.location.href="DatabaseConnection"' class="btn btn-default" data-toggle="tooltip" data-placement="auto" title="Change database"><span class='folder_icon'></span></button>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a id="selection-a" onclick="goToPage('MainPage', false)" style="color: orange;" MainPage">Home</a></li>
+                <li class="breadcrumb-item"><a id="selection-a" onclick="goToSelection('@Model.Functionality')" style="color: orange;" Selection">Selection</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Create Masks</li>
+            </ol>
+        </div>
+    </div>
+</nav>
+<!-- This part is the most complicated of this view
+    It gets the data sent from the controller (double array with the database entry.Value names and column names of each entry.Value)
+    Then it creates for each entry.Value an item of an accordion which when expanded shows its columns with checkboxes for all of those items-->
+<div id="middle_container" class="left-half">
+    <div id="selection-top" class="centeredBig">
+        <h3>
+            <span>Restrictions Report</span>
+        </h3>
+    </div>
+    <div id="accordion" class="overflow-auto left-half" style="width:17vw;">
+        <span class="font-weight-bold">Tables:</span>
+        <br />
+        @foreach (KeyValuePair<string, string[]> entry in Model.ColumnsSelected)
+        {
+            string collapse = "#collapse" + entry.Key;
+            string collapseState = "collapse hide";
+
+            if (collapse.Substring(1) == Model.TableAccordion)
+            {
+                collapseState = "hide collapse show";
+            }
+
+            <div class="card">
+                <div class="card-header nav_color_1" id="@entry.Key">
+                    <h5>
+                        <button class="btn btn-link" data-toggle="collapse" data-target="@collapse" aria-expanded="true" aria-controls="collapseOne">
+                            @entry.Key
+                        </button>
+                    </h5>
+                </div>
+
+                <div id="@collapse.Substring(1)" class="@collapseState" aria-labelledby="@entry.Key" data-parent="#accordion">
+                    <div class="card-body nav_color_2">
+                        <span style="color: white;">@entry.Key columns: </span>
+                        <br />
+                        @for (int i = 0; i < ((string[])entry.Value).Length; i++)
+                        {
+                            string name = @entry.Key + '.' + @entry.Value[i];
+                            if (Model.Records.ContainsKey(name))
+                            {
+                                <button class="btn btn-link" onclick="openTab(event, '@name', true)">@entry.Value[i]</button>
+                                <br />
+                            }
+                            else
+                            {
+                                <button class="btn btn-link" onclick="checkRecord(event, '@name', '@Model.Functionality')">@entry.Value[i]</button>
+                                <br />
+                            }
+                        }
+                    </div>
+                </div>
+
+            </div>
+        }
+    </div>
+    <div id="Tab-contents" class="overflow-auto">
+        @{
+            string defaultDisplay = "none";
+            if (Model.ColumnAccordion == null)
+            {
+                defaultDisplay = "block";
+            }
+        }
+        <div id="default" class="tabcontent">
+            <h2 style="display: @defaultDisplay; padding-top:35vh;">No column selected, select one from the dropdown on the left</h2>
+        </div>
+        @foreach (KeyValuePair<string, string[]> entry in Model.ColumnsSelected)
+        {
+            for (int i = 0; i < entry.Value.Length; i++)
+            {
+                string name = @entry.Key + '.' + @entry.Value[i];
+                string display = "none";
+                if (Model.Records.ContainsKey(name))
+                {
+                    if (name == Model.ColumnAccordion)
+                    {
+                        display = "block";
+                    }
+
+                    string[] record = Model.Records[name];
+                    if (record == null)
+                    {
+                        record = new string[0];
+                    }
+
+                    <div id="@name" class="tabcontent" style="display: @display;">
+                        <table class="table table-striped overflow-auto">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th scope="col">@entry.Key Record Number</th>
+                                    <th scope="col">Column data (@entry.Value[i])</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (int j = 1; j <= record.Length; j++)
+                                {
+                                    <tr>
+                                        <th scope="row">@j</th>
+
+                                        <td>@record[j - 1]</td>
+
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            }
+        }
+    </div>
+</div>
+<!-- This part is perform whole actions like selecting everything or nothing and running the functionality with the selected items -->
+<div id="controls">
+    <div id="controls-inside">
+        <span>Select a mask type</span>
+        @foreach (KeyValuePair<string, string[]> entry in Model.ColumnsSelected)
+        {
+            for (int i = 0; i < entry.Value.Length; i++)
+            {
+                string dropdown = entry.Key + '.' + entry.Value[i] + "Dropdown";
+                string name = entry.Key + '.' + entry.Value[i];
+                string text = dropdown + "Text";
+                string stri;
+                string display = "none";
+
+                if (name == Model.ColumnAccordion)
+                {
+                    display = "inline";
+                }
+
+                if (Model.MasksSelected != null && Model.MasksSelected.ContainsKey(name))
+                {
+                    stri = Model.MasksSelected[name];
+                }
+                else
+                {
+                    stri = "None";
+                }
+
+                <div class="dropdown">
+                    <button class="btn btn-outline-dark dropdown-toggle tabcontent" type="button" id="@dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="display: @display;">
+                        <span id="@text">@stri</span>
+                    </button>
+
+                    @if (Model.Records.ContainsKey(name) && Model.MasksAvailable.ContainsKey(name))
+                    {
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            @if (Model.MasksAvailable[name][0])
+                            {
+                                <a class="dropdown-item" onclick="changeName('@text', 'DNI')">DNI</a>
+                            }
+                            @if (Model.MasksAvailable[name][1])
+                            {
+                                <a class="dropdown-item" onclick="changeName('@text', 'Email')">Email</a>
+                            }
+                            @if (Model.MasksAvailable[name][2])
+                            {
+                                <a class="dropdown-item" onclick="changeName('@text', 'Phone Number')">Phone Number</a>
+                            }
+                            @if (Model.MasksAvailable[name][3])
+                            {
+                                <a class="dropdown-item" onclick="changeName('@text', 'Credit card')">Credit card</a>
+                            }
+                            <a class="dropdown-item" onclick="changeName('@text', 'None')">None</a>
+                        </div>
+                    }
+                </div>
+            }
+        }
+        <div id="bottom-buttons">
+            <button type="button" onclick='goToPageAfterCreate("@Model.Functionality")' class="btn btn-outline-primary">Confirm masks selections</button>
+        </div>
+    </div>
+</div>

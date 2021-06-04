@@ -81,8 +81,8 @@ function goToPageAfterCreate(functionality) {
     if (functionality == 'create_masks') {
         functionality = 'data_masking';
     }
-    if (functionality == 'create_constraints') {
-        functionality = 'constraints';
+    if (functionality == 'create_restrictions') {
+        functionality = 'restrictions';
     }
 
     document.getElementById("functionalitySelected4").value = functionality;
@@ -382,7 +382,7 @@ function selectRecords(fromColumn) {
 
 // this method parameter checks all the even record checkboxes and updates the output text
 function selectHalfRecords(even) {
-    
+
     document.querySelectorAll('input[type=checkbox][id$=Record]').forEach(
         function (item) {
             if (item.parentElement.parentElement.parentElement.parentElement.parentElement.style.display != "none") {

@@ -1,0 +1,104 @@
+﻿@{
+    @using TFG.Models
+    @model TFG.Models.Interchange
+
+    ViewData["Title"] = "Restricions Report";
+}
+@using (Html.BeginForm("GoToSelection", "Home"))
+{
+    <input type="text" id="functionalitySelected1" class="functionalitySelected" name="functionalitySelected" />
+    <input id="hidden-btn1" class="hidden-btn" type="submit" style="display: none;" />
+}
+@using (Html.BeginForm("GoBackToPage", "Home"))
+{
+    <input type="text" id="functionalitySelected3" class="functionalitySelected" name="functionalitySelected" />
+    <input id="hidden-btn3" class="hidden-btn" type="submit" style="display: none;" />
+}
+@using (Html.BeginForm("Confirm", "Home"))
+{
+    <input type="text" id="functionalitySelected5" class="functionalitySelected" name="functionalitySelected" />
+    <input type="text" id="data" class="functionalitySelected" name="data" />
+    <input id="hidden-btn5" class="hidden-btn" type="submit" style="display: none;" />
+}
+<!-- A navegation bar which does not navigate, it only shows the chosen database name along with a button that
+    allows the user to go to the corresponding page to change it, if needed and show the current page (receiving the functionality selected from the controller)-->
+<nav class="navbar nav_color_1">
+    <div id="Top-container">
+        <div id="Top">
+            <span class='database_icon'></span>
+            <span class="top-text">@Model.Database</span>
+            <button type="button" onclick='window.location.href="DatabaseConnection"' class="btn btn-default" data-toggle="tooltip" data-placement="auto" title="Change database"><span class='folder_icon'></span></button>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a id="selection-a" onclick="goToPage('MainPage', false)" style="color: orange;" MainPage">Home</a></li>
+                <li class="breadcrumb-item"><a id="selection-a" onclick="goToSelection('@Model.Functionality')" style="color: orange;" Selection">Selection</a></li>
+                <li class="breadcrumb-item"><a id="selection-a" onclick="goToPage('@Model.Functionality', false)" style="color: orange;" Create_Masks">Create Masks</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Data Masking Report</li>
+            </ol>
+        </div>
+    </div>
+</nav>
+<!-- This part is the most complicated of this view
+    It gets the data sent from the controller (double array with the database table names and column names of each table)
+    Then it creates for each table an item of an accordion which when expanded shows its columns with checkboxes for all of those items-->
+<div id="middle_container" class="left-half">
+    <div id="selection-top" class="centeredBig">
+        <h3>
+            <span>Restrictions Report</span>
+        </h3>
+    </div>
+    <div id="accordion" class="overflow-auto left-half" style="width:17vw;">
+        <span class="font-weight-bold">Tables:</span>
+        <br />
+        @foreach (string table in Model.TablesSelected)
+        {
+            string collapse = "#collapse" + table;
+            string CheckBox = table + "CheckBox";
+
+            <div class="card">
+                <div class="card-header nav_color_1" id="@table">
+                    <h5>
+                        <input type="checkbox" id="@CheckBox" name="@table" style="display: none;" />
+                        <button class="btn btn-link" data-toggle="collapse" data-target="@collapse" aria-expanded="true" aria-controls="collapseOne">
+                            @table
+                        </button>
+                    </h5>
+                </div>
+            </div>
+        }
+    </div>
+    <div id="Tab-contents" class="overflow-auto">
+        <div id="default" class="tabcontent">
+            <h2 style="padding-top:35vh;">No table selected, select one from the dropdown on the left</h2>
+        </div>
+        @foreach (string table in Model.TablesSelected)
+        {
+
+        }
+    </div>
+</div>
+<!-- This part is perform whole actions like selecting everything or nothing and running the functionality with the selected items -->
+<div id="controls">
+    <div class="btn-group-vertical" role="group" style="padding-top: 20vh;">
+        <button type="button" onclick="selectAll()" class="btn btn-outline-primary">Select All</button>
+        <button type="button" onclick="selectRecords(true)" class="btn btn-outline-dark">Select Column Records</button>
+        <button type="button" onclick="unselectRecords(true)" class="btn btn-outline-primary">Unselect Column Records</button>
+        <button type="button" onclick="selectNone()" class="btn btn-outline-dark">Select None</button>
+    </div>
+    <br />
+    <span id="records-selected" class="selection-text"></span>
+    <br />
+    <span id="columns-selected" class="selection-text">None selected</span>
+    <br />
+    <span id="tables-selected" class="selection-text"></span>
+    <br />
+    <div id="controls-inside">
+        <button type="button" onclick='confirm("@Model.Functionality")' class="btn btn-outline-primary">Confirm and run</button>
+    </div>
+    <br />
+    <div id="controls-inside">
+        @{
+            string filename = "restrictions_report" + DateTime.Now.ToString() + ".csv";
+        }
+        <button type="button" onclick="exportTableToCSV('@filename')" class="btn btn-outline-primary"><span class='download_icon'></span></button>
+    </div>
+</div>

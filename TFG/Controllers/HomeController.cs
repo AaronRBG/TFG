@@ -97,15 +97,15 @@ namespace TFG.Controllers
             }
         }
 
-        // loads the constraints View
+        // loads the restrictionss View
         [HttpGet]
-        public ActionResult constraints()
+        public ActionResult restrictions()
         {
 
             string id = HttpContext.Session.GetString("id");
             if (HttpContext.Session.Id == id)
             {
-                return View("constraints", daos[id].info);
+                return View("restrictions", daos[id].info);
             }
             else
             {
@@ -224,12 +224,12 @@ namespace TFG.Controllers
             }
         }
         [HttpGet]
-        public ActionResult create_constraints()
+        public ActionResult create_restrictions()
         {
             string id = HttpContext.Session.GetString("id");
             if (HttpContext.Session.Id == id)
             {
-                return View("create_constraints", daos[id].info);
+                return View("create_restrictions", daos[id].info);
             }
             else
             {
@@ -374,6 +374,9 @@ namespace TFG.Controllers
                     {
                         case "create_masks":
                             daos[id].getAvailableMasks();
+                            break;
+                        case "create_restrictions":
+                            //daos[id].getRestrictions();
                             break;
                         case "primary_keys":
                             daos[id].getPks();
@@ -609,7 +612,7 @@ namespace TFG.Controllers
                 daos[id].info.ColumnsSelected = selection;
                 daos[id].getMaskedRecords();
             }
-            
+
         }
 
         // This method is used to send the simplest model possible to the view to improve performance
