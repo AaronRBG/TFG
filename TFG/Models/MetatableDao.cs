@@ -104,6 +104,26 @@ namespace TFG
             tabledata.TableSuggestedPks = suggested_pks;
         }
 
+        // This method applies runs queries to calculate the best suitable fks for the given tables
+        public void getFks()
+        {
+            getForeignKeys();
+            getSuggestedFks();
+        }
+
+        // This method applies runs queries to calculate the best suitable fks for the given tables
+        private void findFks()
+        {
+            Models.Constraint[] aux = tabledata.constraints.Where(c => c.type == "FOREIGN KEY").ToArray();
+            foreach (Models.Constraint c in aux)
+            {
+                c.table = c.table.Replace("[", "").Replace("]", "").Split('.')[1];
+                c.table2 = c.table2.Replace("[", "").Replace("]", "").Split('.')[1];
+            }
+            tabledata.TableFks = aux;
+            tabledata.TableSuggestedFks = findSuggestedFks();
+        }
+
         // This method is used to retrieve the primary keys from tabledata to info
         public void getPrimaryKeys(bool getSpacial)
         {
@@ -124,6 +144,12 @@ namespace TFG
                 }
             }
             info.TablePks = pks;
+        }
+
+        // This method is used to retrieve the foreign keys from tabledata to info
+        public void getForeignKeys()
+        {
+            info.TableFks = tabledata.TableFks.Where(f => info.TablesSelected.Contains(f.table) || info.TablesSelected.Contains(f.table2)).ToArray();
         }
 
         // This method retrieves the primary key(s) of a table (all or only the non spacial ones)
@@ -155,7 +181,7 @@ namespace TFG
             return res;
         }
 
-        // This method is used to retrieve the suggested keys from tabledata to info
+        // This method is used to retrieve the suggested primary keys from tabledata to info
         public void getSuggestedKeys()
         {
             Dictionary<string, string[]> suggested_pks = new Dictionary<string, string[]>();
@@ -166,8 +192,13 @@ namespace TFG
             }
             info.TableSuggestedPks = suggested_pks;
         }
+        // This method is used to retrieve the suggested foreign keys from tabledata to info
+        public void getSuggestedFks()
+        {
+            info.TableSuggestedFks = tabledata.TableSuggestedFks.Where(f => info.TablesSelected.Contains(f.table) || info.TablesSelected.Contains(f.table2)).ToArray();
+        }
 
-        // This method applies the selected masks to the records and saves the results in the corresponding Model variable
+        // This method applies finds a suitable value for the primary key of a table
         private string[] findSuggestedPks(string table)
         {
             string res = "";
@@ -229,6 +260,35 @@ namespace TFG
             string[] suggested = res.Split(',');
             Array.Sort(suggested);
             return suggested;
+        }
+
+        // This method applies finds suitables values for the foreign keys of the database tables
+        private Models.Constraint[] findSuggestedFks()
+        {
+            List<Models.Constraint> res = new List<Models.Constraint>();
+            string[] tables = tabledata.Tables;
+            for (int i = 0; i < tables.Length; i++)
+            {
+                string table = tables[i];
+                for (int j = i + 1; j < tables.Length; j++)
+                {
+                    string table2 = tables[j];
+                    if (table != table2)
+                    {
+                        string[] tableColumns = tabledata.TablesColumns[table];
+                        string[] table2Columns = tabledata.TablesColumns[table2];
+                        foreach (string column in tableColumns)
+                        {
+                            if (table2Columns.Contains(column))
+                            {
+                                string name = "FK_" + table + '_' + table2 + '_' + column;
+                                res.Add(new Models.Constraint(name, table, table2, "FOREIGN KEY"));
+                            }
+                        }
+                    }
+                }
+            }
+            return res.ToArray();
         }
 
         // This method calculates and returns all the possible pk combinations ordered
@@ -653,6 +713,10 @@ namespace TFG
                     selectPksTables(data);
                     updatePrimaryKeys();
                     break;
+                case "foreign_keys":
+                    selectFksTables(data);
+                    updateForeignKeys();
+                    break;
                 case "remove_duplicates":
                     selectDuplicates(data);
                     deleteDuplicates();
@@ -762,6 +826,20 @@ namespace TFG
                 }
                 Broker.Instance().Run(new SqlCommand("ALTER TABLE " + getTableSchemaName(entry) + " ADD CONSTRAINT " + constraint_name + " PRIMARY KEY (" + ArrayToString(tabledata.TableSuggestedPks[entry], true) + ")", con), "addPK");
                 tabledata.TablePks[entry] = tabledata.TableSuggestedPks[entry];
+            }
+        }
+
+        // This method updates the database with the corresponding changes for functionality foreign_keys
+        private void updateForeignKeys()
+        {
+            foreach (Models.Constraint c in info.TableFks)
+            {
+                Broker.Instance().Run(new SqlCommand("ALTER TABLE " + getTableSchemaName(c.table) + " DROP CONSTRAINT " + c.name, con), "findConstraints");
+            }
+            foreach (Models.Constraint c in info.TableSuggestedFks)
+            {
+                Broker.Instance().Run(new SqlCommand("ALTER TABLE " + getTableSchemaName(c.table) + " ADD CONSTRAINT " + c.name + " FOREIGN KEY(" + c.column
+                    + ") REFERENCES " + getTableSchemaName(c.table2) + " (" + c.column + ") ON DELETE CASCADE ON UPDATE CASCADE", con), "findConstraints");
             }
         }
 
@@ -1118,6 +1196,7 @@ namespace TFG
             findAvailableMasks();
             findPks();
             findConstraints();
+            findFks();
             findIndexes();
             findUnification();
         }
@@ -1617,6 +1696,47 @@ namespace TFG
             info.TablesSelected = pks.Keys.ToArray();
             info.TablePks = pks;
             info.TableSuggestedPks = suggestedPks;
+        }
+
+        // This method saves the selection of the tables selected for the foreign_keys functionality
+        private void selectFksTables(string data)
+        {
+            string[] input = data.Split(',');
+            List<Models.Constraint> Fks = new List<Models.Constraint>();
+            List<Models.Constraint> SuggestedFks = new List<Models.Constraint>();
+
+            for (int i = 1; i < input.Length; i++)
+            {
+                Models.Constraint[] aux = info.TableFks.Where(f => f.table == input[i].Split('.')[0] && f.table2 == input[i].Split('.')[1]).ToArray();
+                foreach (Models.Constraint c in aux)
+                {
+                    Fks.Add(c);
+                }
+                aux = info.TableSuggestedFks.Where(f => f.table == input[i].Split('.')[0] && f.table2 == input[i].Split('.')[1]).ToArray();
+                foreach (Models.Constraint c in aux)
+                {
+                    SuggestedFks.Add(c);
+                }
+            }
+
+            List<Models.Constraint> other = new List<Models.Constraint>();
+
+            foreach (Models.Constraint c in SuggestedFks)
+            {
+                if (Fks.Contains(c))
+                {
+                    other.Add(c);
+                }
+            }
+
+            foreach (Models.Constraint c in other)
+            {
+                Fks.Remove(c);
+                SuggestedFks.Remove(c);
+            }
+
+            info.TableFks = Fks.ToArray();
+            info.TableSuggestedFks = SuggestedFks.ToArray();
         }
 
         // This method saves the selection of the records selected for the remove_duplicates functionality

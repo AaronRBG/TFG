@@ -44,7 +44,9 @@ namespace TFG.Models
         public string[] Tables { get; set; }
         public Dictionary<string, bool[]> MasksAvailable { get; set; }
         public Dictionary<string, string[]> TablePks { get; set; }
+        public Models.Constraint[] TableFks { get; set; }
         public Dictionary<string, string[]> TableSuggestedPks { get; set; }
+        public Models.Constraint[] TableSuggestedFks { get; set; }
         public Dictionary<string, string[]> TablesColumns { get; set; }
         public Dictionary<string, string[]> Records { get; set; }
         public Dictionary<string, string[]> Unification { get; set; }
