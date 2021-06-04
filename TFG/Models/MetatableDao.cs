@@ -714,8 +714,8 @@ namespace TFG
                     updatePrimaryKeys();
                     break;
                 case "foreign_keys":
-                    //selectFksTables(data);
-                    //updateForeignKeys();
+                    selectFksTables(data);
+                    updateForeignKeys();
                     break;
                 case "remove_duplicates":
                     selectDuplicates(data);
@@ -826,6 +826,20 @@ namespace TFG
                 }
                 Broker.Instance().Run(new SqlCommand("ALTER TABLE " + getTableSchemaName(entry) + " ADD CONSTRAINT " + constraint_name + " PRIMARY KEY (" + ArrayToString(tabledata.TableSuggestedPks[entry], true) + ")", con), "addPK");
                 tabledata.TablePks[entry] = tabledata.TableSuggestedPks[entry];
+            }
+        }
+
+        // This method updates the database with the corresponding changes for functionality foreign_keys
+        private void updateForeignKeys()
+        {
+            foreach (Models.Constraint c in info.TableFks)
+            {
+                Broker.Instance().Run(new SqlCommand("ALTER TABLE " + getTableSchemaName(c.table) + " DROP CONSTRAINT " + c.name, con), "findConstraints");
+            }
+            foreach (Models.Constraint c in info.TableSuggestedFks)
+            {
+                Broker.Instance().Run(new SqlCommand("ALTER TABLE " + getTableSchemaName(c.table) + " ADD CONSTRAINT " + c.name + " FOREIGN KEY(" + c.column
+                    + ") REFERENCES " + getTableSchemaName(c.table2) + " (" + c.column + ") ON DELETE CASCADE ON UPDATE CASCADE", con), "findConstraints");
             }
         }
 
@@ -1682,6 +1696,47 @@ namespace TFG
             info.TablesSelected = pks.Keys.ToArray();
             info.TablePks = pks;
             info.TableSuggestedPks = suggestedPks;
+        }
+
+        // This method saves the selection of the tables selected for the foreign_keys functionality
+        private void selectFksTables(string data)
+        {
+            string[] input = data.Split(',');
+            List<Models.Constraint> Fks = new List<Models.Constraint>();
+            List<Models.Constraint> SuggestedFks = new List<Models.Constraint>();
+
+            for (int i = 1; i < input.Length; i++)
+            {
+                Models.Constraint[] aux = info.TableFks.Where(f => f.table == input[i].Split('.')[0] && f.table2 == input[i].Split('.')[1]).ToArray();
+                foreach (Models.Constraint c in aux)
+                {
+                    Fks.Add(c);
+                }
+                aux = info.TableSuggestedFks.Where(f => f.table == input[i].Split('.')[0] && f.table2 == input[i].Split('.')[1]).ToArray();
+                foreach (Models.Constraint c in aux)
+                {
+                    SuggestedFks.Add(c);
+                }
+            }
+
+            List<Models.Constraint> other = new List<Models.Constraint>();
+
+            foreach (Models.Constraint c in SuggestedFks)
+            {
+                if (Fks.Contains(c))
+                {
+                    other.Add(c);
+                }
+            }
+
+            foreach (Models.Constraint c in other)
+            {
+                Fks.Remove(c);
+                SuggestedFks.Remove(c);
+            }
+
+            info.TableFks = Fks.ToArray();
+            info.TableSuggestedFks = SuggestedFks.ToArray();
         }
 
         // This method saves the selection of the records selected for the remove_duplicates functionality

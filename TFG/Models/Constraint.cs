@@ -49,5 +49,11 @@ namespace TFG.Models
         public string column { get; set; }
         public string definition { get; set; }
         public string type { get; set; }
+
+        public override bool Equals(Object obj)
+        {
+            return this.table == ((Constraint)obj).table && this.table2 == ((Constraint)obj).table2 && this.name == ((Constraint)obj).name && this.type == ((Constraint)obj).type && this.column == ((Constraint)obj).column;
+        }
+
     }
 }
