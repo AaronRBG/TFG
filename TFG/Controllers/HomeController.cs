@@ -376,7 +376,7 @@ namespace TFG.Controllers
                             daos[id].getAvailableMasks();
                             break;
                         case "create_restrictions":
-                            //daos[id].getRestrictions();
+                            daos[id].info.ColumnsSelected = daos[id].getColumns(false);
                             break;
                         case "primary_keys":
                             daos[id].getPks();
@@ -465,6 +465,9 @@ namespace TFG.Controllers
                 {
                     case "create_masks":
                         daos[id].getAvailableMasks();
+                        break;
+                    case "create_restrictions":
+                        daos[id].info.ColumnsSelected = daos[id].getColumns(false);
                         break;
                     case "primary_keys":
                         daos[id].getPks();
@@ -556,6 +559,34 @@ namespace TFG.Controllers
             }
         }
 
+        // this method is used to specify the restrictions in the restrictions functionality
+        [HttpPost]
+        public ActionResult ManageRestrictions(string table, string index, string column1, string column2)
+        {
+            string id = HttpContext.Session.GetString("id");
+            if (HttpContext.Session.Id == id)
+            {
+                daos[id].info.TableAccordion = table;
+                daos[id].info.ColumnAccordion = column1;
+                daos[id].info.Column2Accordion = column2;
+
+                if (column2 == null && column1 == null)
+                {
+                    Restriction r = daos[id].info.restrictions.Where(r => r.table == table).ToArray()[Int32.Parse(index)];
+                    daos[id].info.restrictions.Remove(r);
+                }
+                else
+                {
+                    daos[id].info.restrictions.Add(new Restriction(table, column1, column2));
+                }
+                return View("create_restrictions", daos[id].info);
+            }
+            else
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
+        }
+
         // this method is used to get the records of a specific column
         [HttpPost]
         public ActionResult GetMissingValue(string missingValue, string functionalitySelected)
@@ -624,6 +655,7 @@ namespace TFG.Controllers
             daos[id].info = new Interchange(database, log);
             daos[id].info.Records = new Dictionary<string, string[]>();
             daos[id].info.TablePks = new Dictionary<string, string[]>();
+            daos[id].info.restrictions = new List<Restriction>();
         }
 
         // This method is used to send the simplest model possible to the view to improve performance

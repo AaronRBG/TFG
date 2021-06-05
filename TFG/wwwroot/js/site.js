@@ -14,8 +14,8 @@ function goToSelection(functionality) {
     if (functionality == 'data_masking') {
         functionality = 'create_masks';
     }
-    if (functionality == 'constraints') {
-        functionality = 'create_constraints';
+    if (functionality == 'restrictions') {
+        functionality = 'create_restrictions';
     }
     document.getElementById("functionalitySelected1").value = functionality;
     $("#hidden-btn1").click();
@@ -26,8 +26,8 @@ function goToPageAll(functionality) {
     if (functionality == 'data_masking') {
         functionality = 'create_masks';
     }
-    if (functionality == 'constraints') {
-        functionality = 'create_constraints';
+    if (functionality == 'restrictions') {
+        functionality = 'create_restrictions';
     }
     document.getElementById("functionalitySelected2").value = functionality;
     $("#hidden-btn2").click();
@@ -43,8 +43,8 @@ function goToPage(functionality, page) {
         if (functionality == 'data_masking') {
             functionality = 'create_masks';
         }
-        if (functionality == 'constraints') {
-            functionality = 'create_constraints';
+        if (functionality == 'restrictions') {
+            functionality = 'create_restrictions';
         }
 
         var selected;
@@ -641,4 +641,22 @@ function exportTableToCSV(filename) {
 // For Dropdown menus
 function changeName(dropdown, text) {
     document.getElementById(dropdown).textContent = text;
+}
+
+// For restrictions functionality, removing row from table
+function removeRestriction(table, index) {
+    document.getElementById('table').value = table;
+    document.getElementById('index').value = index;
+    document.getElementById('column1').value = "";
+    document.getElementById('column2').value = "";
+    $("#hidden-btn8").click();
+}
+
+// For restrictions functionality, dding row to table
+function addRestriction(table, index) {
+    document.getElementById('table').value = table;
+    document.getElementById('index').value = index;
+    document.getElementById('column1').value = document.getElementById(table + 'DropdownText').innerText;
+    document.getElementById('column2').value = document.getElementById(table + 'DropdownText2').innerText;
+    $("#hidden-btn8").click();
 }

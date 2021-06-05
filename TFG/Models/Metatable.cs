@@ -21,8 +21,8 @@ namespace TFG.Models
             Functionalities_need_columns.Add("data_unification", true);
             Functionalities_text.Add("remove_duplicates", "Remove Duplicates");
             Functionalities_need_columns.Add("remove_duplicates", true);
-            Functionalities_text.Add("create_constraints", "Constraints");
-            Functionalities_need_columns.Add("create_constraints", false);
+            Functionalities_text.Add("create_restrictions", "Restrictions");
+            Functionalities_need_columns.Add("create_restrictions", false);
             Functionalities_text.Add("missing_values", "Treating Missing Values");
             Functionalities_need_columns.Add("missing_values", true);
 
