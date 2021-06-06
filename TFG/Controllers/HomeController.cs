@@ -428,6 +428,10 @@ namespace TFG.Controllers
                 if (functionalitySelected != "MainPage" && functionalitySelected != "Performance")
                 {
                     resetInfo(functionalitySelected);
+                    if (functionalitySelected == "create_restrictions")
+                    {
+                        daos[id].info.ColumnsSelected = daos[id].getColumns(false);
+                    }
                 }
                 else
                 {
@@ -509,8 +513,15 @@ namespace TFG.Controllers
             string id = HttpContext.Session.GetString("id");
             if (HttpContext.Session.Id == id)
             {
-                saveMaskTypes(data, true);
-                daos[id].getPrimaryKeysRecords();
+                if (functionalitySelected == "data_masking")
+                {
+                    saveMaskTypes(data, true);
+                    daos[id].getPrimaryKeysRecords();
+                }
+                else
+                {
+                    daos[id].getRestrictions();
+                }
                 return RedirectToAction(functionalitySelected, daos[id].info);
             }
             else
@@ -567,8 +578,6 @@ namespace TFG.Controllers
             if (HttpContext.Session.Id == id)
             {
                 daos[id].info.TableAccordion = table;
-                daos[id].info.ColumnAccordion = column1;
-                daos[id].info.Column2Accordion = column2;
 
                 if (column2 == null && column1 == null)
                 {
@@ -577,7 +586,10 @@ namespace TFG.Controllers
                 }
                 else
                 {
-                    daos[id].info.restrictions.Add(new Restriction(table, column1, column2));
+                    if (!daos[id].info.restrictions.Contains(new Restriction(table, column1, column2)))
+                    {
+                        daos[id].info.restrictions.Add(new Restriction(table, column1, column2));
+                    }
                 }
                 return View("create_restrictions", daos[id].info);
             }

@@ -75,7 +75,7 @@
     <div id="Tab-contents" class="overflow-auto">
         @{
             string display = "block";
-            if(Model.TableAccordion != null)
+            if (Model.TableAccordion != null)
             {
                 display = "none";
             }
@@ -91,7 +91,7 @@
             string dropdown2 = dropdown + "2";
             string text2 = text + "2";
             string defaultdisplay = "none";
-            if(Model.TableAccordion == table)
+            if (Model.TableAccordion == table)
             {
                 defaultdisplay = "block";
             }
@@ -110,8 +110,6 @@
                     <tbody>
                         @{
                             string[] columns = Model.ColumnsSelected[table];
-                            Model.ColumnAccordion = columns[0];
-                            Model.Column2Accordion = columns[1];
                             Restriction[] restrictions = Model.restrictions.Where(r => r.table == table).ToArray();
                         }
                         @for (int j = 0; j < @restrictions.Length; j++)
@@ -135,10 +133,7 @@
                                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                                         @foreach (string column in columns)
                                         {
-                                            if (column != Model.Column2Accordion)
-                                            {
-                                                <a class="dropdown-item" onclick="changeName('@text', '@column')">@column</a>
-                                            }
+                                            <a class="dropdown-item" onclick="changeName('@text', '@column')">@column</a>
                                         }
                                     </div>
                                 </div>
@@ -151,10 +146,7 @@
                                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                                         @foreach (string column in columns)
                                         {
-                                            if (column != Model.ColumnAccordion)
-                                            {
-                                                <a class="dropdown-item" onclick="changeName('@text2', '@column')">@column</a>
-                                            }
+                                            <a class="dropdown-item" onclick="changeName('@text2', '@column')">@column</a>
                                         }
                                     </div>
                                 </div>
@@ -172,11 +164,4 @@
     <div id="bottom-buttons">
         <button type="button" onclick='goToPageAfterCreate("@Model.Functionality")' class="btn btn-outline-primary">Confirm restrictions</button>
     </div>
-    <div id="controls-inside">
-        @{
-            string filename = "create_restrictions_report" + DateTime.Now.ToString() + ".csv";
-        }
-        <button type="button" onclick="exportTableToCSV('@filename')" class="btn btn-outline-primary"><span class='download_icon'></span></button>
-    </div>
-</div>
 </div>

@@ -654,9 +654,13 @@ function removeRestriction(table, index) {
 
 // For restrictions functionality, dding row to table
 function addRestriction(table, index) {
-    document.getElementById('table').value = table;
-    document.getElementById('index').value = index;
-    document.getElementById('column1').value = document.getElementById(table + 'DropdownText').innerText;
-    document.getElementById('column2').value = document.getElementById(table + 'DropdownText2').innerText;
-    $("#hidden-btn8").click();
+    if (document.getElementById(table + 'DropdownText').innerText != document.getElementById(table + 'DropdownText2').innerText) {
+        document.getElementById('table').value = table;
+        document.getElementById('index').value = index;
+        document.getElementById('column1').value = document.getElementById(table + 'DropdownText').innerText;
+        document.getElementById('column2').value = document.getElementById(table + 'DropdownText2').innerText;
+        $("#hidden-btn8").click();
+    } else {
+        alert('Both columns cannot be the same');
+    }
 }
