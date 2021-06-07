@@ -155,13 +155,17 @@ function confirm(functionality) {
                 });
         }
 
-        if (functionality == "improve_indexes" || functionality == "data_unification") {
+        if (functionality == "improve_indexes" || functionality == "data_unification" || functionality == "create_restrictions") {
             var aux;
             document.querySelectorAll('input[type=checkbox][id$=Record]').forEach(
                 function (item) {
                     if (item.checked) {
                         var table = item.name.split('.')[0];
-                        var number = item.name.replace("Record", "").split('.')[1];
+                        var separate = '.';
+                        if (functionality == "create_restrictions") {
+                            separate = '_';
+                        }
+                        var number = item.name.replace("Record", "").split(separate)[1];
                         if (aux != table) {
                             selected += "/";
                             selected += table;
@@ -269,15 +273,24 @@ function checkParent(CheckBoxparent, child) {
 }
 
 // this method is used to uncheck alternate checkboxes on data_unification functionality
-function uncheck(idname) {
-    var number = parseInt(idname.replace("Record", "").split('_')[1]);
-    if (number % 2 == 0) {
-        number = number + 1;
+function uncheck(idname, restrictions) {
+    if (restrictions) {
+        document.querySelectorAll('input[type=checkbox][id^="' + idname.split('_')[0] + '"]').forEach(
+            function (item) {
+                if (item.id != idname) {
+                    item.checked = false;
+                }
+            });
     } else {
-        number = number - 1;
+        var number = parseInt(idname.replace("Record", "").split('_')[1]);
+        if (number % 2 == 0) {
+            number = number + 1;
+        } else {
+            number = number - 1;
+        }
+        idname = idname.split('_')[0] + '_' + number + "Record";
+        document.getElementById(idname).checked = false;
     }
-    idname = idname.split('_')[0] + '_' + number + "Record";
-    document.getElementById(idname).checked = false;
 }
 
 // this method parameter checks all the checkboxes and updates the output text

@@ -31,7 +31,7 @@
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a id="selection-a" onclick="goToPage('MainPage', false)" style="color: orange;" MainPage">Home</a></li>
                 <li class="breadcrumb-item"><a id="selection-a" onclick="goToSelection('@Model.Functionality')" style="color: orange;" Selection">Selection</a></li>
-                <li class="breadcrumb-item"><a id="selection-a" onclick="goToPage('@Model.Functionality', false)" style="color: orange;" Create_Masks">Create Masks</a></li>
+                <li class="breadcrumb-item"><a id="selection-a" onclick="goToPage('@Model.Functionality', false)" style="color: orange;" Create_Masks">Create Restrictions</a></li>
                 <li class="breadcrumb-item active" aria-current="page">Data Masking Report</li>
             </ol>
         </div>
@@ -85,8 +85,13 @@
             string name1 = name + '.' + r.column1;
             string name2 = name + '.' + r.column2;
             string divName = name + "Div";
-            string[] records1 = Model.Records[name1];
-            string[] records2 = Model.Records[name2];
+            string[] records1 = new string[0];
+            string[] records2 = new string[0];
+            if (Model.Records.ContainsKey(name1))
+            {
+                records1 = Model.Records[name1];
+                records2 = Model.Records[name2];
+            }
             string CheckBox = name + "CheckBox";
 
             <div id="@divName" class="tabcontent" style="display: none;">
@@ -102,8 +107,9 @@
                     <tbody>
                         @for (int i = 0; i < records1.Length; i++)
                         {
+                            string idname = index.ToString() + "." + records1[i] + '_' + i + "Record";
                             <tr>
-                                <th scope="row"><input type="checkbox" id="@name" name="@name" data-parent="@CheckBox" onclick="checkParent('@CheckBox', '@name')" /></th>
+                                <th scope="row"><input type="checkbox" id="@idname" name="@idname" data-parent="@CheckBox" onclick="uncheck('@idname', true);checkParent('@CheckBox', '@idname')" /></th>
                                 <td style="border-left: 1px solid;">@records1[i]</td>
                                 <td>@records2[i]</td>
                             </tr>
@@ -117,14 +123,7 @@
 </div>
 <!-- This part is perform whole actions like selecting everything or nothing and running the functionality with the selected items -->
 <div id="controls">
-    <div class="btn-group-vertical" role="group" style="padding-top: 20vh;">
-        <button type="button" onclick="selectAll()" class="btn btn-outline-primary">Select All</button>
-        <button type="button" onclick="selectRecords(true)" class="btn btn-outline-dark">Select Column Records</button>
-        <button type="button" onclick="unselectRecords(true)" class="btn btn-outline-primary">Unselect Column Records</button>
-        <button type="button" onclick="selectNone()" class="btn btn-outline-dark">Select None</button>
-    </div>
-    <br />
-    <span id="records-selected" class="selection-text"></span>
+    <span id="records-selected" class="selection-text" style="padding-top: 20vh;"></span>
     <br />
     <span id="columns-selected" class="selection-text">None selected</span>
     <br />

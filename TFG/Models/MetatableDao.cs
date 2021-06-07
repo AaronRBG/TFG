@@ -710,7 +710,7 @@ namespace TFG
                     updateDataMasking();
                     break;
                 case "create_restrictions":
-                    //
+                    updateRestrictions(data);
                     break;
                 case "primary_keys":
                     selectPksTables(data);
@@ -1085,6 +1085,41 @@ namespace TFG
             }
         }
 
+        // This method updates the database with the corresponding changes for functionality restrictions
+        private void updateRestrictions(string data)
+        {
+            Dictionary<int, int[]> input = new Dictionary<int, int[]>();
+            foreach (string a in data.Split('/'))
+            {
+                if (a != "undefined")
+                {
+                    int index = Int32.Parse(a.Split(',')[0]);
+                    string[] splitted = a.Split(',');
+                    List<int> recordsList = new List<int>();
+                    for (int j = 1; j < splitted.Length; j++)
+                    {
+                        foreach (string item in splitted[j].Split('_'))
+                        {
+                            recordsList.Add(Int32.Parse(item));
+                        }
+                    }
+                    input.Add(index, recordsList.ToArray());
+                }
+            }
+
+            foreach (KeyValuePair<int, int[]> entry in input)
+            {
+                Restriction r = info.restrictions[entry.Key];
+                for (int i = 0; i < entry.Value.Length; i++)
+                {
+                    string name1 = r.table + entry.Key + '.' + r.column1;
+                    string name2 = r.table + entry.Key + '.' + r.column2;
+
+                    Broker.Instance().Run(new SqlCommand("UPDATE " + getTableSchemaName(r.table) + " SET " + r.column2 + " = '" + info.Records[name2][entry.Value[i]] + "' WHERE " + r.column1 + " = '" + info.Records[name1][entry.Value[i]] + "'", con), "updateRestrictions");
+                }
+            }
+        }
+
         // This method is used to retrieve the already computed available masks for a column
         public void getAvailableMasks()
         {
@@ -1227,7 +1262,7 @@ namespace TFG
                     else if (list1.Count == 1 || list1[list1.Count - 1] != list1[list1.Count - 2])
                     {
                         list1.RemoveAt(list1.Count - 1);
-                        list2.RemoveAt(list1.Count - 1);
+                        list2.RemoveAt(list2.Count - 1);
                         entered = true;
                     }
                     if ((list1.Count == 2) && ((string)dt.Rows[i][0] != list1[0]))
@@ -1238,7 +1273,7 @@ namespace TFG
                     else if (list1.Count > 2 && !entered && (string)dt.Rows[i][0] != list1[list1.Count - 2] && list1[list1.Count - 2] != list1[list1.Count - 3])
                     {
                         list1.RemoveAt(list1.Count - 2);
-                        list2.RemoveAt(list1.Count - 2);
+                        list2.RemoveAt(list2.Count - 2);
                     }
                 }
                 if (list1.Count > 1)
@@ -1246,6 +1281,7 @@ namespace TFG
                     res.Add(name1, list1.ToArray());
                     res.Add(name2, list2.ToArray());
                 }
+                index++;
             }
             info.Records = res;
         }
