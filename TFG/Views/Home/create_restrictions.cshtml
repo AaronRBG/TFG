@@ -1,0 +1,167 @@
+﻿@{
+    @using TFG.Models
+    @model TFG.Models.Interchange
+
+    ViewData["Title"] = "Restrictions Report";
+}
+@using (Html.BeginForm("GoToSelection", "Home"))
+{
+    <input type="text" id="functionalitySelected1" class="functionalitySelected" name="functionalitySelected" />
+    <input id="hidden-btn1" class="hidden-btn" type="submit" style="display: none;" />
+}
+@using (Html.BeginForm("ManageRestrictions", "Home"))
+{
+    <input type="text" id="table" class="functionalitySelected" name="table" />
+    <input type="text" id="index" class="functionalitySelected" name="index" />
+    <input type="text" id="column1" class="functionalitySelected" name="column1" />
+    <input type="text" id="column2" class="functionalitySelected" name="column2" />
+    <input id="hidden-btn8" class="hidden-btn" type="submit" style="display: none;" />
+}
+@using (Html.BeginForm("GoToPageAfterCreate", "Home"))
+{
+    <input type="text" id="functionalitySelected4" class="functionalitySelected" name="functionalitySelected" />
+    <input type="text" id="data" class="functionalitySelected" name="data" />
+    <input id="hidden-btn4" class="hidden-btn" type="submit" style="display: none;" />
+}
+@using (Html.BeginForm("GoBackToPage", "Home"))
+{
+    <input type="text" id="functionalitySelected3" class="functionalitySelected" name="functionalitySelected" />
+    <input id="hidden-btn3" class="hidden-btn" type="submit" style="display: none;" />
+}
+<!-- A navegation bar which does not navigate, it only shows the chosen database name along with a button that
+    allows the user to go to the corresponding page to change it, if needed and show the current page (receiving the functionality selected from the controller)-->
+<nav class="navbar nav_color_1">
+    <div id="Top-container">
+        <div id="Top">
+            <span class='database_icon'></span>
+            <span class="top-text">@Model.Database</span>
+            <button type="button" onclick='window.location.href="DatabaseConnection"' class="btn btn-default" data-toggle="tooltip" data-placement="auto" title="Change database"><span class='folder_icon'></span></button>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a id="selection-a" onclick="goToPage('MainPage', false)" style="color: orange;" MainPage">Home</a></li>
+                <li class="breadcrumb-item"><a id="selection-a" onclick="goToSelection('@Model.Functionality')" style="color: orange;" Selection">Selection</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Create Restrictions</li>
+            </ol>
+        </div>
+    </div>
+</nav>
+<!-- This part is the most complicated of this view
+    It gets the data sent from the controller (double array with the database entry.Value names and column names of each entry.Value)
+    Then it creates for each entry.Value an item of an accordion which when expanded shows its columns with checkboxes for all of those items-->
+<div id="middle_container" class="left-half">
+    <div id="selection-top" class="centeredBig">
+        <h3>
+            <span>Restrictions Report</span>
+        </h3>
+    </div>
+    <div id="accordion" class="overflow-auto left-half" style="width:17vw;">
+        <span class="font-weight-bold">Tables:</span>
+        <br />
+        @foreach (string table in Model.TablesSelected)
+        {
+            string collapse = "#collapse" + table;
+            string divName = table + "Div";
+
+            <div class="card">
+                <div class="card-header nav_color_1" id="@table">
+                    <h5>
+                        <button class="btn btn-link" onclick="openTab(event, '@divName')" data-toggle="collapse" data-target="@collapse" aria-expanded="true" aria-controls="collapseOne">
+                            @table
+                        </button>
+                    </h5>
+                </div>
+            </div>
+        }
+    </div>
+    <div id="Tab-contents" class="overflow-auto">
+        @{
+            string display = "block";
+            if (Model.TableAccordion != null)
+            {
+                display = "none";
+            }
+        }
+        <div id="default" class="tabcontent">
+            <h2 style="display: @display; padding-top: 35vh;">No column selected, select one from the dropdown on the left</h2>
+        </div>
+        @foreach (string table in Model.TablesSelected)
+        {
+            string divName = table + "Div";
+            string dropdown = table + "Dropdown";
+            string text = dropdown + "Text";
+            string dropdown2 = dropdown + "2";
+            string text2 = text + "2";
+            string defaultdisplay = "none";
+            if (Model.TableAccordion == table)
+            {
+                defaultdisplay = "block";
+            }
+
+            <div id="@divName" class="tabcontent" style="display: @defaultdisplay;">
+                <table class="table table-striped overflow-auto">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">@table Restriction Number</th>
+                            <th scope="col">Table Name</th>
+                            <th scope="col">Base Column</th>
+                            <th scope="col">Restricted Column</th>
+                            <th scope="col">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            string[] columns = Model.ColumnsSelected[table];
+                            Restriction[] restrictions = Model.restrictions.Where(r => r.table == table).ToArray();
+                        }
+                        @for (int j = 0; j < @restrictions.Length; j++)
+                        {
+                            <tr>
+                                <th scope="row">@j</th>
+                                <td>@table</td>
+                                <td>@restrictions[j].column1</td>
+                                <td>@restrictions[j].column2</td>
+                                <td><input type="button" value="Remove Restriction" onclick="removeRestriction('@table', '@j')" /></td>
+                            </tr>
+                        }
+                        <tr>
+                            <th scope="row">@restrictions.Length</th>
+                            <td>@table</td>
+                            <td>
+                                <div class="dropdown">
+                                    <button class="btn btn-secondary dropdown-toggle" type="button" id="@dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <span id="@text">@columns[0]</span>
+                                    </button>
+                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                        @foreach (string column in columns)
+                                        {
+                                            <a class="dropdown-item" onclick="changeName('@text', '@column')">@column</a>
+                                        }
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="dropdown">
+                                    <button class="btn btn-secondary dropdown-toggle" type="button" id="@dropdown2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <span id="@text2">@columns[1]</span>
+                                    </button>
+                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                        @foreach (string column in columns)
+                                        {
+                                            <a class="dropdown-item" onclick="changeName('@text2', '@column')">@column</a>
+                                        }
+                                    </div>
+                                </div>
+                            </td>
+                            <td><input type="button" value="Add Restriction" onclick="addRestriction('@table', '@restrictions.Length')" /></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+<!-- This part is perform whole actions like selecting everything or nothing and running the functionality with the selected items -->
+<div id="controls">
+    <div id="bottom-buttons">
+        <button type="button" onclick='goToPageAfterCreate("@Model.Functionality")' class="btn btn-outline-primary">Confirm restrictions</button>
+    </div>
+</div>

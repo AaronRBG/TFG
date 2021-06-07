@@ -709,6 +709,9 @@ namespace TFG
                     selectMaskedRecords(data);
                     updateDataMasking();
                     break;
+                case "create_restrictions":
+                    updateRestrictions(data);
+                    break;
                 case "primary_keys":
                     selectPksTables(data);
                     updatePrimaryKeys();
@@ -1082,6 +1085,41 @@ namespace TFG
             }
         }
 
+        // This method updates the database with the corresponding changes for functionality restrictions
+        private void updateRestrictions(string data)
+        {
+            Dictionary<int, int[]> input = new Dictionary<int, int[]>();
+            foreach (string a in data.Split('/'))
+            {
+                if (a != "undefined")
+                {
+                    int index = Int32.Parse(a.Split(',')[0]);
+                    string[] splitted = a.Split(',');
+                    List<int> recordsList = new List<int>();
+                    for (int j = 1; j < splitted.Length; j++)
+                    {
+                        foreach (string item in splitted[j].Split('_'))
+                        {
+                            recordsList.Add(Int32.Parse(item));
+                        }
+                    }
+                    input.Add(index, recordsList.ToArray());
+                }
+            }
+
+            foreach (KeyValuePair<int, int[]> entry in input)
+            {
+                Restriction r = info.restrictions[entry.Key];
+                for (int i = 0; i < entry.Value.Length; i++)
+                {
+                    string name1 = r.table + entry.Key + '.' + r.column1;
+                    string name2 = r.table + entry.Key + '.' + r.column2;
+
+                    Broker.Instance().Run(new SqlCommand("UPDATE " + getTableSchemaName(r.table) + " SET " + r.column2 + " = '" + info.Records[name2][entry.Value[i]] + "' WHERE " + r.column1 + " = '" + info.Records[name1][entry.Value[i]] + "'", con), "updateRestrictions");
+                }
+            }
+        }
+
         // This method is used to retrieve the already computed available masks for a column
         public void getAvailableMasks()
         {
@@ -1185,9 +1223,73 @@ namespace TFG
             }
             tabledata.MasksAvailable = auxDict;
         }
+
+        // This method is used to retrieve the values that don't follow the selected restrictions for restrictions functionality
+        public void getRestrictions()
+        {
+            info.restrictions = info.restrictions.OrderBy(r => r.table).ToList();
+            string aux = info.restrictions[0].table;
+            string[] columns = getTableColumns(aux, false);
+            int index = 0;
+            Dictionary<string, string[]> res = new Dictionary<string, string[]>();
+
+            foreach (Restriction r in info.restrictions)
+            {
+                string name1 = r.table + index + '.' + r.column1;
+                string name2 = r.table + index + '.' + r.column2;
+                List<string> list1 = new List<string>();
+                List<string> list2 = new List<string>();
+
+                if (r.table != aux)
+                {
+                    columns = getTableColumns(r.table, false);
+                    aux = r.table;
+                }
+                DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT DISTINCT a.[" + r.column1 + "],a.[" + r.column2 + "] FROM " + getTableSchemaName(r.table)
+                    + " a JOIN(SELECT [" + r.column1 + "], [" + r.column2 + "] FROM " + getTableSchemaName(r.table) + " GROUP BY [" + r.column1 + "], [" + r.column2
+                    + "] HAVING COUNT(*)> 1) b ON a.[" + r.column1 + "] = b.[" + r.column1 + "] ORDER BY [" + r.column1 + "],[" + r.column2 + "]", con), "getRestriction");
+                DataTable dt = ds.Tables["getRestriction"];
+
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    bool entered = false;
+
+                    if (list1.Count == 0 || !(i == dt.Rows.Count - 1 && (string)dt.Rows[i][0] != list1[list1.Count - 1]))
+                    {
+                        list1.Add(dt.Rows[i][0].ToString());
+                        list2.Add(dt.Rows[i][1].ToString());
+                    }
+                    else if (list1.Count == 1 || list1[list1.Count - 1] != list1[list1.Count - 2])
+                    {
+                        list1.RemoveAt(list1.Count - 1);
+                        list2.RemoveAt(list2.Count - 1);
+                        entered = true;
+                    }
+                    if ((list1.Count == 2) && ((string)dt.Rows[i][0] != list1[0]))
+                    {
+                        list1.RemoveAt(0);
+                        list2.RemoveAt(0);
+                    }
+                    else if (list1.Count > 2 && !entered && (string)dt.Rows[i][0] != list1[list1.Count - 2] && list1[list1.Count - 2] != list1[list1.Count - 3])
+                    {
+                        list1.RemoveAt(list1.Count - 2);
+                        list2.RemoveAt(list2.Count - 2);
+                    }
+                }
+                if (list1.Count > 1)
+                {
+                    res.Add(name1, list1.ToArray());
+                    res.Add(name2, list2.ToArray());
+                }
+                index++;
+            }
+            info.Records = res;
+        }
+
         public void initMetatable()
         {
             findTableData();
+            findTableAndColumnData();
             findTableAndColumnData();
             findTablesSchemaNames();
             findDatatypes();

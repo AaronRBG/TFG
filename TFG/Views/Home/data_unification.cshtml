@@ -102,16 +102,16 @@
                         <tbody>
                             @for (int j = 0; j < records.Length; j++)
                             {
-                                string idname = name + '_' + @j + "Record";
+                                string idname = name + '_' + j + "Record";
                                 <tr>
                                     @if (j % 2 == 0)
                                     {
-                                        <th scope="row"><input type="checkbox" id="@idname" name="@idname" data-parent="@CheckBox" onclick="uncheck('@idname');checkParent('@CheckBox', '@idname')" /></th>
+                                        <th scope="row"><input type="checkbox" id="@idname" name="@idname" data-parent="@CheckBox" onclick="uncheck('@idname', false);checkParent('@CheckBox', '@idname')" /></th>
                                         <td>@records[j]</td>
                                     }
                                     else
                                     {
-                                        <th scope="row" style="border-bottom: 1px solid;"><input type="checkbox" id="@idname" name="@idname" data-parent="@CheckBox" onclick="uncheck('@idname');checkParent('@CheckBox', '@idname')" /></th>
+                                        <th scope="row" style="border-bottom: 1px solid;"><input type="checkbox" id="@idname" name="@idname" data-parent="@CheckBox" onclick="uncheck('@idname', false);checkParent('@CheckBox', '@idname')" /></th>
                                         <td style="border-bottom: 1px solid;">@records[j]</td>
                                     }
                                 </tr>

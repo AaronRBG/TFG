@@ -2,7 +2,7 @@
     @using TFG.Models
     @model TFG.Models.Interchange
 
-    ViewData["Title"] = "Improve Datatypes Report";
+    ViewData["Title"] = "Restricions Report";
 }
 @using (Html.BeginForm("GoToSelection", "Home"))
 {
@@ -31,7 +31,8 @@
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a id="selection-a" onclick="goToPage('MainPage', false)" style="color: orange;" MainPage">Home</a></li>
                 <li class="breadcrumb-item"><a id="selection-a" onclick="goToSelection('@Model.Functionality')" style="color: orange;" Selection">Selection</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Improve Datatypes Report</li>
+                <li class="breadcrumb-item"><a id="selection-a" onclick="goToPage('@Model.Functionality', false)" style="color: orange;" Create_Masks">Create Restrictions</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Data Masking Report</li>
             </ol>
         </div>
     </div>
@@ -42,37 +43,56 @@
 <div id="middle_container" class="left-half">
     <div id="selection-top" class="centeredBig">
         <h3>
-            <span>Improve Datatypes Report</span>
+            <span>Restrictions Report</span>
         </h3>
     </div>
     <div id="accordion" class="overflow-auto left-half" style="width:17vw;">
         <span class="font-weight-bold">Tables:</span>
         <br />
-        @foreach (KeyValuePair<string, string[]> entry in Model.ColumnsSelected)
+        @{
+            int index = 0;
+        }
+        @foreach (Restriction r in Model.restrictions)
         {
-            string collapse = "#collapse" + entry.Key;
-            string CheckBox = entry.Key + "CheckBox";
-            string divName = entry.Key + "Div";
+            string name = r.table + index;
+            string collapse = "#collapse" + name;
+            string CheckBox = name + "CheckBox";
+            string divName = name + "Div";
 
             <div class="card">
-                <div class="card-header nav_color_1" id="@entry.Key">
+                <div class="card-header nav_color_1" id="@name">
                     <h5>
-                        <input type="checkbox" id="@CheckBox" name="@entry.Key" style="display: none;" />
+                        <input type="checkbox" id="@CheckBox" name="@name" style="display: none;" />
                         <button class="btn btn-link" onclick="openTab(event, '@divName')" data-toggle="collapse" data-target="@collapse" aria-expanded="true" aria-controls="collapseOne">
-                            @entry.Key
+                            Restriction @index
                         </button>
                     </h5>
                 </div>
             </div>
+            index++;
         }
     </div>
     <div id="Tab-contents" class="overflow-auto">
         <div id="default" class="tabcontent">
-            <h2 style="padding-top:35vh;">No column selected, select one from the dropdown on the left</h2>
+            <h2 style="padding-top:35vh;">No table selected, select one from the dropdown on the left</h2>
         </div>
-        @foreach (KeyValuePair<string, string[]> entry in Model.ColumnsSelected)
+        @{
+            index = 0;
+        }
+        @foreach (Restriction r in Model.restrictions)
         {
-            string divName = entry.Key + "Div";
+            string name = r.table + index;
+            string name1 = name + '.' + r.column1;
+            string name2 = name + '.' + r.column2;
+            string divName = name + "Div";
+            string[] records1 = new string[0];
+            string[] records2 = new string[0];
+            if (Model.Records.ContainsKey(name1))
+            {
+                records1 = Model.Records[name1];
+                records2 = Model.Records[name2];
+            }
+            string CheckBox = name + "CheckBox";
 
             <div id="@divName" class="tabcontent" style="display: none;">
                 <table class="table table-striped overflow-auto">
@@ -80,42 +100,30 @@
                     <thead class="thead-dark">
                         <tr>
                             <th scope="col">Selections</th>
-                            <th scope="col">Table name</th>
-                            <th scope="col">Column name</th>
-                            <th scope="col">Column original datatype</th>
-                            <th scope="col">Column suggested datatype</th>
+                            <th scope="col">Base Column Value</th>
+                            <th scope="col">Restricted Column Value</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @for (int i = 0; i < entry.Value.Length; i++)
+                        @for (int i = 0; i < records1.Length; i++)
                         {
-                            string chechBox = entry.Key + entry.Value[i];
-                            string CheckBox = entry.Key + "CheckBox";
-                            string name = entry.Key + '.' + entry.Value[i];
+                            string idname = index.ToString() + "." + records1[i] + '_' + i + "Record";
                             <tr>
-                                <th scope="row"><input type="checkbox" id="@name" name="@name" data-parent="@CheckBox" onclick="checkParent('@CheckBox', '@name')" /></th>
-                                <td>@entry.Key</td>
-                                <td>@entry.Value[i]</td>
-                                <td style="border-left: 1px solid;">@Model.ColumnsDatatypes[name]</td>
-                                <td>@Model.ColumnsSuggestedDatatypes[name]</td>
+                                <th scope="row"><input type="checkbox" id="@idname" name="@idname" data-parent="@CheckBox" onclick="uncheck('@idname', true);checkParent('@CheckBox', '@idname')" /></th>
+                                <td style="border-left: 1px solid;">@records1[i]</td>
+                                <td>@records2[i]</td>
                             </tr>
                         }
                     </tbody>
                 </table>
             </div>
+            index++;
         }
     </div>
 </div>
 <!-- This part is perform whole actions like selecting everything or nothing and running the functionality with the selected items -->
 <div id="controls">
-    <div class="btn-group-vertical" role="group" style="padding-top: 20vh;">
-        <button type="button" onclick="selectAll()" class="btn btn-outline-primary">Select All</button>
-        <button type="button" onclick="selectColumns()" class="btn btn-outline-dark">Select Table Columns</button>
-        <button type="button" onclick="unselectColumns()" class="btn btn-outline-primary">Unselect Table Columns</button>
-        <button type="button" onclick="selectNone()" class="btn btn-outline-dark">Select None</button>
-    </div>
-    <br />
-    <span id="records-selected" class="selection-text"></span>
+    <span id="records-selected" class="selection-text" style="padding-top: 20vh;"></span>
     <br />
     <span id="columns-selected" class="selection-text">None selected</span>
     <br />
@@ -127,7 +135,7 @@
     <br />
     <div id="controls-inside">
         @{
-            string filename = "improve_datatypes_report" + DateTime.Now.ToString() + ".csv";
+            string filename = "restrictions_report" + DateTime.Now.ToString() + ".csv";
         }
         <button type="button" onclick="exportTableToCSV('@filename')" class="btn btn-outline-primary"><span class='download_icon'></span></button>
     </div>

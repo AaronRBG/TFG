@@ -97,15 +97,15 @@ namespace TFG.Controllers
             }
         }
 
-        // loads the constraints View
+        // loads the restrictionss View
         [HttpGet]
-        public ActionResult constraints()
+        public ActionResult restrictions()
         {
 
             string id = HttpContext.Session.GetString("id");
             if (HttpContext.Session.Id == id)
             {
-                return View("constraints", daos[id].info);
+                return View("restrictions", daos[id].info);
             }
             else
             {
@@ -224,12 +224,12 @@ namespace TFG.Controllers
             }
         }
         [HttpGet]
-        public ActionResult create_constraints()
+        public ActionResult create_restrictions()
         {
             string id = HttpContext.Session.GetString("id");
             if (HttpContext.Session.Id == id)
             {
-                return View("create_constraints", daos[id].info);
+                return View("create_restrictions", daos[id].info);
             }
             else
             {
@@ -375,6 +375,9 @@ namespace TFG.Controllers
                         case "create_masks":
                             daos[id].getAvailableMasks();
                             break;
+                        case "create_restrictions":
+                            daos[id].info.ColumnsSelected = daos[id].getColumns(false);
+                            break;
                         case "primary_keys":
                             daos[id].getPks();
                             break;
@@ -424,7 +427,10 @@ namespace TFG.Controllers
             {
                 if (functionalitySelected != "MainPage" && functionalitySelected != "Performance")
                 {
-                    resetInfo(functionalitySelected);
+                    if (functionalitySelected != "create_restrictions")
+                    {
+                        resetInfo(functionalitySelected);
+                    }
                 }
                 else
                 {
@@ -462,6 +468,9 @@ namespace TFG.Controllers
                 {
                     case "create_masks":
                         daos[id].getAvailableMasks();
+                        break;
+                    case "create_restrictions":
+                        daos[id].info.ColumnsSelected = daos[id].getColumns(false);
                         break;
                     case "primary_keys":
                         daos[id].getPks();
@@ -503,8 +512,15 @@ namespace TFG.Controllers
             string id = HttpContext.Session.GetString("id");
             if (HttpContext.Session.Id == id)
             {
-                saveMaskTypes(data, true);
-                daos[id].getPrimaryKeysRecords();
+                if (functionalitySelected == "data_masking")
+                {
+                    saveMaskTypes(data, true);
+                    daos[id].getPrimaryKeysRecords();
+                }
+                else
+                {
+                    daos[id].getRestrictions();
+                }
                 return RedirectToAction(functionalitySelected, daos[id].info);
             }
             else
@@ -546,6 +562,35 @@ namespace TFG.Controllers
                 }
                 daos[id].getRecord(record);
                 return View(functionalitySelected, daos[id].info);
+            }
+            else
+            {
+                return RedirectToAction("DatabaseConnection");
+            }
+        }
+
+        // this method is used to specify the restrictions in the restrictions functionality
+        [HttpPost]
+        public ActionResult ManageRestrictions(string table, string index, string column1, string column2)
+        {
+            string id = HttpContext.Session.GetString("id");
+            if (HttpContext.Session.Id == id)
+            {
+                daos[id].info.TableAccordion = table;
+
+                if (column2 == null && column1 == null)
+                {
+                    Restriction r = daos[id].info.restrictions.Where(r => r.table == table).ToArray()[Int32.Parse(index)];
+                    daos[id].info.restrictions.Remove(r);
+                }
+                else
+                {
+                    if (!daos[id].info.restrictions.Contains(new Restriction(table, column1, column2)))
+                    {
+                        daos[id].info.restrictions.Add(new Restriction(table, column1, column2));
+                    }
+                }
+                return View("create_restrictions", daos[id].info);
             }
             else
             {
@@ -609,7 +654,7 @@ namespace TFG.Controllers
                 daos[id].info.ColumnsSelected = selection;
                 daos[id].getMaskedRecords();
             }
-            
+
         }
 
         // This method is used to send the simplest model possible to the view to improve performance
@@ -621,6 +666,7 @@ namespace TFG.Controllers
             daos[id].info = new Interchange(database, log);
             daos[id].info.Records = new Dictionary<string, string[]>();
             daos[id].info.TablePks = new Dictionary<string, string[]>();
+            daos[id].info.restrictions = new List<Restriction>();
         }
 
         // This method is used to send the simplest model possible to the view to improve performance
