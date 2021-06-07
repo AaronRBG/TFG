@@ -427,10 +427,9 @@ namespace TFG.Controllers
             {
                 if (functionalitySelected != "MainPage" && functionalitySelected != "Performance")
                 {
-                    resetInfo(functionalitySelected);
-                    if (functionalitySelected == "create_restrictions")
+                    if (functionalitySelected != "create_restrictions")
                     {
-                        daos[id].info.ColumnsSelected = daos[id].getColumns(false);
+                        resetInfo(functionalitySelected);
                     }
                 }
                 else

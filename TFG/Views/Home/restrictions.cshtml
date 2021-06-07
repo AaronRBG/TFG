@@ -49,30 +49,69 @@
     <div id="accordion" class="overflow-auto left-half" style="width:17vw;">
         <span class="font-weight-bold">Tables:</span>
         <br />
-        @foreach (string table in Model.TablesSelected)
+        @{
+            int index = 0;
+        }
+        @foreach (Restriction r in Model.restrictions)
         {
-            string collapse = "#collapse" + table;
-            string CheckBox = table + "CheckBox";
+            string name = r.table + index;
+            string collapse = "#collapse" + name;
+            string CheckBox = name + "CheckBox";
+            string divName = name + "Div";
 
             <div class="card">
-                <div class="card-header nav_color_1" id="@table">
+                <div class="card-header nav_color_1" id="@name">
                     <h5>
-                        <input type="checkbox" id="@CheckBox" name="@table" style="display: none;" />
-                        <button class="btn btn-link" data-toggle="collapse" data-target="@collapse" aria-expanded="true" aria-controls="collapseOne">
-                            @table
+                        <input type="checkbox" id="@CheckBox" name="@name" style="display: none;" />
+                        <button class="btn btn-link" onclick="openTab(event, '@divName')" data-toggle="collapse" data-target="@collapse" aria-expanded="true" aria-controls="collapseOne">
+                            Restriction @index
                         </button>
                     </h5>
                 </div>
             </div>
+            index++;
         }
     </div>
     <div id="Tab-contents" class="overflow-auto">
         <div id="default" class="tabcontent">
             <h2 style="padding-top:35vh;">No table selected, select one from the dropdown on the left</h2>
         </div>
-        @foreach (string table in Model.TablesSelected)
+        @{
+            index = 0;
+        }
+        @foreach (Restriction r in Model.restrictions)
         {
+            string name = r.table + index;
+            string name1 = name + '.' + r.column1;
+            string name2 = name + '.' + r.column2;
+            string divName = name + "Div";
+            string[] records1 = Model.Records[name1];
+            string[] records2 = Model.Records[name2];
+            string CheckBox = name + "CheckBox";
 
+            <div id="@divName" class="tabcontent" style="display: none;">
+                <table class="table table-striped overflow-auto">
+
+                    <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">Selections</th>
+                            <th scope="col">Base Column Value</th>
+                            <th scope="col">Restricted Column Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < records1.Length; i++)
+                        {
+                            <tr>
+                                <th scope="row"><input type="checkbox" id="@name" name="@name" data-parent="@CheckBox" onclick="checkParent('@CheckBox', '@name')" /></th>
+                                <td style="border-left: 1px solid;">@records1[i]</td>
+                                <td>@records2[i]</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            index++;
         }
     </div>
 </div>
