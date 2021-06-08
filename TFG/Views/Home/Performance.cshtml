@@ -1,6 +1,6 @@
 ﻿@{
     @using TFG.Models
-    @model TFG.Models.Interchange
+    @model TFG.Models.Performance
 
     ViewData["Title"] = "Performance";
 }
@@ -15,7 +15,7 @@
     <div id="Top-container">
         <div id="Top">
             <span class='database_icon'></span>
-            <span class="top-text">@Model.Database</span>
+            <span class="top-text">@Model.database</span>
             <button type="button" onclick='window.location.href="DatabaseConnection"' class="btn btn-default" data-toggle="tooltip" data-placement="auto" title="Change database"><span class='folder_icon'></span></button>
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a id="selection-a" onclick="goToPage('MainPage', false)" style="color: orange;" Home">Home</a></li>
@@ -34,22 +34,44 @@
         </h3>
     </div>
     <div id="Tab-contents" class="overflow-auto">
-        <div id="Tokyo" class="tabcontent">
-            <table class="table table-striped">
-                <thead class="thead-dark">
+        <table class="table table-striped overflow-auto">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">Table name</th>
+                    <th scope="col">Type</th>
+                    <th scope="col">Rows</th>
+                    <th scope="col">Reserved</th>
+                    <th scope="col">Data</th>
+                    <th scope="col">Index Size</th>
+                    <th scope="col">Unused</th>
+                    <th scope="col">Query Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (string table in Model.rows.Keys.ToArray())
+                {
                     <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">First</th>
+                        <th scope="row" rowspan="2">@table</th>
+                        <td style="border-left: 1px solid;">OLD</td>
+                        <td style="border-left: 1px solid;">@Model.rows[table][0]</td>
+                        <td>@Model.reserved[table][0]</td>
+                        <td>@Model.data[table][0]</td>
+                        <td>@Model.index_size[table][0]</td>
+                        <td>@Model.unused[table][0]</td>
+                        <td>@Model.query_time[table][0]</td>
                     </tr>
-                </thead>
-                <tbody>
                     <tr>
-                        <th scope="row">1</th>
-                        <td>Mark</td>
+                        <td style="border-left: 1px solid;">NEW</td>
+                        <td style="border-left: 1px solid;">@Model.rows[table][1]</td>
+                        <td>@Model.reserved[table][1]</td>
+                        <td>@Model.data[table][1]</td>
+                        <td>@Model.index_size[table][1]</td>
+                        <td>@Model.unused[table][1]</td>
+                        <td>@Model.query_time[table][1]</td>
                     </tr>
-                </tbody>
-            </table>
-        </div>
+                }
+            </tbody>
+        </table>
     </div>
 </div>
 <!-- This part is perform whole actions like selecting everything or nothing and running the functionality with the selected items -->
@@ -60,13 +82,10 @@
         </h3>
     </div>
     <br />
-    @{
-        string[] rows = Model.Log.Split("\n");
-    }
-    @foreach (string row in rows)
+    @foreach (string row in Model.log)
     {
         <span id="selection-text">@row</span>
-        <br/>
+        <br />
     }
     <div id="controls-inside">
         <button type="button" onclick="download()" class="btn btn-outline-primary"><span class='download_icon'></span></button>

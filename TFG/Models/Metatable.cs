@@ -10,7 +10,7 @@ namespace TFG.Models
         public Metatable(string database)
         {
             this.Database = database;
-            this.Log = "";
+            this.Log = new List<string>();
             this.Functionalities_text = new Dictionary<string, string>();
             this.Functionalities_need_columns = new Dictionary<string, bool>();
 
@@ -40,7 +40,7 @@ namespace TFG.Models
         }
 
         public string Database { get; set; }
-        public string Log { get; set; }
+        public List<string> Log { get; set; }
         public string[] Tables { get; set; }
         public Dictionary<string, bool[]> MasksAvailable { get; set; }
         public Dictionary<string, string[]> TablePks { get; set; }

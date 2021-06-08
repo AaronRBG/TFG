@@ -243,7 +243,8 @@ namespace TFG.Controllers
             string id = HttpContext.Session.GetString("id");
             if (HttpContext.Session.Id == id)
             {
-                return View("Performance", daos[id].info);
+                daos[id].updatePerformance();
+                return View("Performance", daos[id].perf);
             }
             else
             {
@@ -537,7 +538,7 @@ namespace TFG.Controllers
             if (HttpContext.Session.Id == id)
             {
                 daos[id].update(data);
-                daos[id].tabledata.Log += functionalitySelected + "\t" + DateTime.Now.ToString() + "\n";
+                daos[id].tabledata.Log.Add(functionalitySelected + "\t" + DateTime.Now.ToString());
                 return RedirectToAction("MainPage", daos[id].info);
             }
             else
@@ -662,8 +663,7 @@ namespace TFG.Controllers
         {
             string id = HttpContext.Session.GetString("id");
             string database = daos[id].tabledata.Database;
-            string log = daos[id].tabledata.Log;
-            daos[id].info = new Interchange(database, log);
+            daos[id].info = new Interchange(database);
             daos[id].info.Records = new Dictionary<string, string[]>();
             daos[id].info.TablePks = new Dictionary<string, string[]>();
             daos[id].info.restrictions = new List<Restriction>();
