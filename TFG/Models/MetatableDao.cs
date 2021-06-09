@@ -1339,8 +1339,9 @@ namespace TFG
             foreach (string tableI in tabledata.Tables)
             {
                 string table = getTableSchemaName(tableI);
-                this.perf.insertLater(table, p.rows[table][0], p.reserved[table][0], p.data[table][0], p.index_size[table][0], p.unused[table][0], p.query_time[table][0]);
+                perf.insertLater(table, p.rows[table][0], p.reserved[table][0], p.data[table][0], p.index_size[table][0], p.unused[table][0], p.query_time[table][0]);
             }
+            perf.log = tabledata.Log;
         }
 
         // This method gathers the schema names of the tables from the database

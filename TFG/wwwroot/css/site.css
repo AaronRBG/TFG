@@ -66,7 +66,6 @@ body {
     bottom: 0;
     width: 100%;
     white-space: nowrap;
-    line-height: 1vh;
     font-size: calc(0.5vmin + 0.5vmax);
 }
 
@@ -129,6 +128,11 @@ div#controls {
     right: 0;
 }
 
+div#performance_controls {
+    font-size: calc(0.5vmin + 0.5vmax);
+    text-align: center;
+}
+
 div#Tab-contents {
     font-size: calc(0.5vmin + 0.5vmax);
     padding-left: 1vw;
@@ -151,6 +155,11 @@ div#Tab-contents {
 div#middle_container {
     font-size: calc(0.5vmin + 0.5vmax);
     width: 85vw;
+}
+
+div#performance_container {
+    font-size: calc(0.5vmin + 0.5vmax);
+    width: 75vw;
 }
 
 div#Bottom-container {
