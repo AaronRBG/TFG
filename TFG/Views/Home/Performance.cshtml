@@ -87,7 +87,10 @@
         <span id="selection-text">@row</span>
         <br />
     }
-    <div id="controls-inside">
-        <button type="button" onclick="download()" class="btn btn-outline-primary"><span class='download_icon'></span></button>
-    </div>
+<div id="controls-inside">
+    @{
+        string filename = "performance_report" + DateTime.Now.ToString() + ".csv";
+    }
+    <button type="button" onclick="exportTableToCSV('@filename')" class="btn btn-outline-primary"><span class='download_icon'></span></button>
+</div>
 </div>

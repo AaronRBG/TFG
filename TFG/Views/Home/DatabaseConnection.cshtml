@@ -23,24 +23,26 @@
 */}
 <!-- This part is used by the user to input their connection string and the bottom part is just a button
     that along with the beginForm and some hidden text input and buttons sends that connection string to the controller-->
-<div id="Remote" class="centeredBig">
-    <div class="middle-container">
-        <h1>Connect to a remote database</h1>
-        <div id="remote_inside">
-            <textarea id="constr" style="background: rgba(255,255,255,0.5);" placeholder="Introduce your connection String"></textarea>
-            @using (Html.BeginForm("Connect", "Home"))
-            {
-                <input type="text" id="connectionString" name="connectionString" />
-                <input id="hidden-btn" class="hidden-btn" type="submit" style="display: none;" />
-            }
+<div class="centeredBig" style="display: flex;">
+    <img src="~/database-tuning.png" style="float:left; height:50vh; width: 25vw; padding-top: 10vh;" />
+    <div id="Remote" class="right-half">
+        <div class="middle-container">
+            <img src="~/logo.png" style="height:10vh; width: auto;" />
+            <h1 style="padding-top:5vh;">Connect to a remote database</h1>
+            <div id="remote_inside">
+                <textarea id="constr" style="background: rgba(255,255,255,0.5);" placeholder="Introduce your connection String"></textarea>
+                @using (Html.BeginForm("Connect", "Home"))
+                {
+                    <input type="text" id="connectionString" name="connectionString" />
+                    <input id="hidden-btn" class="hidden-btn" type="submit" style="display: none;" />
+                }
+            </div>
         </div>
-    </div>
-</div>
-<div id="Bottom-container">
-    <div id="Bottom">
-        <div class="btn-group" role="group">
-            @{/*<button type="button" class="btn btn-outline-primary">Connect to Local</button>*/}
-            <button type="button" onclick="connect()" class="btn btn-outline-primary">Connect to Remote</button>
+        <div id="Bottom">
+            <div class="btn-group" role="group">
+                @{/*<button type="button" class="btn btn-outline-primary">Connect to Local</button>*/}
+                <button type="button" onclick="connect()" class="btn btn-outline-primary">Connect to Remote</button>
+            </div>
         </div>
     </div>
 </div>
