@@ -2108,7 +2108,7 @@ namespace TFG
         }
 
         //
-        private string ArrayToString(object[] array, bool brackets)
+        public string ArrayToString(object[] array, bool brackets)
         {
             string res = "";
             for (int i = 0; i < array.Length; i++)

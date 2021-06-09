@@ -177,22 +177,6 @@ namespace TFG.Controllers
             }
         }
 
-        // loads the table_defragmentation View
-        [HttpGet]
-        public ActionResult table_defragmentation()
-        {
-
-            string id = HttpContext.Session.GetString("id");
-            if (HttpContext.Session.Id == id)
-            {
-                return View("table_defragmentation", daos[id].info);
-            }
-            else
-            {
-                return RedirectToAction("DatabaseConnection");
-            }
-        }
-
         // loads the improve_indexes View
         [HttpGet]
         public ActionResult improve_indexes()
@@ -503,6 +487,10 @@ namespace TFG.Controllers
                     case "data_unification":
                         daos[id].getUnification();
                         break;
+                    case "table_defragmentation":
+                        string aux = "undefined," + daos[id].ArrayToString(daos[id].info.TablesSelected, false);
+                        return Confirm(aux, functionalitySelected);
+                        break;
                     default:
                         // some functionalities do not need preparation
                         break;
@@ -548,7 +536,8 @@ namespace TFG.Controllers
             {
                 daos[id].update(data);
                 daos[id].tabledata.Log.Add(functionalitySelected + "\t" + DateTime.Now.ToString());
-                return RedirectToAction("MainPage", daos[id].info);
+                const string V = "Functionality completed successfully";
+                return base.RedirectToAction("MainPage", daos[id].info);
             }
             else
             {
