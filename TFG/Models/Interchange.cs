@@ -7,15 +7,13 @@ namespace TFG.Models
     {
         public Interchange() { }
 
-        public Interchange(string database, string log)
+        public Interchange(string database)
         {
             this.Database = database;
-            this.Log = log;
         }
 
         public string Database { get; set; }
         public string Functionality { get; set; }
-        public string Log { get; set; }
         public string TableAccordion { get; set; }
         public string ColumnAccordion { get; set; }
         public string[] TablesSelected { get; set; }

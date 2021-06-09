@@ -15,12 +15,15 @@ namespace TFG
         // The variables are the Model in which the methods results are saved and the connection to the database
         public Metatable tabledata { get; set; }
         public Interchange info { get; set; }
+        public Performance perf { get; set; }
+        public Help help { get; set; }
         public SqlConnection con { get; set; }
 
         public MetatableDao(Metatable tabledata, SqlConnection con)
         {
             this.tabledata = tabledata;
             this.con = con;
+            this.help = new Help();
         }
 
         // This method creates the needed scripts
@@ -1286,6 +1289,7 @@ namespace TFG
             info.Records = res;
         }
 
+        // This method is used to gather all information needed pre initialization
         public void initMetatable()
         {
             findTableData();
@@ -1301,6 +1305,45 @@ namespace TFG
             findFks();
             findIndexes();
             findUnification();
+            this.perf = getPerformance();
+        }
+
+        // This method is used to gather performance initial status
+        public Performance getPerformance()
+        {
+            Performance res = new Performance(tabledata.Database);
+            foreach(string tableI in tabledata.Tables)
+            {
+                string table = getTableSchemaName(tableI);
+                string columns = ArrayToString(getTableColumns(tableI, false), true);
+                Int64 qt = 0;
+                string query_time = "";
+                DataSet ds, ds2;
+                ds = Broker.Instance().Run(new SqlCommand("select ms_ticks from sys.dm_os_sys_info", con), "initPerformance");
+                Broker.Instance().Run(new SqlCommand("SELECT * FROM " + table, con), "initPerformance");
+                ds2 = Broker.Instance().Run(new SqlCommand("select ms_ticks from sys.dm_os_sys_info", con), "initPerformance");
+                DataTable dt = ds.Tables["initPerformance"];
+                qt = (Int64)dt.Rows[0][0];
+                dt = ds2.Tables["initPerformance"];
+                qt = (Int64)dt.Rows[0][0] - qt;
+                query_time = qt.ToString() + " ms";
+                ds = Broker.Instance().Run(new SqlCommand("exec sp_spaceused '" + table + "'", con), "initPerformance");
+                dt = ds.Tables["initPerformance"];
+                res.insertFirst(table, dt.Rows[0][1].ToString(), dt.Rows[0][2].ToString(), dt.Rows[0][3].ToString(), dt.Rows[0][4].ToString(), dt.Rows[0][5].ToString(), query_time);
+            }
+            return res;
+        }
+
+        // This method is used to recalculate the performance view values
+        public void updatePerformance()
+        {
+            Performance p = getPerformance();
+            foreach (string tableI in tabledata.Tables)
+            {
+                string table = getTableSchemaName(tableI);
+                perf.insertLater(table, p.rows[table][0], p.reserved[table][0], p.data[table][0], p.index_size[table][0], p.unused[table][0], p.query_time[table][0]);
+            }
+            perf.log = tabledata.Log;
         }
 
         // This method gathers the schema names of the tables from the database
@@ -2065,7 +2108,7 @@ namespace TFG
         }
 
         //
-        private string ArrayToString(object[] array, bool brackets)
+        public string ArrayToString(object[] array, bool brackets)
         {
             string res = "";
             for (int i = 0; i < array.Length; i++)

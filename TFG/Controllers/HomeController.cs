@@ -177,22 +177,6 @@ namespace TFG.Controllers
             }
         }
 
-        // loads the table_defragmentation View
-        [HttpGet]
-        public ActionResult table_defragmentation()
-        {
-
-            string id = HttpContext.Session.GetString("id");
-            if (HttpContext.Session.Id == id)
-            {
-                return View("table_defragmentation", daos[id].info);
-            }
-            else
-            {
-                return RedirectToAction("DatabaseConnection");
-            }
-        }
-
         // loads the improve_indexes View
         [HttpGet]
         public ActionResult improve_indexes()
@@ -243,7 +227,8 @@ namespace TFG.Controllers
             string id = HttpContext.Session.GetString("id");
             if (HttpContext.Session.Id == id)
             {
-                return View("Performance", daos[id].info);
+                daos[id].updatePerformance();
+                return View("Performance", daos[id].perf);
             }
             else
             {
@@ -268,7 +253,15 @@ namespace TFG.Controllers
         [HttpGet]
         public ActionResult Help()
         {
-            return View("Help");
+            string id = HttpContext.Session.GetString("id");
+            if (id == null)
+            {
+                return View("Help", new Help());
+            }
+            else
+            {
+                return View("Help", daos[id].help);
+            }
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
@@ -314,6 +307,7 @@ namespace TFG.Controllers
                 daos[HttpContext.Session.Id].loadScripts();
                 daos[HttpContext.Session.Id].initMetatable();
                 resetInfo();
+                daos[HttpContext.Session.Id].help.connected = true;
 
                 return await Task.Run<ActionResult>(() =>
                 {
@@ -493,6 +487,10 @@ namespace TFG.Controllers
                     case "data_unification":
                         daos[id].getUnification();
                         break;
+                    case "table_defragmentation":
+                        string aux = "undefined," + daos[id].ArrayToString(daos[id].info.TablesSelected, false);
+                        return Confirm(aux, functionalitySelected);
+                        break;
                     default:
                         // some functionalities do not need preparation
                         break;
@@ -537,8 +535,9 @@ namespace TFG.Controllers
             if (HttpContext.Session.Id == id)
             {
                 daos[id].update(data);
-                daos[id].tabledata.Log += functionalitySelected + "\t" + DateTime.Now.ToString() + "\n";
-                return RedirectToAction("MainPage", daos[id].info);
+                daos[id].tabledata.Log.Add(functionalitySelected + "\t" + DateTime.Now.ToString());
+                const string V = "Functionality completed successfully";
+                return base.RedirectToAction("MainPage", daos[id].info);
             }
             else
             {
@@ -662,8 +661,7 @@ namespace TFG.Controllers
         {
             string id = HttpContext.Session.GetString("id");
             string database = daos[id].tabledata.Database;
-            string log = daos[id].tabledata.Log;
-            daos[id].info = new Interchange(database, log);
+            daos[id].info = new Interchange(database);
             daos[id].info.Records = new Dictionary<string, string[]>();
             daos[id].info.TablePks = new Dictionary<string, string[]>();
             daos[id].info.restrictions = new List<Restriction>();

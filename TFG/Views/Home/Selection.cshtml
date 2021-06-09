@@ -12,6 +12,12 @@
     <input type="text" id="selection" class="functionalitySelected" name="selection" />
     <input id="hidden-btn3" class="hidden-btn" type="submit" style="display: none;" />
 }
+@using (Html.BeginForm("Confirm", "Home"))
+{
+    <input type="text" id="functionalitySelected5" class="functionalitySelected" name="functionalitySelected" />
+    <input type="text" id="data" class="functionalitySelected" name="data" />
+    <input id="hidden-btn5" class="hidden-btn" type="submit" style="display: none;" />
+}
 <!-- A navegation bar which does not navigate, it only shows the chosen database name along with a button that
     allows the user to go to the corresponding page to change it, if needed and show the current page (receiving the functionality selected from the controller)-->
 <nav class="navbar nav_color_1">
@@ -88,7 +94,17 @@
     <br />
     <span id="tables-selected" class="selection-text"></span>
     <br />
-    <div id="controls-inside">
-        <button type="button" onclick='goToPage("@Model.Functionality", true)' class="btn btn-outline-primary">Confirm and run</button>
-    </div>
+    @if (Model.Functionality == "table_defragmentation")
+    {
+        <div id="controls-inside">
+            <button type="button" onclick='confirm("@Model.Functionality")' class="btn btn-outline-primary">Confirm and run</button>
+        </div>
+    }
+    else
+    {
+        <div id="controls-inside">
+            <button type="button" onclick='goToPage("@Model.Functionality", true)' class="btn btn-outline-primary">Confirm and run</button>
+        </div>
+    }
+
 </div>

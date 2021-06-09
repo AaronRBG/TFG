@@ -637,11 +637,17 @@ function downloadCSV(csv, filename) {
 function exportTableToCSV(filename) {
     var csv = [];
     var rows = document.querySelectorAll("table tr");
+    var index = 1;
+    if (filename.includes('performance')) {
+        index = 0;
+    }
 
     for (var i = 0; i < rows.length; i++) {
         var row = [], cols = rows[i].querySelectorAll("td, th");
-
-        for (var j = 1; j < cols.length; j++)
+        if (filename.includes('performance') && i%2==0 && i!=0) {
+            row.push("");
+        }
+        for (var j = index; j < cols.length; j++)
             row.push(cols[j].innerText);
 
         csv.push(row.join(","));
