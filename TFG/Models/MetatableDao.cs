@@ -16,12 +16,14 @@ namespace TFG
         public Metatable tabledata { get; set; }
         public Interchange info { get; set; }
         public Performance perf { get; set; }
+        public Help help { get; set; }
         public SqlConnection con { get; set; }
 
         public MetatableDao(Metatable tabledata, SqlConnection con)
         {
             this.tabledata = tabledata;
             this.con = con;
+            this.help = new Help();
         }
 
         // This method creates the needed scripts

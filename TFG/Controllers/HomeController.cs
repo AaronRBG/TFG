@@ -269,7 +269,15 @@ namespace TFG.Controllers
         [HttpGet]
         public ActionResult Help()
         {
-            return View("Help");
+            string id = HttpContext.Session.GetString("id");
+            if (id == null)
+            {
+                return View("Help", new Help());
+            }
+            else
+            {
+                return View("Help", daos[id].help);
+            }
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
@@ -315,6 +323,7 @@ namespace TFG.Controllers
                 daos[HttpContext.Session.Id].loadScripts();
                 daos[HttpContext.Session.Id].initMetatable();
                 resetInfo();
+                daos[HttpContext.Session.Id].help.connected = true;
 
                 return await Task.Run<ActionResult>(() =>
                 {
