@@ -9,20 +9,20 @@ namespace TFG.Models
 
         public Constraint(string name, string table, string col_type)
         {
-            this.name = name;
-            this.table = table;
+            this.Name = name;
+            this.Table = table;
             if (col_type == "FOREIGN KEY" || col_type == "PRIMARY KEY" || col_type == "INDEX")
             {
-                this.type = col_type;
+                this.Type = col_type;
                 if (col_type != "INDEX")
                 {
-                    this.column = name.Split('_')[name.Split('_').Length - 1];
+                    this.Column = name.Split('_')[^1];
                 }
             }
             else
             {
-                this.type = "COMPUTED COLUMN";
-                this.column = col_type;
+                this.Type = "COMPUTED COLUMN";
+                this.Column = col_type;
             }
 
         }
@@ -31,29 +31,33 @@ namespace TFG.Models
         {
             if (col_type == "FOREIGN KEY")
             {
-                this.table2 = def_tab;
+                this.Table2 = def_tab;
             }
             else if (col_type == "INDEX")
             {
-                this.column = def_tab;
+                this.Column = def_tab;
             }
             else
             {
-                this.definition = def_tab;
+                this.Definition = def_tab;
             }
         }
 
-        public string name { get; set; }
-        public string table { get; set; }
-        public string table2 { get; set; }
-        public string column { get; set; }
-        public string definition { get; set; }
-        public string type { get; set; }
+        public string Name { get; set; }
+        public string Table { get; set; }
+        public string Table2 { get; set; }
+        public string Column { get; set; }
+        public string Definition { get; set; }
+        public string Type { get; set; }
 
         public override bool Equals(Object obj)
         {
-            return this.table == ((Constraint)obj).table && this.table2 == ((Constraint)obj).table2 && this.name == ((Constraint)obj).name && this.type == ((Constraint)obj).type && this.column == ((Constraint)obj).column;
+            return this.Table == ((Constraint)obj).Table && this.Table2 == ((Constraint)obj).Table2 && this.Name == ((Constraint)obj).Name && this.Type == ((Constraint)obj).Type && this.Column == ((Constraint)obj).Column;
         }
 
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Name, Table, Table2, Column, Definition, Type);
+        }
     }
 }

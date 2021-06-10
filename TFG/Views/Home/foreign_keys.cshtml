@@ -67,12 +67,12 @@
                         string fks = "", suggestedFks = "";
                         string name = table + '.' + table2;
                         string chechBox = name + "CheckBox";
-                        Constraint[] fksArray = Model.TableFks.Where(f => f.table == table && f.table2 == table2).ToArray();
-                        Constraint[] SuggestedFksArray = Model.TableSuggestedFks.Where(f => f.table == table && f.table2 == table2).ToArray();
+                        Constraint[] fksArray = Model.TableFks.Where(f => f.Table == table && f.Table2 == table2).ToArray();
+                        Constraint[] SuggestedFksArray = Model.TableSuggestedFks.Where(f => f.Table == table && f.Table2 == table2).ToArray();
 
                         for (int i = 0; i < fksArray.Length; i++)
                         {
-                            fks += fksArray[i].column;
+                            fks += fksArray[i].Column;
 
                             if (i != fksArray.Length - 1)
                             {
@@ -82,7 +82,7 @@
 
                         for (int i = 0; i < SuggestedFksArray.Length; i++)
                         {
-                            suggestedFks += SuggestedFksArray[i].column;
+                            suggestedFks += SuggestedFksArray[i].Column;
 
                             if (i != SuggestedFksArray.Length - 1)
                             {

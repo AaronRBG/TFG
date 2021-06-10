@@ -15,7 +15,7 @@
     <div id="Top-container">
         <div id="Top">
             <span class='database_icon'></span>
-            <span class="top-text">@Model.database</span>
+            <span class="top-text">@Model.Database</span>
             <button type="button" onclick='window.location.href="DatabaseConnection"' class="btn btn-default" data-toggle="tooltip" data-placement="auto" title="Change database"><span class='folder_icon'></span></button>
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a id="selection-a" onclick="goToPage('MainPage', false)" style="color: orange;" Home">Home</a></li>
@@ -48,26 +48,26 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (string table in Model.rows.Keys.ToArray())
+                @foreach (string table in Model.Rows.Keys.ToArray())
                 {
                     <tr>
                         <th scope="row" rowspan="2">@table</th>
                         <td style="border-left: 1px solid;">OLD</td>
-                        <td style="border-left: 1px solid;">@Model.rows[table][0]</td>
-                        <td>@Model.reserved[table][0]</td>
-                        <td>@Model.data[table][0]</td>
-                        <td>@Model.index_size[table][0]</td>
-                        <td>@Model.unused[table][0]</td>
-                        <td>@Model.query_time[table][0]</td>
+                        <td style="border-left: 1px solid;">@Model.Rows[table][0]</td>
+                        <td>@Model.Reserved[table][0]</td>
+                        <td>@Model.Data[table][0]</td>
+                        <td>@Model.Index_size[table][0]</td>
+                        <td>@Model.Unused[table][0]</td>
+                        <td>@Model.Query_time[table][0]</td>
                     </tr>
                     <tr>
                         <td style="border-left: 1px solid;">NEW</td>
-                        <td style="border-left: 1px solid;">@Model.rows[table][1]</td>
-                        <td>@Model.reserved[table][1]</td>
-                        <td>@Model.data[table][1]</td>
-                        <td>@Model.index_size[table][1]</td>
-                        <td>@Model.unused[table][1]</td>
-                        <td>@Model.query_time[table][1]</td>
+                        <td style="border-left: 1px solid;">@Model.Rows[table][1]</td>
+                        <td>@Model.Reserved[table][1]</td>
+                        <td>@Model.Data[table][1]</td>
+                        <td>@Model.Index_size[table][1]</td>
+                        <td>@Model.Unused[table][1]</td>
+                        <td>@Model.Query_time[table][1]</td>
                     </tr>
                 }
             </tbody>
@@ -82,7 +82,7 @@
         </h3>
     </div>
     <br />
-    @foreach (string row in Model.log)
+    @foreach (string row in Model.Log)
     {
         <span id="selection-text">@row</span>
         <br />

@@ -110,15 +110,15 @@
                     <tbody>
                         @{
                             string[] columns = Model.ColumnsSelected[table];
-                            Restriction[] restrictions = Model.restrictions.Where(r => r.table == table).ToArray();
+                            Restriction[] restrictions = Model.restrictions.Where(r => r.Table == table).ToArray();
                         }
                         @for (int j = 0; j < @restrictions.Length; j++)
                         {
                             <tr>
                                 <th scope="row">@j</th>
                                 <td>@table</td>
-                                <td>@restrictions[j].column1</td>
-                                <td>@restrictions[j].column2</td>
+                                <td>@restrictions[j].Column1</td>
+                                <td>@restrictions[j].Column2</td>
                                 <td><input type="button" value="Remove Restriction" onclick="removeRestriction('@table', '@j')" /></td>
                             </tr>
                         }
