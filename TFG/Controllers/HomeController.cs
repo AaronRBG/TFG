@@ -25,256 +25,352 @@ namespace TFG.Controllers
         // loads the MainPage View saving the database name in the viewdata to be accesed later
 
         [HttpGet]
-        public ActionResult MainPage()
+        public ViewResult MainPage()
         {
-            string id = HttpContext.Session.GetString("id");
-
-            if (HttpContext.Session.Id == id)
+            if (HttpContext is null)
             {
-                return View("MainPage", Daos[id].Info);
+                return View("MainPage");
             }
             else
             {
-                return RedirectToAction("DatabaseConnection");
+                string id = HttpContext.Session.GetString("id");
+
+                if (HttpContext.Session.Id == id)
+                {
+                    return View("MainPage", Daos[id].Info);
+                }
+                else
+                {
+                    return DatabaseConnection();
+                }
             }
 
         }
 
         // loads the DatabaseConnection View
         [HttpGet]
-        public ActionResult DatabaseConnection()
+        public ViewResult DatabaseConnection()
         {
-            return View("DatabaseConnection", "Home");
+            return View("DatabaseConnection");
         }
 
         // loads the data_masking View
         [HttpGet]
-        public ActionResult Data_masking()
+        public ViewResult Data_masking()
         {
-            string id = HttpContext.Session.GetString("id");
-            if (HttpContext.Session.Id == id)
+            if (HttpContext is null)
             {
-                return View("data_masking", Daos[id].Info);
+                return View("data_masking");
             }
             else
             {
-                return RedirectToAction("DatabaseConnection");
+                string id = HttpContext.Session.GetString("id");
+                if (HttpContext.Session.Id == id)
+                {
+                    return View("data_masking", Daos[id].Info);
+                }
+                else
+                {
+                    return DatabaseConnection();
+                }
             }
         }
 
         // loads the data_unification View
         [HttpGet]
-        public ActionResult Data_unification()
+        public ViewResult Data_unification()
         {
-
-            string id = HttpContext.Session.GetString("id");
-            if (HttpContext.Session.Id == id)
+            if (HttpContext is null)
             {
-                return View("data_unification", Daos[id].Info);
+                return View("data_unification");
             }
             else
             {
-                return RedirectToAction("DatabaseConnection");
+                string id = HttpContext.Session.GetString("id");
+                if (HttpContext.Session.Id == id)
+                {
+                    return View("data_unification", Daos[id].Info);
+                }
+                else
+                {
+                    return DatabaseConnection();
+                }
             }
         }
 
         // loads the remove_duplicates View
         [HttpGet]
-        public ActionResult Remove_duplicates()
+        public ViewResult Remove_duplicates()
         {
-
-            string id = HttpContext.Session.GetString("id");
-            if (HttpContext.Session.Id == id)
+            if (HttpContext is null)
             {
-                return View("remove_duplicates", Daos[id].Info);
+                return View("remove_duplicates");
             }
             else
             {
-                return RedirectToAction("DatabaseConnection");
+                string id = HttpContext.Session.GetString("id");
+                if (HttpContext.Session.Id == id)
+                {
+                    return View("remove_duplicates", Daos[id].Info);
+                }
+                else
+                {
+                    return DatabaseConnection();
+                }
             }
         }
 
         // loads the restrictionss View
         [HttpGet]
-        public ActionResult Restrictions()
+        public ViewResult Restrictions()
         {
-
-            string id = HttpContext.Session.GetString("id");
-            if (HttpContext.Session.Id == id)
+            if (HttpContext is null)
             {
-                return View("restrictions", Daos[id].Info);
+                return View("restrictions");
             }
             else
             {
-                return RedirectToAction("DatabaseConnection");
+                string id = HttpContext.Session.GetString("id");
+                if (HttpContext.Session.Id == id)
+                {
+                    return View("restrictions", Daos[id].Info);
+                }
+                else
+                {
+                    return DatabaseConnection();
+                }
             }
         }
 
         // loads the missing_values View
         [HttpGet]
-        public ActionResult Missing_values()
+        public ViewResult Missing_values()
         {
-
-            string id = HttpContext.Session.GetString("id");
-            if (HttpContext.Session.Id == id)
+            if (HttpContext is null)
             {
-                return View("missing_values", Daos[id].Info);
+                return View("missing_values");
             }
             else
             {
-                return RedirectToAction("DatabaseConnection");
+                string id = HttpContext.Session.GetString("id");
+                if (HttpContext.Session.Id == id)
+                {
+                    return View("missing_values", Daos[id].Info);
+                }
+                else
+                {
+                    return DatabaseConnection();
+                }
             }
         }
 
         // loads the improve_Metatable daos[id].tabledatatypes View
         [HttpGet]
-        public ActionResult Improve_datatypes()
+        public ViewResult Improve_datatypes()
         {
-
-            string id = HttpContext.Session.GetString("id");
-            if (HttpContext.Session.Id == id)
+            if (HttpContext is null)
             {
-                return View("improve_datatypes", Daos[id].Info);
+                return View("improve_datatypes");
             }
             else
             {
-                return RedirectToAction("DatabaseConnection");
+                string id = HttpContext.Session.GetString("id");
+                if (HttpContext.Session.Id == id)
+                {
+                    return View("improve_datatypes", Daos[id].Info);
+                }
+                else
+                {
+                    return DatabaseConnection();
+                }
             }
         }
 
         // loads the primary_keys View
         [HttpGet]
-        public ActionResult Primary_keys()
+        public ViewResult Primary_keys()
         {
-
-            string id = HttpContext.Session.GetString("id");
-            if (HttpContext.Session.Id == id)
+            if (HttpContext is null)
             {
-                return View("primary_keys", Daos[id].Info);
+                return View("primary_keys");
             }
             else
             {
-                return RedirectToAction("DatabaseConnection");
+                string id = HttpContext.Session.GetString("id");
+                if (HttpContext.Session.Id == id)
+                {
+                    return View("primary_keys", Daos[id].Info);
+                }
+                else
+                {
+                    return DatabaseConnection();
+                }
             }
         }
 
         // loads the foreign_keys View
         [HttpGet]
-        public ActionResult Foreign_keys()
+        public ViewResult Foreign_keys()
         {
-
-            string id = HttpContext.Session.GetString("id");
-            if (HttpContext.Session.Id == id)
+            if (HttpContext is null)
             {
-                return View("foreign_keys", Daos[id].Info);
+                return View("foreign_keys");
             }
             else
             {
-                return RedirectToAction("DatabaseConnection");
+                string id = HttpContext.Session.GetString("id");
+                if (HttpContext.Session.Id == id)
+                {
+                    return View("foreign_keys", Daos[id].Info);
+                }
+                else
+                {
+                    return DatabaseConnection();
+                }
             }
         }
 
         // loads the improve_indexes View
         [HttpGet]
-        public ActionResult Improve_indexes()
+        public ViewResult Improve_indexes()
         {
-
-            string id = HttpContext.Session.GetString("id");
-            if (HttpContext.Session.Id == id)
+            if (HttpContext is null)
             {
-                return View("improve_indexes", Daos[id].Info);
+                return View("improve_indexes");
             }
             else
             {
-                return RedirectToAction("DatabaseConnection");
+                string id = HttpContext.Session.GetString("id");
+                if (HttpContext.Session.Id == id)
+                {
+                    return View("improve_indexes", Daos[id].Info);
+                }
+                else
+                {
+                    return DatabaseConnection();
+                }
             }
         }
 
         [HttpGet]
-        public ActionResult Create_masks()
+        public ViewResult Create_masks()
         {
-
-            string id = HttpContext.Session.GetString("id");
-            if (HttpContext.Session.Id == id)
+            if (HttpContext is null)
             {
-                return View("create_masks", Daos[id].Info);
+                return View("create_masks");
             }
             else
             {
-                return RedirectToAction("DatabaseConnection");
+                string id = HttpContext.Session.GetString("id");
+                if (HttpContext.Session.Id == id)
+                {
+                    return View("create_masks", Daos[id].Info);
+                }
+                else
+                {
+                    return DatabaseConnection();
+                }
             }
         }
         [HttpGet]
-        public ActionResult Create_restrictions()
+        public ViewResult Create_restrictions()
         {
-            string id = HttpContext.Session.GetString("id");
-            if (HttpContext.Session.Id == id)
+            if (HttpContext is null)
             {
-                return View("create_restrictions", Daos[id].Info);
+                return View("create_restrictions");
             }
             else
             {
-                return RedirectToAction("DatabaseConnection");
-            }
-        }
-
-        [HttpGet]
-        public ActionResult Performance()
-        {
-            string id = HttpContext.Session.GetString("id");
-            if (HttpContext.Session.Id == id)
-            {
-                Daos[id].UpdatePerformance();
-                return View("Performance", Daos[id].Perf);
-            }
-            else
-            {
-                return RedirectToAction("DatabaseConnection");
+                string id = HttpContext.Session.GetString("id");
+                if (HttpContext.Session.Id == id)
+                {
+                    return View("create_restrictions", Daos[id].Info);
+                }
+                else
+                {
+                    return DatabaseConnection();
+                }
             }
         }
 
         [HttpGet]
-        public ActionResult Selection()
+        public ViewResult Performance()
         {
-            string id = HttpContext.Session.GetString("id");
-            if (HttpContext.Session.Id == id)
+            if (HttpContext is null)
             {
-                return View("Selection", Daos[id].Info);
+                return View("Performance");
             }
             else
             {
-                return RedirectToAction("DatabaseConnection");
+                string id = HttpContext.Session.GetString("id");
+                if (HttpContext.Session.Id == id)
+                {
+                    Daos[id].UpdatePerformance();
+                    return View("Performance", Daos[id].Perf);
+                }
+                else
+                {
+                    return DatabaseConnection();
+                }
             }
         }
 
         [HttpGet]
-        public ActionResult Help()
+        public ViewResult Selection()
         {
-            string id = HttpContext.Session.GetString("id");
-            if (id == null)
+            if (HttpContext is null)
             {
-                return View("Help", new Help());
+                return View("Selection");
             }
             else
             {
-                return View("Help", Daos[id].Help);
+                string id = HttpContext.Session.GetString("id");
+                if (HttpContext.Session.Id == id)
+                {
+                    return View("Selection", Daos[id].Info);
+                }
+                else
+                {
+                    return DatabaseConnection();
+                }
+            }
+        }
+
+        [HttpGet]
+        public ViewResult Help()
+        {
+            if (HttpContext is null)
+            {
+                return View("Help");
+            }
+            else
+            {
+                string id = HttpContext.Session.GetString("id");
+                if (id == null)
+                {
+                    return View("Help", new Help());
+                }
+                else
+                {
+                    return View("Help", Daos[id].Help);
+                }
             }
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         [HttpGet]
-        public ActionResult Error()
+        public ViewResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
         [HttpPost]
-        public ActionResult Connect(string connectionString)
+        public RedirectToActionResult Connect(string connectionString)
         {
             // this method checks the connection string to see it is not empty
             if (connectionString == null || connectionString == "")
             {
-                return Help();
+                return RedirectToAction("Help");
             }
 
             // then tries to open it to see if it is valid
@@ -283,27 +379,30 @@ namespace TFG.Controllers
                 SqlConnection con = new SqlConnection(connectionString);
                 con.Open();
 
-                // if it is valid it gets the database name
-                string[] splits = connectionString.Split(';');
-                foreach (string splitted in splits)
+                if (HttpContext is not null)
                 {
-                    if (splitted.Contains("database"))
+                    // if it is valid it gets the database name
+                    string[] splits = connectionString.Split(';');
+                    foreach (string splitted in splits)
                     {
-                        splits = splitted.Split('=');
-                        break;
+                        if (splitted.Contains("database"))
+                        {
+                            splits = splitted.Split('=');
+                            break;
+                        }
                     }
-                }
 
-                // Save a id variable in the session to stop it for resetting, then save the connection and create the dao
-                HttpContext.Session.SetString("id", HttpContext.Session.Id);
-                Daos = new Dictionary<string, MetatableDao>
-                {
+                    // Save a id variable in the session to stop it for resetting, then save the connection and create the dao
+                    HttpContext.Session.SetString("id", HttpContext.Session.Id);
+                    Daos = new Dictionary<string, MetatableDao>
+                    {
                     { HttpContext.Session.Id, new MetatableDao(new Metatable(splits[1]), con) }
-                };
-                Daos[HttpContext.Session.Id].LoadScripts();
-                Daos[HttpContext.Session.Id].InitMetatable();
-                ResetInfo();
-                Daos[HttpContext.Session.Id].Help.connected = true;
+                    };
+                    Daos[HttpContext.Session.Id].LoadScripts();
+                    Daos[HttpContext.Session.Id].InitMetatable();
+                    ResetInfo();
+                    Daos[HttpContext.Session.Id].Help.connected = true;
+                }
                 return RedirectToAction("MainPage");
             }
             catch (Exception)
@@ -329,7 +428,7 @@ namespace TFG.Controllers
             }
             else
             {
-                return RedirectToAction("DatabaseConnection");
+                return DatabaseConnection();
             }
 
         }
@@ -395,7 +494,7 @@ namespace TFG.Controllers
             }
             else
             {
-                return RedirectToAction("DatabaseConnection");
+                return DatabaseConnection();
             }
 
         }
@@ -423,7 +522,7 @@ namespace TFG.Controllers
             }
             else
             {
-                return RedirectToAction("DatabaseConnection");
+                return DatabaseConnection();
             }
         }
 
@@ -487,7 +586,7 @@ namespace TFG.Controllers
             }
             else
             {
-                return RedirectToAction("DatabaseConnection");
+                return DatabaseConnection();
             }
         }
 
@@ -511,7 +610,7 @@ namespace TFG.Controllers
             }
             else
             {
-                return RedirectToAction("DatabaseConnection");
+                return DatabaseConnection();
             }
         }
 
@@ -528,7 +627,7 @@ namespace TFG.Controllers
             }
             else
             {
-                return RedirectToAction("DatabaseConnection");
+                return DatabaseConnection();
             }
         }
 
@@ -551,7 +650,7 @@ namespace TFG.Controllers
             }
             else
             {
-                return RedirectToAction("DatabaseConnection");
+                return DatabaseConnection();
             }
         }
 
@@ -580,7 +679,7 @@ namespace TFG.Controllers
             }
             else
             {
-                return RedirectToAction("DatabaseConnection");
+                return DatabaseConnection();
             }
         }
 
@@ -597,7 +696,7 @@ namespace TFG.Controllers
             }
             else
             {
-                return RedirectToAction("DatabaseConnection");
+                return DatabaseConnection();
             }
         }
 
