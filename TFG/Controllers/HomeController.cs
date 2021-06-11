@@ -269,17 +269,14 @@ namespace TFG.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> Connect(string connectionString)
+        public ActionResult Connect(string connectionString)
         {
             // this method checks the connection string to see it is not empty
             if (connectionString == null || connectionString == "")
             {
                 return Help();
             }
-            return await ConnectTask(connectionString);
-        }
-        public async Task<ActionResult> ConnectTask(string connectionString)
-        {
+
             // then tries to open it to see if it is valid
             try
             {
@@ -307,19 +304,12 @@ namespace TFG.Controllers
                 Daos[HttpContext.Session.Id].InitMetatable();
                 ResetInfo();
                 Daos[HttpContext.Session.Id].Help.connected = true;
-
-                return await Task.Run<ActionResult>(() =>
-                {
-                    return RedirectToAction("MainPage");
-                });
+                return RedirectToAction("MainPage");
             }
             catch (Exception)
             {
                 // if it is not valid it return the Help View
-                return await Task.Run<ActionResult>(() =>
-                {
-                    return RedirectToAction("Help");
-                });
+                return RedirectToAction("Help");
             }
         }
 
