@@ -81,10 +81,9 @@
                     <button type="button" onclick="goToSelection('@functionalities[i]')" class="btn btn-outline-dark">Select what to run</button>
                 </div>
             </div>
-
         }
         <div class="alert alert-warning" role="alert">
-            Disclaimer: Some Datacleaning functionalities may malfunction on tables with missing Primary Keys. Tuning functionalities should be prioritized!
+            Some Datacleaning functionalities may malfunction on tables with no Primary Keys.
         </div>
     </div>
 </div>
@@ -102,5 +101,13 @@
                 </div>
             </div>
         }
+        <div class="alert alert-warning" role="alert">
+            <p>
+                Primary keys can be further optimized by running the Remove Duplicates functionality beforehand on specific columns.
+            </p>
+            <p>
+                Table Defragmentation functionality is run without middle steps and does not produce a report.
+            </p>
+        </div>
     </div>
 </div>
