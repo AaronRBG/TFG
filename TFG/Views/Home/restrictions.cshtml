@@ -52,7 +52,7 @@
         @{
             int index = 0;
         }
-        @foreach (Restriction r in Model.restrictions)
+        @foreach (Restriction r in Model.Restrictions)
         {
             string name = r.Table + index;
             string collapse = "#collapse" + name;
@@ -79,7 +79,7 @@
         @{
             index = 0;
         }
-        @foreach (Restriction r in Model.restrictions)
+        @foreach (Restriction r in Model.Restrictions)
         {
             string name = r.Table + index;
             string name1 = name + '.' + r.Column1;

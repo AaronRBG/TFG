@@ -17,7 +17,7 @@ namespace TFG.Tests
         [SetUp]
         public void Setup()
         {
-            h = new HomeController(); 
+            h = new HomeController();
         }
 
         [Test]
@@ -144,6 +144,108 @@ namespace TFG.Tests
         {
             res = h.Help();
             Assert.AreEqual("Help", res.ViewName);
+        }
+
+        [Test]
+        public void GetCombinationsTest()
+        {
+            string[] input = {"a", "b", "c"};
+            string[] result = MetatableDao.GetCombinations(input);
+            Assert.AreEqual(7, result.Length);
+            Assert.AreEqual("a", result[0]);
+            Assert.AreEqual("b", result[1]);
+            Assert.AreEqual("c", result[2]);
+            Assert.AreEqual("a,b", result[3]);
+            Assert.AreEqual("a,c", result[4]);
+            Assert.AreEqual("b,c", result[5]);
+            Assert.AreEqual("a,b,c", result[6]);
+        }
+
+        [Test]
+        public void GetCombinationsWithIDTest()
+        {
+            string[] input = { "a", "b", "cID" };
+            string[] result = MetatableDao.GetCombinations(input);
+            Assert.AreEqual(7, result.Length);
+            Assert.AreEqual("cID", result[0]);
+            Assert.AreEqual("a", result[1]);
+            Assert.AreEqual("b", result[2]);
+            Assert.AreEqual("a,cID", result[3]);
+            Assert.AreEqual("b,cID", result[4]);
+            Assert.AreEqual("a,b", result[5]);
+            Assert.AreEqual("a,b,cID", result[6]);
+        }
+
+        [Test]
+        public void IsSpacialTest()
+        {
+            Assert.AreEqual(true, MetatableDao.IsSpacial("hierarchyid"));
+        }
+
+        [Test]
+        public void BadIsSpacialTest()
+        {
+            Assert.AreEqual(false, MetatableDao.IsSpacial("nvarchar(50)"));
+        }
+
+        [Test]
+        public void IsDNITest()
+        {
+            Assert.AreEqual(true, MetatableDao.IsDNI("50505050A"));
+        }
+
+        [Test]
+        public void BadIsDNITest()
+        {
+            Assert.AreEqual(false, MetatableDao.IsDNI("5"));
+        }
+
+        [Test]
+        public void IsEmailTest()
+        {
+            Assert.AreEqual(true, MetatableDao.IsEmail("pepe@gmail.com"));
+        }
+
+        [Test]
+        public void BadIsEmailTest()
+        {
+            Assert.AreEqual(false, MetatableDao.IsEmail("5"));
+        }
+
+        [Test]
+        public void IsPhoneTest()
+        {
+            Assert.AreEqual(true, MetatableDao.IsPhone("5606504654"));
+        }
+
+        [Test]
+        public void BadIsPhoneTest()
+        {
+            Assert.AreEqual(false, MetatableDao.IsPhone("5"));
+        }
+
+        [Test]
+        public void IsCCNTest()
+        {
+            Assert.AreEqual(true, MetatableDao.IsCCN("4984846456146546"));
+        }
+
+        [Test]
+        public void BadIsCCNTest()
+        {
+            Assert.AreEqual(false, MetatableDao.IsCCN("5"));
+        }
+
+        [Test]
+        public void StringSimilarTest()
+        {
+            Assert.AreEqual(true, MetatableDao.StringSimilar("helloworld", "hellworld"));
+        }
+
+        [Test]
+        public void BadStringSimilarTest()
+        {
+            Assert.AreEqual(false, MetatableDao.StringSimilar("helloworld","exampleText"));
         }
 
     }

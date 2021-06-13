@@ -110,7 +110,7 @@
                     <tbody>
                         @{
                             string[] columns = Model.ColumnsSelected[table];
-                            Restriction[] restrictions = Model.restrictions.Where(r => r.Table == table).ToArray();
+                            Restriction[] restrictions = Model.Restrictions.Where(r => r.Table == table).ToArray();
                         }
                         @for (int j = 0; j < @restrictions.Length; j++)
                         {

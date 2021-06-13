@@ -17,7 +17,7 @@ namespace TFG.Models
         public string TableAccordion { get; set; }
         public string ColumnAccordion { get; set; }
         public string[] TablesSelected { get; set; }
-        public List<Restriction> restrictions { get; set; }
+        public List<Restriction> Restrictions { get; set; }
         public Dictionary<string, bool[]> MasksAvailable { get; set; }
         public Dictionary<string, string[]> TablePks { get; set; }
         public Dictionary<string, string[]> TableSuggestedPks { get; set; }

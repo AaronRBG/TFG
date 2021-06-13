@@ -665,14 +665,14 @@ namespace TFG.Controllers
 
                 if (column2 == null && column1 == null)
                 {
-                    Restriction r = Daos[id].Info.restrictions.Where(r => r.Table == table).ToArray()[Int32.Parse(index)];
-                    Daos[id].Info.restrictions.Remove(r);
+                    Restriction r = Daos[id].Info.Restrictions.Where(r => r.Table == table).ToArray()[Int32.Parse(index)];
+                    Daos[id].Info.Restrictions.Remove(r);
                 }
                 else
                 {
-                    if (!Daos[id].Info.restrictions.Contains(new Restriction(table, column1, column2)))
+                    if (!Daos[id].Info.Restrictions.Contains(new Restriction(table, column1, column2)))
                     {
-                        Daos[id].Info.restrictions.Add(new Restriction(table, column1, column2));
+                        Daos[id].Info.Restrictions.Add(new Restriction(table, column1, column2));
                     }
                 }
                 return View("create_restrictions", Daos[id].Info);
@@ -751,7 +751,7 @@ namespace TFG.Controllers
             {
                 Records = new Dictionary<string, string[]>(),
                 TablePks = new Dictionary<string, string[]>(),
-                restrictions = new List<Restriction>()
+                Restrictions = new List<Restriction>()
             };
         }
 

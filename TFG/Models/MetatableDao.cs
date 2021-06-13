@@ -108,7 +108,7 @@ namespace TFG
         // This method applies runs queries to calculate the best suitable fks for the given tables
         private void FindFks()
         {
-            Models.Constraint[] aux = Tabledata.constraints.Where(c => c.Type == "FOREIGN KEY").ToArray();
+            Models.Constraint[] aux = Tabledata.Constraints.Where(c => c.Type == "FOREIGN KEY").ToArray();
             foreach (Models.Constraint c in aux)
             {
                 c.Table = c.Table.Replace("[", "").Replace("]", "").Split('.')[1];
@@ -286,7 +286,7 @@ namespace TFG
         }
 
         // This method calculates and returns all the possible pk combinations ordered
-        private static string[] GetCombinations(string[] columns)
+        public static string[] GetCombinations(string[] columns)
         {
             int count = (int)Math.Pow(2, columns.Length);
             string[] res = new string[count - 1];
@@ -655,20 +655,20 @@ namespace TFG
                 res.Add(aux);
             }
 
-            Tabledata.constraints = res.ToArray();
+            Tabledata.Constraints = res.ToArray();
         }
 
         private void DeleteConstraints(string table)
         {
-            foreach (Models.Constraint c in Tabledata.constraints.Where(s => s.Type != "COMPUTED COLUMN" && s.Type != "INDEX" && (s.Table == table || s.Table2 == table)))
+            foreach (Models.Constraint c in Tabledata.Constraints.Where(s => s.Type != "COMPUTED COLUMN" && s.Type != "INDEX" && (s.Table == table || s.Table2 == table)))
             {
                 Broker.Instance().Run(new SqlCommand("ALTER TABLE " + c.Table + " DROP CONSTRAINT " + c.Name, Con), "findConstraints");
             }
-            foreach (Models.Constraint c in Tabledata.constraints.Where(s => s.Type == "COMPUTED COLUMN" && s.Table == table))
+            foreach (Models.Constraint c in Tabledata.Constraints.Where(s => s.Type == "COMPUTED COLUMN" && s.Table == table))
             {
                 Broker.Instance().Run(new SqlCommand("ALTER TABLE " + c.Table + " DROP COLUMN " + c.Column, Con), "findConstraints");
             }
-            foreach (Models.Constraint c in Tabledata.constraints.Where(s => s.Type == "INDEX" && s.Table == table))
+            foreach (Models.Constraint c in Tabledata.Constraints.Where(s => s.Type == "INDEX" && s.Table == table))
             {
                 Broker.Instance().Run(new SqlCommand("DROP INDEX " + c.Name + " ON " + c.Table, Con), "findConstraints");
             }
@@ -676,20 +676,20 @@ namespace TFG
 
         private void ReplaceConstraints(string table)
         {
-            foreach (Models.Constraint c in Tabledata.constraints.Where(s => s.Type == "COMPUTED COLUMN" && s.Table == table))
+            foreach (Models.Constraint c in Tabledata.Constraints.Where(s => s.Type == "COMPUTED COLUMN" && s.Table == table))
             {
                 Broker.Instance().Run(new SqlCommand("ALTER TABLE " + c.Table + " ADD " + c.Column + " AS " + c.Definition, Con), "findConstraints");
             }
-            foreach (Models.Constraint c in Tabledata.constraints.Where(s => s.Type == "PRIMARY KEY" && s.Table == table))
+            foreach (Models.Constraint c in Tabledata.Constraints.Where(s => s.Type == "PRIMARY KEY" && s.Table == table))
             {
                 Broker.Instance().Run(new SqlCommand("ALTER TABLE " + c.Table + " ADD CONSTRAINT " + c.Name + " PRIMARY KEY(" + c.Column + ")", Con), "findConstraints");
             }
-            foreach (Models.Constraint c in Tabledata.constraints.Where(s => s.Type == "FOREIGN KEY" && (s.Table == table || s.Table2 == table)))
+            foreach (Models.Constraint c in Tabledata.Constraints.Where(s => s.Type == "FOREIGN KEY" && (s.Table == table || s.Table2 == table)))
             {
                 Broker.Instance().Run(new SqlCommand("ALTER TABLE " + c.Table + " ADD CONSTRAINT " + c.Name + " FOREIGN KEY(" + c.Column
                     + ") REFERENCES " + c.Table2 + " (" + c.Column + ") ON DELETE CASCADE ON UPDATE CASCADE", Con), "findConstraints");
             }
-            foreach (Models.Constraint c in Tabledata.constraints.Where(s => s.Type == "INDEX" && s.Table == table))
+            foreach (Models.Constraint c in Tabledata.Constraints.Where(s => s.Type == "INDEX" && s.Table == table))
             {
                 string aux = ArrayToString(c.Column.Split('_'), true);
                 Broker.Instance().Run(new SqlCommand("CREATE INDEX " + c.Name + " ON " + c.Table + " (" + aux + ")", Con), "findConstraints");
@@ -1106,7 +1106,7 @@ namespace TFG
 
             foreach (KeyValuePair<int, int[]> entry in input)
             {
-                Restriction r = Info.restrictions[entry.Key];
+                Restriction r = Info.Restrictions[entry.Key];
                 for (int i = 0; i < entry.Value.Length; i++)
                 {
                     string name1 = r.Table + entry.Key + '.' + r.Column1;
@@ -1224,11 +1224,11 @@ namespace TFG
         // This method is used to retrieve the values that don't follow the selected restrictions for restrictions functionality
         public void GetRestrictions()
         {
-            Info.restrictions = Info.restrictions.OrderBy(r => r.Table).ToList();
+            Info.Restrictions = Info.Restrictions.OrderBy(r => r.Table).ToList();
             int index = 0;
             Dictionary<string, string[]> res = new Dictionary<string, string[]>();
 
-            foreach (Restriction r in Info.restrictions)
+            foreach (Restriction r in Info.Restrictions)
             {
                 string name1 = r.Table + index + '.' + r.Column1;
                 string name2 = r.Table + index + '.' + r.Column2;
@@ -1576,7 +1576,7 @@ namespace TFG
 
             foreach (KeyValuePair<string, string[]> entry in Info.ColumnsSelected)
             {
-                Models.Constraint[] c = Tabledata.constraints.Where(s => s.Type == "COMPUTED COLUMN" && s.Table == GetTableSchemaName(entry.Key)).ToArray();
+                Models.Constraint[] c = Tabledata.Constraints.Where(s => s.Type == "COMPUTED COLUMN" && s.Table == GetTableSchemaName(entry.Key)).ToArray();
                 if (c.Length > 0)
                 {
                     string[] aux = c.Select(c => c.Column).ToArray();
@@ -1686,7 +1686,7 @@ namespace TFG
 
 
         // This method is used to filter the spacial datatypes 
-        private static bool IsSpacial(string type)
+        public static bool IsSpacial(string type)
         {
             if (type == "geometry")
             {
@@ -1704,7 +1704,7 @@ namespace TFG
         }
 
         // This method is used to check if a database cell data corresponds to a DNI
-        private static bool IsDNI(string value)
+        public static bool IsDNI(string value)
         {
             char[] aux = value.ToCharArray();
             int INTcount = 0;
@@ -1728,7 +1728,7 @@ namespace TFG
         }
 
         // This method is used to check if a database cell data corresponds to an Email
-        private static bool IsEmail(string value)
+        public static bool IsEmail(string value)
         {
             if (value.Contains('@') && value.Contains('.') && value.IndexOf('@') < value.IndexOf('.'))
             {
@@ -1738,7 +1738,7 @@ namespace TFG
         }
 
         // This method is used to check if a database cell data corresponds to a Phone Number
-        private static bool IsPhone(string value)
+        public static bool IsPhone(string value)
         {
             char[] aux = value.ToCharArray();
             int count = 0;
@@ -1757,7 +1757,7 @@ namespace TFG
         }
 
         // This method is used to check if a database cell data corresponds to a Credit Card Number
-        private static bool IsCCN(string value)
+        public static bool IsCCN(string value)
         {
             char[] aux = value.ToCharArray();
             int count = 0;
@@ -2130,7 +2130,7 @@ namespace TFG
             return bld.ToString();
         }
 
-        private static bool StringSimilar(string a, string b)
+        public static bool StringSimilar(string a, string b)
         {
             if ((a.Length == 0) || (b.Length == 0))
             {
@@ -2144,13 +2144,30 @@ namespace TFG
                 return false;
             double LIMIT = ((maxLen - 1) / maxLen);
             int same = 0;
-            Parallel.For(0, minLen, (i) =>
+            int index = 0;
+            string big, small;
+            if(a.Length == maxLen)
             {
-                if (a[i] == b[i])
+                big = a;
+                small = b;
+            }
+            else
+            {
+                big = b;
+                small = a;
+            }
+            for(int i=0; i<maxLen; i++)
+            {
+                if (small[index] == big[i])
                 {
                     same++;
+                    index++;
                 }
-            });
+                if(index==minLen)
+                {
+                    i = (int)maxLen;
+                }
+            }
             if (same >= maxLen * LIMIT)
                 return true;
             return false;
