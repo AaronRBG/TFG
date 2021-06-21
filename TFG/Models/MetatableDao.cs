@@ -451,7 +451,7 @@ namespace TFG
                     + " WHERE " + bld.ToString(), Con), "missing");
                 DataTable dt = ds.Tables["missing"];
                 string[][] container = new string[columns.Length][];
-                if (dt != null)
+                if (dt != null && dt.Rows.Count > 0)
                 {
                     for (int x = 0; x < dt.Rows.Count; x++)
                     {
@@ -464,24 +464,28 @@ namespace TFG
                             container[i][x] = dt.Rows[x][i].ToString();
                         }
                     }
+                    for (int i = 0; i < columns.Length; i++)
+                    {
+                        string name = entry.Key + '.' + columns[i];
+                        if (container[i] != null)
+                        {
+                            res.Add(name, container[i]);
+                        }
+                        else
+                        {
+                            res.Add(name, Array.Empty<string>());
+                        }
+                    }
+                    string[] other = new string[columns.Length + entry.Value.Length];
+                    Array.Copy(columns, 0, other, 0, columns.Length);
+                    string[] aux = entry.Value.Select(s => s + "Missing").ToArray();
+                    Array.Copy(aux, 0, other, columns.Length, aux.Length);
+                    Info.ColumnsSelected[entry.Key] = other;
                 }
-                for (int i = 0; i < columns.Length; i++)
+                else
                 {
-                    string name = entry.Key + '.' + columns[i];
-                    if (container[i] != null)
-                    {
-                        res.Add(name, container[i]);
-                    }
-                    else
-                    {
-                        res.Add(name, Array.Empty<string>());
-                    }
+                    Info.ColumnsSelected.Remove(entry.Key);
                 }
-                string[] other = new string[columns.Length + entry.Value.Length];
-                Array.Copy(columns, 0, other, 0, columns.Length);
-                string[] aux = entry.Value.Select(s => s + "Missing").ToArray();
-                Array.Copy(aux, 0, other, columns.Length, aux.Length);
-                Info.ColumnsSelected[entry.Key] = other;
             }
             Tabledata.MissingValues = res;
         }
@@ -764,7 +768,7 @@ namespace TFG
 
                     for (int i = 0; i < data.Length; i++)
                     {
-                        StringBuilder bld = new StringBuilder(); 
+                        StringBuilder bld = new StringBuilder();
                         bld.Append(" WHERE");
 
                         for (int j = 0; j < pks.Length; j++)
@@ -1305,12 +1309,20 @@ namespace TFG
                 string query_time;
                 DataSet ds, ds2;
                 ds = Broker.Instance().Run(new SqlCommand("select ms_ticks from sys.dm_os_sys_info", Con), "initPerformance");
-                Broker.Instance().Run(new SqlCommand("SELECT * FROM " + table, Con), "initPerformance");
+                for (int i = 0; i < 10; i++)
+                {
+                    Broker.Instance().Run(new SqlCommand("SELECT * FROM " + table, Con), "initPerformance");
+                }
                 ds2 = Broker.Instance().Run(new SqlCommand("select ms_ticks from sys.dm_os_sys_info", Con), "initPerformance");
                 DataTable dt = ds.Tables["initPerformance"];
                 qt = (Int64)dt.Rows[0][0];
                 dt = ds2.Tables["initPerformance"];
                 qt = (Int64)dt.Rows[0][0] - qt;
+                qt = qt / 10;
+                if (qt == 0)
+                {
+                    qt++;
+                }
                 query_time = qt.ToString() + " ms";
                 ds = Broker.Instance().Run(new SqlCommand("exec sp_spaceused '" + table + "'", Con), "initPerformance");
                 dt = ds.Tables["initPerformance"];
@@ -1484,7 +1496,7 @@ namespace TFG
                 for (int i = 0; i < entry.Value.Length; i++)
                 {
                     string name = entry.Key + '.' + entry.Value[i];
-                    string result = "result";
+                    string result = "nvarchar(100)";
 
                     if (Tabledata.Records.ContainsKey(name) && Tabledata.Records[name] != null)
                     {
@@ -1683,7 +1695,6 @@ namespace TFG
             Array.Sort(res);
             return res;
         }
-
 
         // This method is used to filter the spacial datatypes 
         public static bool IsSpacial(string type)
@@ -2146,7 +2157,7 @@ namespace TFG
             int same = 0;
             int index = 0;
             string big, small;
-            if(a.Length == maxLen)
+            if (a.Length == maxLen)
             {
                 big = a;
                 small = b;
@@ -2156,14 +2167,14 @@ namespace TFG
                 big = b;
                 small = a;
             }
-            for(int i=0; i<maxLen; i++)
+            for (int i = 0; i < maxLen; i++)
             {
                 if (small[index] == big[i])
                 {
                     same++;
                     index++;
                 }
-                if(index==minLen)
+                if (index == minLen)
                 {
                     i = (int)maxLen;
                 }

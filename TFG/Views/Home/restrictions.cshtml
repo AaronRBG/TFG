@@ -109,7 +109,7 @@
                         {
                             string idname = index.ToString() + "." + records1[i] + '_' + i + "Record";
                             <tr>
-                                <th scope="row"><input type="checkbox" id="@idname" name="@idname" data-parent="@CheckBox" onclick="uncheck('@idname', true);checkParent('@CheckBox', '@idname')" /></th>
+                                <th scope="row"><input type="checkbox" id="@idname" name="@idname" data-parent="@CheckBox" onclick="uncheck('@idname', true);checkParent('@CheckBox', '@idname','@Model.Functionality')" /></th>
                                 <td style="border-left: 1px solid;">@records1[i]</td>
                                 <td>@records2[i]</td>
                             </tr>

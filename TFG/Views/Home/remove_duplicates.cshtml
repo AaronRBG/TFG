@@ -101,15 +101,15 @@
                         <tbody>
                             @for (int j = 0; j < container[0].Length; j++)
                             {
-                                string idname = @entry.Key + @j + "Record";
+                                string idname = @entry.Key + '_' + j + "Record";
                                 <tr>
                                     @if (j % 2 == 0)
                                     {
-                                        <th scope="row"><input type="checkbox" id="@idname" name="@idname" data-parent="@CheckBox" onclick="checkParent('@CheckBox', '@idname')" /></th>
+                                        <th scope="row"><input type="checkbox" id="@idname" name="@idname" data-parent="@CheckBox" onclick="uncheck('@idname', false);checkParent('@CheckBox', '@idname','@Model.Functionality')" /></th>
                                     }
                                     else
                                     {
-                                        <th scope="row" style="border-bottom: 1px solid;"><input type="checkbox" id="@idname" name="@idname" data-parent="@CheckBox" onclick="checkParent('@CheckBox', '@idname')" /></th>
+                                        <th scope="row" style="border-bottom: 1px solid;"><input type="checkbox" id="@idname" name="@idname" data-parent="@CheckBox" onclick="uncheck('@idname', false);checkParent('@CheckBox', '@idname','@Model.Functionality')" /></th>
                                     }
                                     @for (int k = 0; k < entry.Value.Length; k++)
                                     {
@@ -134,10 +134,9 @@
 <!-- This part is perform whole actions like selecting everything or nothing and running the functionality with the selected items -->
 <div id="controls">
     <div class="btn-group-vertical" role="group" style="padding-top: 20vh;">
-        <button type="button" onclick="selectAll()" class="btn btn-outline-primary">Select All</button>
-        <button type="button" onclick="selectRecords()" class="btn btn-outline-dark">Select Table Records</button>
-        <button type="button" onclick="unselectRecords()" class="btn btn-outline-primary">Unselect Table Records</button>
-        <button type="button" onclick="selectNone()" class="btn btn-outline-dark">Select None</button>
+        <button type="button" onclick="selectHalfRecords(false)" class="btn btn-outline-primary">Select Odd Records</button>
+        <button type="button" onclick="selectHalfRecords(true)" class="btn btn-outline-dark">Select Even Records</button>
+        <button type="button" onclick="selectNone()" class="btn btn-outline-primary">Select None</button>
     </div>
     <br />
     <span id="records-selected" class="selection-text"></span>

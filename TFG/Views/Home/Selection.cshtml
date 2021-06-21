@@ -71,7 +71,7 @@
                         <div class="card-body nav_color_2">
                             @for (int i = 0; i < ((string[])entry.Value).Length; i++)
                             {
-                                <input type="checkbox" id="@entry.Value[i]" onclick="checkParent('@CheckBox', '@entry.Value[i]')" data-parent="@CheckBox" /> <span style="color: white;">@entry.Value[i]</span>
+                                <input type="checkbox" id="@entry.Value[i]" onclick="checkParent('@CheckBox', '@entry.Value[i]','@Model.Functionality')" data-parent="@CheckBox" /> <span style="color: white;">@entry.Value[i]</span>
                                 <br />
                             }
                         </div>
@@ -84,7 +84,7 @@
 <!-- This part is perform whole actions like selecting everything or nothing and running the functionality with the selected items -->
 <div id="controls">
     <div class="btn-group" role="group" style="padding-top: 20vh;">
-        <button type="button" onclick="selectAll()" class="btn btn-outline-primary">Select All</button>
+        <button type="button" onclick="selectAll('')" class="btn btn-outline-primary">Select All</button>
         <button type="button" onclick="selectNone()" class="btn btn-outline-dark">Select None</button>
     </div>
     <br />

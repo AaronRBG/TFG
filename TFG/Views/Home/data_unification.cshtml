@@ -70,7 +70,7 @@
                         {
                             string name = @entry.Key + '.' + @entry.Value[i];
                             string divName = name + "Div";
-                            <input type="checkbox" id="@name" name="@name" onclick="checkParent('@CheckBox', '@name')" data-parent="@CheckBox" style="display: none;" /> <button class="btn btn-link" onclick="openTab(event, '@divName')">@entry.Value[i]</button>
+                            <input type="checkbox" id="@name" name="@name" onclick="checkParent('@CheckBox', '@name','@Model.Functionality')" data-parent="@CheckBox" style="display: none;" /> <button class="btn btn-link" onclick="openTab(event, '@divName')">@entry.Value[i]</button>
                             <br />
                         }
                     </div>
@@ -106,12 +106,12 @@
                                 <tr>
                                     @if (j % 2 == 0)
                                     {
-                                        <th scope="row"><input type="checkbox" id="@idname" name="@idname" data-parent="@CheckBox" onclick="uncheck('@idname', false);checkParent('@CheckBox', '@idname')" /></th>
+                                        <th scope="row"><input type="checkbox" id="@idname" name="@idname" data-parent="@CheckBox" onclick="uncheck('@idname', false);checkParent('@CheckBox', '@idname','@Model.Functionality')" /></th>
                                         <td>@records[j]</td>
                                     }
                                     else
                                     {
-                                        <th scope="row" style="border-bottom: 1px solid;"><input type="checkbox" id="@idname" name="@idname" data-parent="@CheckBox" onclick="uncheck('@idname', false);checkParent('@CheckBox', '@idname')" /></th>
+                                        <th scope="row" style="border-bottom: 1px solid;"><input type="checkbox" id="@idname" name="@idname" data-parent="@CheckBox" onclick="uncheck('@idname', false);checkParent('@CheckBox', '@idname','@Model.Functionality')" /></th>
                                         <td style="border-bottom: 1px solid;">@records[j]</td>
                                     }
                                 </tr>

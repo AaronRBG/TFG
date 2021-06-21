@@ -93,7 +93,7 @@
                             string CheckBox = entry.Key + "CheckBox";
                             string name = entry.Key + '.' + entry.Value[i];
                             <tr>
-                                <th scope="row"><input type="checkbox" id="@name" name="@name" data-parent="@CheckBox" onclick="checkParent('@CheckBox', '@name')" /></th>
+                                <th scope="row"><input type="checkbox" id="@name" name="@name" data-parent="@CheckBox" onclick="checkParent('@CheckBox', '@name','@Model.Functionality')" /></th>
                                 <td>@entry.Key</td>
                                 <td>@entry.Value[i]</td>
                                 <td style="border-left: 1px solid;">@Model.ColumnsDatatypes[name]</td>
@@ -109,7 +109,7 @@
 <!-- This part is perform whole actions like selecting everything or nothing and running the functionality with the selected items -->
 <div id="controls">
     <div class="btn-group-vertical" role="group" style="padding-top: 20vh;">
-        <button type="button" onclick="selectAll()" class="btn btn-outline-primary">Select All</button>
+        <button type="button" onclick="selectAll('@Model.Functionality')" class="btn btn-outline-primary">Select All</button>
         <button type="button" onclick="selectColumns()" class="btn btn-outline-dark">Select Table Columns</button>
         <button type="button" onclick="unselectColumns()" class="btn btn-outline-primary">Unselect Table Columns</button>
         <button type="button" onclick="selectNone()" class="btn btn-outline-dark">Select None</button>

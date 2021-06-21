@@ -72,7 +72,7 @@
                         {
                             string name = @entry.Key + '.' + @entry.Value[i];
                             string divName = name + "Div";
-                            <input type="checkbox" id="@name" name="@name" onclick="checkParent('@CheckBox', '@name')" data-parent="@CheckBox" style="display: none;" /> <button class="btn btn-link" onclick="openTab(event, '@divName')">@entry.Value[i]</button>
+                            <input type="checkbox" id="@name" name="@name" onclick="checkParent('@CheckBox', '@name','@Model.Functionality')" data-parent="@CheckBox" style="display: none;" /> <button class="btn btn-link" onclick="openTab(event, '@divName')">@entry.Value[i]</button>
                             <br />
                         }
                     </div>
@@ -122,7 +122,7 @@
                             {
                                 string idname = @entry.Value[i] + @j + "Record";
                                 <tr>
-                                    <th scope="row"><input type="checkbox" id="@idname" name="@idname" data-parent="@name" onclick="checkParent('@name', '@idname')" /></th>
+                                    <th scope="row"><input type="checkbox" id="@idname" name="@idname" data-parent="@name" onclick="checkParent('@name', '@idname','@Model.Functionality')" /></th>
                                     @for (int k = 0; k < pks.Length; k++)
                                     {
                                         <td>@pk_data[k][j]</td>
@@ -145,7 +145,7 @@
 <!-- This part is perform whole actions like selecting everything or nothing and running the functionality with the selected items -->
 <div id="controls">
     <div class="btn-group-vertical" role="group" style="padding-top: 20vh;">
-        <button type="button" onclick="selectAll()" class="btn btn-outline-primary">Select All</button>
+        <button type="button" onclick="selectAll('@Model.Functionality')" class="btn btn-outline-primary">Select All</button>
         <button type="button" onclick="selectRecords(true)" class="btn btn-outline-dark">Select Column Records</button>
         <button type="button" onclick="unselectRecords(true)" class="btn btn-outline-primary">Unselect Column Records</button>
         <button type="button" onclick="selectNone()" class="btn btn-outline-dark">Select None</button>

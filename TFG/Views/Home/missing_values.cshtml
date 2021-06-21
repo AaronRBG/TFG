@@ -48,7 +48,7 @@
 <div id="middle_container" class="left-half">
     <div id="selection-top" class="centeredBig">
         <h3>
-            <span>Data Masking Report</span>
+            <span>Missing Values Report</span>
         </h3>
     </div>
     <div id="accordion" class="overflow-auto left-half" style="width:17vw;">
@@ -131,7 +131,7 @@
                                             @if (Model.ColumnsSelected[entry.Key].Contains(@entry.Value[k] + "Missing"))
                                             {
                                                 name = entry.Key + '.' + entry.Value[k];
-                                                <th scope="col"><input type="checkbox" id="@name" name="@name" data-parent="@CheckBox" onclick="checkParent('@CheckBox', '@name')" /></th>
+                                                <th scope="col"><input type="checkbox" id="@name" name="@name" data-parent="@CheckBox" onclick="checkParent('@CheckBox', '@name','@Model.Functionality')" /></th>
                                             }
                                             else
                                             {
@@ -156,7 +156,7 @@
                                 {
                                     string idname = @entry.Key + @j + "Record";
                                     <tr>
-                                        <th scope="row"><input type="checkbox" id="@idname" name="@idname" data-parent="@CheckBox" onclick="checkParent('@CheckBox', '@idname')" /></th>
+                                        <th scope="row"><input type="checkbox" id="@idname" name="@idname" data-parent="@CheckBox" onclick="checkParent('@CheckBox', '@idname','@Model.Functionality')" /></th>
                                         @for (int k = 0; k < entry.Value.Length; k++)
                                         {
                                             if (!entry.Value[k].Contains("Missing"))
@@ -185,7 +185,7 @@
 <!-- This part is perform whole actions like selecting everything or nothing and running the functionality with the selected items -->
 <div id="controls">
     <div class="btn-group-vertical" role="group" style="padding-top: 20vh;">
-        <button type="button" onclick="selectAll()" class="btn btn-outline-primary">Select All</button>
+        <button type="button" onclick="selectAll('@Model.Functionality')" class="btn btn-outline-primary">Select All</button>
         <button type="button" onclick="selectColumns()" class="btn btn-outline-dark">Select Table Columns</button>
         <button type="button" onclick="unselectColumns()" class="btn btn-outline-primary">Unselect Table Columns</button>
         <button type="button" onclick="selectRecords()" class="btn btn-outline-dark">Select Table Records</button>
@@ -208,7 +208,7 @@
         <br />
         <div id="controls-inside">
             @{
-                string filename = "remove_duplicates_report" + DateTime.Now.ToString() + ".csv";
+                string filename = "missing_values_report" + DateTime.Now.ToString() + ".csv";
             }
             <button type="button" onclick="exportTableToCSV('@filename')" class="btn btn-outline-primary"><span class='download_icon'></span></button>
         </div>

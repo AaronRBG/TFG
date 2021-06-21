@@ -86,7 +86,7 @@
 <!-- This part is perform whole actions like selecting everything or nothing and running the functionality with the selected items -->
 <div id="controls">
     <div class="btn-group-vertical" role="group" style="padding-top: 20vh;">
-        <button type="button" onclick="selectAll()" class="btn btn-outline-primary">Select All</button>
+        <button type="button" onclick="selectAll('@Model.Functionality')" class="btn btn-outline-primary">Select All</button>
         <button type="button" onclick="selectNone()" class="btn btn-outline-dark">Select None</button>
     </div>
     <br />

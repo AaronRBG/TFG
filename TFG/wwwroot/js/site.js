@@ -154,6 +154,10 @@ function confirm(functionality) {
                     }
                 });
         }
+        if (functionality == "remove_duplicates") {
+            selected = selected.replace("_", "");
+        }
+
 
         if (functionality == "improve_indexes" || functionality == "data_unification" || functionality == "create_restrictions") {
             var aux;
@@ -208,14 +212,18 @@ function confirm(functionality) {
 }
 
 // used to update the selection text field
-function updateSelectionText(name) {
+function updateSelectionText(functionality) {
     document.getElementById('records-selected').innerHTML = ''
     document.getElementById('columns-selected').innerHTML = ''
     document.getElementById('tables-selected').innerHTML = ''
     if (getRecords() == 0) {
         if (getColumns() == 0) {
             if (getTables() != 0) {
-                document.getElementById('tables-selected').innerHTML = getTables() + ' tables selected'
+                if (functionality != "foreign_keys") {
+                    document.getElementById('tables-selected').innerHTML = getTables() + ' tables selected'
+                } else {
+                    document.getElementById('tables-selected').innerHTML = getTables() + ' table combinations selected'
+                }
             } else {
                 document.getElementById('columns-selected').innerHTML = 'None selected'
             }
@@ -225,11 +233,15 @@ function updateSelectionText(name) {
         }
     } else {
         document.getElementById('records-selected').innerHTML = getRecords() + ' records selected';
-        if (getColumns() != 0) {
+        if (getColumns() == 0) {
+            if (getTables() != 0) {
+                document.getElementById('tables-selected').innerHTML = 'from ' + getTables() + ' different tables.';
+            }
+        } else {
             document.getElementById('columns-selected').innerHTML = 'from ' + getColumns() + ' different columns';
-        }
-        if (getTables() != 0) {
-            document.getElementById('tables-selected').innerHTML = 'and ' + getTables() + ' different tables.';
+            if (getTables() != 0) {
+                document.getElementById('tables-selected').innerHTML = 'and ' + getTables() + ' different tables.';
+            }
         }
     }
 }
@@ -253,7 +265,7 @@ function checkChilds(CheckBoxparent) {
 // first checks if that checkbox is checked
 // if it is checked it checks the table checkbox of table it belong to
 // then checks that if all columns checkbox of a table are not checked it unchecks the table checkbox and updates the output text
-function checkParent(CheckBoxparent, child) {
+function checkParent(CheckBoxparent, child, functionality) {
     var boo = document.getElementById(child).checked;
     if (boo) {
         document.getElementById(CheckBoxparent).checked = boo;
@@ -268,8 +280,8 @@ function checkParent(CheckBoxparent, child) {
     if (!boo) {
         document.getElementById(CheckBoxparent).checked = boo;
     }
-    updateSelectionText();
-    checkParent(document.getElementById(CheckBoxparent).attributes["data-parent"].value, CheckBoxparent);
+    updateSelectionText(functionality);
+    checkParent(document.getElementById(CheckBoxparent).attributes["data-parent"].value, CheckBoxparent, functionality);
 }
 
 // this method is used to uncheck alternate checkboxes on data_unification functionality
@@ -429,6 +441,8 @@ function selectHalfRecords(even) {
 
     aux = aux.replace('CheckBox', '');
     par = 'name="' + aux + '"';
+
+    updateSelectionText();
 
     document.querySelectorAll('input[type=checkbox][' + par + ']').forEach(
         function (item) {
@@ -595,12 +609,19 @@ function checkMissingValue(event, name, functionality) {
 
 // This function controls the vertical tabs in some views like reports
 function openTab(event, name) {
+    openTab(event, name, false);
+}
+function openTab(event, name, create_masks) {
     var i, tabcontent;
 
     // Get all elements with class="tabcontent" and hide them
     tabcontent = document.getElementsByClassName("tabcontent");
     for (i = 0; i < tabcontent.length; i++) {
         tabcontent[i].style.display = "none";
+    }
+
+    if (create_masks) {
+        document.getElementById(name + 'Dropdown').style.display = "inline";
     }
 
     // Show the current tab, and add an "active" class to the link that opened the tab

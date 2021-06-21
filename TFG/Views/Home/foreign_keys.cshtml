@@ -92,7 +92,7 @@
                         if (fksArray.Length != 0 || SuggestedFksArray.Length != 0)
                         {
                             <tr>
-                                <th scope="row"><input type="checkbox" id="@chechBox" name="@name" onclick="updateSelectionText();" /></th>
+                                <th scope="row"><input type="checkbox" id="@chechBox" name="@name" onclick="updateSelectionText('@Model.Functionality');" /></th>
                                 <td>@table</td>
                                 <td>@table2</td>
                                 <td style="border-left: 1px solid;">@fks</td>
@@ -109,7 +109,7 @@
 <!-- This part is perform whole actions like selecting everything or nothing and running the functionality with the selected items -->
 <div id="controls">
     <div class="btn-group-vertical" role="group" style="padding-top: 20vh;">
-        <button type="button" onclick="selectAll()" class="btn btn-outline-primary">Select All</button>
+        <button type="button" onclick="selectAll('@Model.Functionality')" class="btn btn-outline-primary">Select All</button>
         <button type="button" onclick="selectNone()" class="btn btn-outline-dark">Select None</button>
     </div>
     <br />
