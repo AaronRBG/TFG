@@ -88,18 +88,25 @@ function goToPageAfterCreate(functionality) {
     document.getElementById("functionalitySelected4").value = functionality;
 
     var data;
-    var array = a = document.querySelectorAll("[id$=DropdownText]");
-    for (i = 0; i < array.length; i++) {
-        if (array[i].innerHTML != 'None') {
-            data += '/';
-            data += array[i].id.replace("DropdownText", '');
-            data += ',';
-            data += array[i].innerHTML;
+    if (functionality == 'data_masking') {
+        var array = a = document.querySelectorAll("[id$=DropdownText]");
+        for (i = 0; i < array.length; i++) {
+            if (array[i].innerHTML != 'None') {
+                data += '/';
+                data += array[i].id.replace("DropdownText", '');
+                data += ',';
+                data += array[i].innerHTML;
+            }
         }
+    } else {
+        document.querySelectorAll('input[type=button][name^="Remove"]').forEach(
+            function (item) {
+                data = "complete";
+            });
     }
 
     if (data == undefined) {
-        alert('You have to select at least one mask or constraint');
+        alert('You have to select at least one mask or restriction');
     } else {
 
         document.getElementById("data").value = data;
