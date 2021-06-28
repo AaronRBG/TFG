@@ -47,31 +47,30 @@ function goToPage(functionality, page) {
             functionality = 'create_restrictions';
         }
 
-        var selected;
+        if (page) {
+            var selected;
 
-        document.querySelectorAll('input[type=checkbox][id$=CheckBox]').forEach(
-            function (item) {
-                if (item.checked) {
-                    selected += "/";
-                    selected += item.name;
+            document.querySelectorAll('input[type=checkbox][id$=CheckBox]').forEach(
+                function (item) {
+                    if (item.checked) {
+                        selected += "/";
+                        selected += item.name;
 
-                    document.querySelectorAll('[ data-parent=' + item.id + ']').forEach(
-                        function (column) {
-                            if (column.checked) {
-                                selected += ",";
-                                selected += column.id;
-                            }
-                        });
-                }
-            });
+                        document.querySelectorAll('[ data-parent=' + item.id + ']').forEach(
+                            function (column) {
+                                if (column.checked) {
+                                    selected += ",";
+                                    selected += column.id;
+                                }
+                            });
+                    }
+                });
+
+                document.getElementById("selection").value = selected;
+        }
 
         document.getElementById("functionalitySelected3").value = functionality;
-
-        if (page) {
-            document.getElementById("selection").value = selected;
-        }
         $("#hidden-btn3").click();
-
     }
 }
 
@@ -226,10 +225,10 @@ function updateSelectionText(functionality) {
     if (getRecords() == 0) {
         if (getColumns() == 0) {
             if (getTables() != 0) {
-                if (functionality != "foreign_keys") {
-                    document.getElementById('tables-selected').innerHTML = getTables() + ' tables selected'
+                if (functionality == "foreign_keys" || functionality == "primary_keys") {
+                    document.getElementById('tables-selected').innerHTML = getTables() + ' keys selected'
                 } else {
-                    document.getElementById('tables-selected').innerHTML = getTables() + ' table combinations selected'
+                    document.getElementById('tables-selected').innerHTML = getTables() + ' tables selected'
                 }
             } else {
                 document.getElementById('columns-selected').innerHTML = 'None selected'
@@ -239,15 +238,19 @@ function updateSelectionText(functionality) {
             document.getElementById('tables-selected').innerHTML = 'from ' + getTables() + ' different tables.'
         }
     } else {
-        document.getElementById('records-selected').innerHTML = getRecords() + ' records selected';
-        if (getColumns() == 0) {
-            if (getTables() != 0) {
-                document.getElementById('tables-selected').innerHTML = 'from ' + getTables() + ' different tables.';
-            }
+        if (functionality == "improve_indexes") {
+            document.getElementById('tables-selected').innerHTML = getRecords() + ' indexes selected';
         } else {
-            document.getElementById('columns-selected').innerHTML = 'from ' + getColumns() + ' different columns';
-            if (getTables() != 0) {
-                document.getElementById('tables-selected').innerHTML = 'and ' + getTables() + ' different tables.';
+            document.getElementById('records-selected').innerHTML = getRecords() + ' records selected';
+            if (getColumns() == 0) {
+                if (getTables() != 0) {
+                    document.getElementById('tables-selected').innerHTML = 'from ' + getTables() + ' different tables.';
+                }
+            } else {
+                document.getElementById('columns-selected').innerHTML = 'from ' + getColumns() + ' different columns';
+                if (getTables() != 0) {
+                    document.getElementById('tables-selected').innerHTML = 'and ' + getTables() + ' different tables.';
+                }
             }
         }
     }
@@ -313,12 +316,12 @@ function uncheck(idname, restrictions) {
 }
 
 // this method parameter checks all the checkboxes and updates the output text
-function selectAll() {
+function selectAll(functionality) {
     document.querySelectorAll('input[type=checkbox]').forEach(
         function (item) {
             item.checked = true;
         });
-    updateSelectionText();
+    updateSelectionText(functionality);
 }
 
 // this method parameter checks all the column checkboxes and updates the output text
@@ -449,13 +452,13 @@ function selectHalfRecords(even) {
     aux = aux.replace('CheckBox', '');
     par = 'name="' + aux + '"';
 
-    updateSelectionText();
-
     document.querySelectorAll('input[type=checkbox][' + par + ']').forEach(
         function (item) {
             item.checked = true;
             element = item;
         });
+
+    updateSelectionText();
 
     par = 'id=' + element.attributes["data-parent"].textContent;
     document.querySelectorAll('input[type=checkbox][' + par + ']').forEach(

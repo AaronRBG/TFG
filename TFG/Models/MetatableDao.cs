@@ -1258,12 +1258,12 @@ namespace TFG
                         list2.RemoveAt(index: list2.Count - 1);
                         entered = true;
                     }
-                    if ((list1.Count == 2) && ((string)dt.Rows[i][0] != list1[0]))
+                    if ((list1.Count == 2) && (dt.Rows[i][0].ToString() != list1[0]))
                     {
                         list1.RemoveAt(0);
                         list2.RemoveAt(0);
                     }
-                    else if (list1.Count > 2 && !entered && (string)dt.Rows[i][0] != list1[^2] && list1[^2] != list1[^3])
+                    else if (list1.Count > 2 && !entered && dt.Rows[i][0].ToString() != list1[^2] && list1[^2] != list1[^3])
                     {
                         list1.RemoveAt(list1.Count - 2);
                         list2.RemoveAt(list2.Count - 2);
