@@ -284,7 +284,7 @@ namespace TFG
                         string[] table2Columns = Tabledata.TablesColumns[table2];
                         foreach (string column in tableColumns)
                         {
-                            if (table2Columns.Contains(column) && Tabledata.TablePks[table2][0] == column && Tabledata.TablePks[table2].Length == 1)
+                            if (table2Columns.Contains(column) && Tabledata.TablePks[table2].Length == 1 && Tabledata.TablePks[table2][0] == column)
                             {
                                 string name = "FK_" + table + '_' + table2 + '_' + column;
                                 res.Add(new Models.Constraint(name, table, table2, "FOREIGN KEY"));
