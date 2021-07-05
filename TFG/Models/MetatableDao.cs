@@ -52,6 +52,7 @@ namespace TFG
             foreach (KeyValuePair<string, string> entry in Info.MasksSelected)
             {
                 string[] pair = entry.Key.Split('.');
+                string pks = ArrayToString(GetPrimaryKey(pair[0], false), false);
                 string mask = entry.Value switch
                 {
                     "DNI" => "dbo].[DNIMask]([",
@@ -59,7 +60,12 @@ namespace TFG
                     "Credit card" => "dbo].[creditCardMask]([",
                     _ => "dbo].[emailMask]([",
                 };
-                DataSet ds = Broker.Instance().Run(new SqlCommand("SELECT [" + mask + pair[1] + "]) FROM " + GetTableSchemaName(pair[0]), Con), "records");
+                string query = "SELECT [" + mask + pair[1] + "]) FROM " + GetTableSchemaName(pair[0]);
+                if(pks != "")
+                {
+                    query += " ORDER BY " + pks;
+                }
+                DataSet ds = Broker.Instance().Run(new SqlCommand(query, Con), "records");
                 DataTable dt = ds.Tables["records"];
                 string[] container = new string[dt.Rows.Count];
                 for (int x = 0; x < dt.Rows.Count; x++)
@@ -860,6 +866,7 @@ namespace TFG
                 Broker.Instance().Run(new SqlCommand("ALTER TABLE " + GetTableSchemaName(c.Table) + " ADD CONSTRAINT " + c.Name + " FOREIGN KEY(" + c.Column
                     + ") REFERENCES " + GetTableSchemaName(c.Table2) + " (" + c.Column + ")", Con), "findConstraints");
             }
+            FindConstraints();
             FindFks();
         }
 
